@@ -27,6 +27,8 @@ import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
+import java.text.DateFormat
+import java.time.LocalDateTime
 
 //FPR_PSE.1
 class `FPR_PSE#1 - AppDev` {
@@ -65,6 +67,8 @@ class `FPR_PSE#1 - AppDev` {
       val file_apk: File =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
 
+      println("** A junit test case for FPR_PSE_1 started on "+LocalDateTime.now()+" **")
+
       AdamUtils.InstallApk(file_apk, false,adb);
 
       Thread.sleep(SHORT_TIMEOUT*2);
@@ -79,7 +83,7 @@ class `FPR_PSE#1 - AppDev` {
       //store preference into map A
       //the map contains unique ids below : ADID,UUID,AID,WIDEVINE (see application code)
       val dictA:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
-      println(dictA);
+      //
 
       //kill process (am force-stop com.package.name)
       client.execute(ShellCommandRequest("am force-stop $TEST_PACKAGE"), adb.deviceSerial);
@@ -93,7 +97,7 @@ class `FPR_PSE#1 - AppDev` {
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
 
       val dictB:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
-      println(dictB);
+      //println(dictB);
 
       //Expected : All unique id values should be maintained
       assertThat(dictA["UUID"]).isEqualTo(dictB["UUID"])
@@ -116,7 +120,7 @@ class `FPR_PSE#1 - AppDev` {
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
       val dictC:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
-      println(dictC);
+
       //Expected : UUID should be changed. Others should be maintained
       assertThat(dictA["UUID"]).isNotEqualTo(dictC["UUID"])
       assertThat(dictA["ADID"]).isEqualTo(dictC["ADID"])

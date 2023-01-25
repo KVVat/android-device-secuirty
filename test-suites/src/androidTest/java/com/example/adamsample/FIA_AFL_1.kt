@@ -3,9 +3,12 @@ package com.example.adamsample
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Point
+import android.graphics.PointF
 import android.provider.Settings
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -25,7 +28,7 @@ import org.junit.runners.MethodSorters
 
 private const val LONG_TIMEOUT = 5000L
 private const val SHORT_TIMEOUT = 1000L
-private const val PIN = 1234
+private const val PIN = "1234"
 private const val PASSWORD = "aaaa"
 
 /**
@@ -33,7 +36,7 @@ private const val PASSWORD = "aaaa"
  */
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)//Execute methods in order of appearance
-class `FIA_AFL_1-Authentication` {
+class `FIA_AFL_1_Authentication` {
 
   @get:Rule
   val adbRule = AdbRule(mode = Mode.ASSERT)
@@ -41,6 +44,12 @@ class `FIA_AFL_1-Authentication` {
 
   private lateinit var mDevice: UiDevice
   private var mContext: Context? = null
+
+  //Pattern Pixel 5e :
+  private var PAT:Array<Point> = arrayOf(Point(230, 1800),
+    Point(230, 850),Point(512,1500),Point(880, 1800));
+
+
 
   @Before
   fun setUp() {
@@ -67,9 +76,19 @@ class `FIA_AFL_1-Authentication` {
   //  -e com.malinskiy.adam.android.ADB_HOST 127.0.0.1
   //  -e com.malinskiy.adam.android.ADB_SERIAL [Serial Number of device]
 
-  //@Test
+
+
+
+
+  @Test
   fun T10_testSetupPINLock() {
-    //assert(isLockScreenEnbled())
+    println("isLock=>"+isLockScreenEnbled())
+
+    if(!isLockScreenEnbled()){
+      println("** To execute this test case you should disable device lockscreen setting first **")
+      //assert(!isLockScreenEnbled())
+      //System.exit(1)
+    }
     runBlocking {
       sleepAndWakeUpDevice()
       launchSettings(Settings.ACTION_SECURITY_SETTINGS);
@@ -87,7 +106,7 @@ class `FIA_AFL_1-Authentication` {
     }
   }
 
-  //@Test
+  @Test
   fun T11_unlockScreenPINSuccess() {
     //assert(fals)
     assert(isLockScreenEnbled())
@@ -103,7 +122,7 @@ class `FIA_AFL_1-Authentication` {
     }
   }
 
-  //@Test
+  @LargeTest
   fun T12_unlockScreenPasswordFailed() {
     assert(isLockScreenEnbled())
     runBlocking {
@@ -132,13 +151,14 @@ class `FIA_AFL_1-Authentication` {
       Thread.sleep(1000);
     }
   }
+  @Test
   fun T13_setupLockNone(){
-    setupLockNone()
+    setupLockNone(PIN)
   }
   @Test
   fun T20_testSetupPasswordLock() {
     //to start this test you should disable screen lock first
-    //assert(isLockScreenEnbled())
+    assert(!isLockScreenEnbled())
     runBlocking {
       sleepAndWakeUpDevice()
       launchSettings(Settings.ACTION_SECURITY_SETTINGS);
@@ -170,10 +190,54 @@ class `FIA_AFL_1-Authentication` {
       Thread.sleep(1000);
     }
   }
-  fun T30_setupLockNone(){
-    setupLockNone()
+  @Test
+  fun T23_setupLockNone(){
+    setupLockNone(PASSWORD)
   }
-  fun setupLockNone() {
+
+  fun T31_testSetupPatternLock() {
+    assert(!isLockScreenEnbled())
+    runBlocking {
+      sleepAndWakeUpDevice()
+      launchSettings(Settings.ACTION_SECURITY_SETTINGS);
+      swipeUp()
+      Thread.sleep(1000);
+      safeObjectClick("Screen lock",2000)
+      safeObjectClick("Pattern",2000)
+      for(i in 0..1) {
+        mDevice.swipe(PAT,4);
+        //mDevice.pressEnter()
+        Thread.sleep(2000);
+        if(i == 0){
+          safeObjectClick("Next",2000)
+        } else {
+          safeObjectClick("Confirm",2000)
+        }
+        Thread.sleep(2000);
+      }
+      safeObjectClick("Done",2000)
+    }
+  }
+
+  @Test
+  fun T32_unlockScreenPatternSuccess() {
+    //assert(fals)
+    assert(isLockScreenEnbled())
+    runBlocking {
+      sleepAndWakeUpDevice()
+      mDevice.waitForIdle()
+      Thread.sleep(1000);
+      swipeUp()
+      mDevice.swipe(PAT,4);
+      //mDevice.pressEnter()
+      Thread.sleep(2000);
+      //Device.pressEnter()
+      //Thread.sleep(1000);
+    }
+    println(isLockScreenEnbled());
+  }
+
+  fun setupLockNone(passInput:String) {
     //to start this test you should disable screen lock first
     //assert(isLockScreenEnbled())
     runBlocking {
@@ -182,7 +246,7 @@ class `FIA_AFL_1-Authentication` {
       Thread.sleep(1000);
       swipeUp()
       Thread.sleep(1000);
-      client.execute(ShellCommandRequest("input text ${PASSWORD}"))
+      client.execute(ShellCommandRequest("input text ${passInput}"))
       mDevice.pressEnter()
       Thread.sleep(1000);
       launchSettings(Settings.ACTION_SECURITY_SETTINGS);
@@ -190,7 +254,7 @@ class `FIA_AFL_1-Authentication` {
       swipeUp()
       Thread.sleep(1000);
       safeObjectClick("Screen lock",2000)
-      client.execute(ShellCommandRequest("input text ${PASSWORD}"))
+      client.execute(ShellCommandRequest("input text ${passInput}"))
       mDevice.pressEnter()
       Thread.sleep(1000);
       safeObjectClick("None",2000)
@@ -211,9 +275,8 @@ class `FIA_AFL_1-Authentication` {
     val intent = Intent(page)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
     mContext!!.startActivity(intent)
-    Thread.sleep(LONG_TIMEOUT * 2)
+    Thread.sleep(LONG_TIMEOUT )
   }
-
   fun isLockScreenEnbled():Boolean{
     val km = mContext!!.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     return km.isKeyguardSecure

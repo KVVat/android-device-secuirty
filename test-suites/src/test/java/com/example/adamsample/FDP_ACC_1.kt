@@ -1,33 +1,20 @@
-package com.example.adamsample.utils
+package com.example.adamsample
 
-
-import android.util.Log
 import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotEqualTo
 import assertk.assertions.isNotNull
 import com.example.adamsample.rule.AdbDeviceRule
-import com.malinskiy.adam.request.pkg.InstallRemotePackageRequest
+import com.example.adamsample.utils.AdamUtils
+import com.example.adamsample.utils.LogcatResult
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
-import com.malinskiy.adam.request.sync.v1.PushFileRequest
 import java.io.File
-import java.io.StringReader
 import java.nio.file.Paths
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.onClosed
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.w3c.dom.Document
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
-import org.xml.sax.InputSource
 
 //FPR_PSE.1
 class `FDP_ACC#1 - UserAssets` {
@@ -70,7 +57,7 @@ class `FDP_ACC#1 - UserAssets` {
       Thread.sleep(SHORT_TIMEOUT*2);
 
       var response: ShellCommandResult
-      var result:LogcatResult?
+      var result: LogcatResult?
 
       //launch application and prepare
       response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.PrepareActivity"), adb.deviceSerial);
