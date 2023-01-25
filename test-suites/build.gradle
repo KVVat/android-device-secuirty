@@ -117,7 +117,7 @@ dependencies {
     testImplementation 'com.malinskiy.adam:android-junit4-test-annotation-producer:0.4.7'
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.25'
     testImplementation 'org.simpleframework:simple-xml:2.7.1'
-
+    testImplementation 'org.slf4j:slf4j-simple:1.7.32'
 
     androidTestImplementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
     //androidTestImplementation "androidx.security:security-crypto-ktx:1.1.0-alpha04"
