@@ -120,11 +120,10 @@ dependencies {
     testImplementation 'org.slf4j:slf4j-simple:1.7.32'
 
     androidTestImplementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
-    //androidTestImplementation "androidx.security:security-crypto-ktx:1.1.0-alpha04"
     androidTestImplementation "androidx.security:security-crypto:1.1.0-alpha04"
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'com.malinskiy.adam:adam:0.4.7'
     androidTestImplementation 'com.malinskiy.adam:android-junit4:0.4.7'
     androidTestImplementation 'com.malinskiy.adam:android-junit4-test-annotation-producer:0.4.7'

@@ -16,7 +16,7 @@ classes
 gen-external-apklibs
 .externalNativeBuild
 .cxx
-
+/*.html
 # Gradle
 /build
 /captures

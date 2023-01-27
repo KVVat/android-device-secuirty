@@ -49,8 +49,6 @@ class `FIA_AFL_1_Authentication` {
   private var PAT:Array<Point> = arrayOf(Point(230, 1800),
     Point(230, 850),Point(512,1500),Point(880, 1800));
 
-
-
   @Before
   fun setUp() {
     val mDevice_ = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());

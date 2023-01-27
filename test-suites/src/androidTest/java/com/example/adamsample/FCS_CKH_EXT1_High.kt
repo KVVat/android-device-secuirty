@@ -42,20 +42,8 @@ const val hoge = "hoge";
 class FCS_CKH_EXT1_High {
   //https://github.com/stravag/android-sample-biometric-prompt/blob/master/app/src/main/java/ch/ranil/sample/android/biometricpromptsample/BiometricPromptManager.kt
 
-  /*@get:Rule
-  val rule = ActivityScenarioRule(MainActivity::class.java)
-  @get:Rule
-  val adbRule = AdbRule(mode = Mode.ASSERT)
-   */
-  //lateinit var client:AndroidDebugBridgeClient;
   private lateinit var norm_enc_data: SharedPreferences
-  private lateinit var unlock_enc_data: SharedPreferences
-  //private lateinit var norm_editor: SharedPreferences.Editor
-
   val PREF_NAME:String = "EncryptedSharedPref"
-  val PREF_NAME_UNLOCK:String = "EncryptedSharedPref_UNLOCK"
-  val UNLOCK_DEVICE_TEST_KEY = "UNLOCK_DEVICE_TEST_KEY"
-  val AUTH_REQUIRED_TEST_KEY = "AUTH_REQUIRED_TEST_KEY"
 
   lateinit var appContext:Context;
   lateinit var masterKeyAlias:String;
@@ -66,71 +54,21 @@ class FCS_CKH_EXT1_High {
   {
     appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
-  //  val keyNormal = MasterKey.Builder(appContext)
-  //    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-  //    .build()
+    val keyNormal = MasterKey.Builder(appContext)
+      .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+      .build()
 
-    keyUnlockDeviceTest = MasterKey.Builder(appContext).setKeyGenParameterSpec(
-      keyGenParameterSpec("_androidx_security_master_key_",false,true)
-    ).build();
-    /*
-    val keyAuthRequiredTest = MasterKey.Builder(appContext).setKeyGenParameterSpec(
-      keyGenParameterSpec(AUTH_REQUIRED_TEST_KEY,false,true)
-    ).build();
-  */
-/*    norm_enc_data = EncryptedSharedPreferences
+    norm_enc_data = EncryptedSharedPreferences
       .create(appContext,
         PREF_NAME,
         keyNormal,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-      )*/
-
-    unlock_enc_data = EncryptedSharedPreferences
-      .create(appContext,
-              PREF_NAME_UNLOCK,
-              keyUnlockDeviceTest,
-              EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-              EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
       )
-
-    /**
-    MasterKey.Builder does not support setUnlockDeviceRequired option yet
-    val keyUserAuthRequired = MasterKey.Builder(appContext)
-      .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-      .setUserAuthenticationRequired(true,30)
-      .build()
-    */
-
 
 
     val fdelete: File = File(appContext.getFilesDir(), "my_sensitive_loremipsum.txt")
     if (fdelete.exists()) {fdelete.delete()}
-  }
-
-  fun keyGenParameterSpec(keyNameAlias:String,authRequired:Boolean,unlockDeviceRequired:Boolean):KeyGenParameterSpec{
-    try {
-      return KeyGenParameterSpec.Builder(keyNameAlias,
-                          KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                          .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setKeySize(256).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                          .setUnlockedDeviceRequired(true)
-                          .setUserAuthenticationRequired(true) // Require that the user has unlocked in the last 30 seconds
-                          .setUserAuthenticationValidityDurationSeconds(30)
-                          .build()
-      //keyGenerator.generateKey()
-    } catch (e: NoSuchAlgorithmException) {
-      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
-    } catch (e: NoSuchProviderException) {
-      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
-    } catch (e: InvalidAlgorithmParameterException) {
-      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
-    } catch (e: KeyStoreException) {
-      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
-    } catch (e: CertificateException) {
-      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
-    } catch (e: IOException) {
-      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
-    }
   }
 
   @Test
@@ -139,15 +77,6 @@ class FCS_CKH_EXT1_High {
       checkEncryptedSharedPreference(norm_enc_data,PREF_NAME)
     }
   }
-
-  @Test
-  fun testEncryptedSharedPreference2(){
-    runBlocking {
-      checkEncryptedSharedPreference(unlock_enc_data,PREF_NAME_UNLOCK)
-    }
-  }
-
-
 
   fun checkEncryptedSharedPreference(data:SharedPreferences,prefName:String)
   {
