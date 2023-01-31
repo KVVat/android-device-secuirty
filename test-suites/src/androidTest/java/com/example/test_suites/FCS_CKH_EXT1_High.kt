@@ -1,10 +1,8 @@
-package com.example.adamsample
+package com.example.test_suites
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -20,11 +18,6 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
-import java.security.InvalidAlgorithmParameterException
-import java.security.KeyStoreException
-import java.security.NoSuchAlgorithmException
-import java.security.NoSuchProviderException
-import javax.security.cert.CertificateException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -32,7 +25,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 
-const val hoge = "hoge";
 /**
  * Instrumented test, which will execute on an Android device.
  *

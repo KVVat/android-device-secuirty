@@ -1,10 +1,9 @@
-package com.example.adamsample
+package com.example.test_suites
 
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Point
-import android.graphics.PointF
 import android.provider.Settings
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -73,9 +72,6 @@ class `FIA_AFL_1_Authentication` {
   //  -e com.malinskiy.adam.android.ADB_PORT 5037
   //  -e com.malinskiy.adam.android.ADB_HOST 127.0.0.1
   //  -e com.malinskiy.adam.android.ADB_SERIAL [Serial Number of device]
-
-
-
 
 
   @Test
@@ -217,7 +213,7 @@ class `FIA_AFL_1_Authentication` {
 
   @Test
   fun T32_unlockScreenPatternSuccess() {
-    //assert(fals)
+
     assert(isLockScreenEnbled())
     runBlocking {
       sleepAndWakeUpDevice()
@@ -225,10 +221,7 @@ class `FIA_AFL_1_Authentication` {
       Thread.sleep(1000);
       swipeUp()
       mDevice.swipe(PAT,4);
-      //mDevice.pressEnter()
       Thread.sleep(2000);
-      //Device.pressEnter()
-      //Thread.sleep(1000);
     }
     println(isLockScreenEnbled());
   }

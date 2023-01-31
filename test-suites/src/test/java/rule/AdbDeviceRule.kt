@@ -1,4 +1,4 @@
-package com.example.adamsample.rule
+package com.example.test_suites.rule
 
 import com.malinskiy.adam.AndroidDebugBridgeClientFactory
 import com.malinskiy.adam.interactor.StartAdbInteractor

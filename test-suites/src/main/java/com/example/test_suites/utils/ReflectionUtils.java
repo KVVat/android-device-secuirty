@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.adamsample.utils;
+package com.example.test_suites.utils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

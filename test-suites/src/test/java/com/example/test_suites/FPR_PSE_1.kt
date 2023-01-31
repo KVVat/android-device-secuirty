@@ -1,11 +1,11 @@
-package com.example.adamsample
+package com.example.test_suites
 
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
-import com.example.adamsample.rule.AdbDeviceRule
-import com.example.adamsample.utils.AdamUtils
+import com.example.test_suites.rule.AdbDeviceRule
+import com.example.test_suites.utils.AdamUtils
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult

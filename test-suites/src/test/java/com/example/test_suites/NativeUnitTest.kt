@@ -1,15 +1,11 @@
-package com.example.adamsample
+package com.example.test_suites
 
 
 import assertk.assertThat
 import assertk.assertions.contains
-import assertk.assertions.startsWith
-import com.example.adamsample.rule.AdbDeviceRule
-import com.malinskiy.adam.request.pkg.InstallRemotePackageRequest
-import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
+import com.example.test_suites.rule.AdbDeviceRule
 import com.malinskiy.adam.request.shell.v1.ChanneledShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
-import com.malinskiy.adam.request.shell.v1.ShellCommandResult
 import com.malinskiy.adam.request.sync.v1.PushFileRequest
 import java.io.File
 import java.nio.file.Paths

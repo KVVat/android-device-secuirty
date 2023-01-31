@@ -1,4 +1,4 @@
-package com.example.adamsample.utils
+package com.example.test_suites.utils
 
 import android.content.Context
 import android.media.MediaDrm

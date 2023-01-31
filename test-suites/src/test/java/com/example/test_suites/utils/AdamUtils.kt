@@ -1,6 +1,6 @@
-package com.example.adamsample.utils
+package com.example.test_suites.utils
 
-import com.example.adamsample.rule.AdbDeviceRule
+import com.example.test_suites.rule.AdbDeviceRule
 import com.malinskiy.adam.AndroidDebugBridgeClient
 import com.malinskiy.adam.request.logcat.ChanneledLogcatRequest
 import com.malinskiy.adam.request.logcat.LogcatSinceFormat

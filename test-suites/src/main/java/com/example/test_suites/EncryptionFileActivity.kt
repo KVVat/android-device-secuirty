@@ -1,10 +1,10 @@
-package com.example.encryption
+package com.example.test_suites
 
 import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
@@ -13,17 +13,14 @@ import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.security.crypto.MasterKey
+import com.example.test_suites.R
 import java.io.IOException
 import java.security.*
 import javax.crypto.*
 import javax.security.cert.CertificateException
 
-
-//The module simply record Unique Id to the configuration file
-class MainActivity : AppCompatActivity() {
-  lateinit var mKeyGuardservice:KeyguardManager
+class EncryptionFileActivity : AppCompatActivity() {
+  lateinit var mKeyGuardservice: KeyguardManager
   var keyLockEnabled = true;
   var TAG = "ADSRP_ENCRYPTION"
   var TAG_TEST = "FCS_CKH_EXT1_HIGH"
@@ -34,9 +31,9 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    setContentView(R.layout.activity_encryption_file)
 
-    val btn:Button = findViewById<Button>(R.id.test_button)
+    val btn: Button = findViewById<Button>(R.id.test_button)
 
     mKeyGuardservice =
       getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager;
@@ -50,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     keyGenParameterSpec1 =
-    keyGenParameterSpec("key_1",true,false)
+      keyGenParameterSpec("key_1",true,false)
     createKey(keyGenParameterSpec1)
 
     keyGenParameterSpec2 =
