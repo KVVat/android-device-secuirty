@@ -18,4 +18,6 @@ include ':uniqueid'
 include ':appupdate'
 include ':assets'
 include ':assets-reader'
+include ':directboot'
 include ':encryption'
+

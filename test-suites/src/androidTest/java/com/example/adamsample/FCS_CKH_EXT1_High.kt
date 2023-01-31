@@ -182,7 +182,7 @@ class FCS_CKH_EXT1_High {
                                          "raw", appContext.packageName));
     val content = isLoremIpsum.bufferedReader().use(BufferedReader::readText)
 
-    val fTarget: File = File(appContext.getFilesDir(), fileToWrite)
+    val fTarget= File(appContext.getFilesDir(), fileToWrite)
 
     val encryptedFile = EncryptedFile.Builder(
       appContext,
@@ -253,7 +253,6 @@ class FCS_CKH_EXT1_High {
       for (key in preference.all.keys) {
         val res = String.format("Shared Preference : %s - %s", pref_name, key)+
               preference.getString(key, "error")!!
-        //Log.i("TAG",res);
         println(res);
       }
     }

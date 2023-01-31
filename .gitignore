@@ -42,6 +42,7 @@ encryption/build
 uniqueid/build
 assets-reader/build
 appupdate/build
+directboot/build
 /security
 /security/*
 

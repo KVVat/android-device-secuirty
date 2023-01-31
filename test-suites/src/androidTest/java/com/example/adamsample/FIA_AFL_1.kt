@@ -84,8 +84,6 @@ class `FIA_AFL_1_Authentication` {
 
     if(!isLockScreenEnbled()){
       println("** To execute this test case you should disable device lockscreen setting first **")
-      //assert(!isLockScreenEnbled())
-      //System.exit(1)
     }
     runBlocking {
       sleepAndWakeUpDevice()

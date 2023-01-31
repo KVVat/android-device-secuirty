@@ -11,6 +11,5 @@ class EncryptionFileActivity : AppCompatActivity() {
 
   override fun onStart() {
     super.onStart()
-
   }
 }

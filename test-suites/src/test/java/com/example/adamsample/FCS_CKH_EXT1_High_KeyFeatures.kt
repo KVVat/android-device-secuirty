@@ -1,5 +1,10 @@
 package com.example.adamsample
 
+import android.app.KeyguardManager
+import android.content.Context
+import android.content.Intent
+import android.provider.Settings
+import android.util.Log
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
@@ -84,34 +89,7 @@ class `FCS_CKH_EXT#1 - High - KeyFeatures ` {
                        adb.deviceSerial)
       }
       Thread.sleep(2000);
-      //Check
-//      var result:LogcatResult?
-//        = AdamUtils.waitLogcatLine(50,"FCS_CKH_EXT1_HIGH",adb)
-//      assertThat { result }.isNotNull()
-//
-//      //(Require)Reboot Device
-//      //1. We expect the bootloader of the device is unlocked.
-//      //2. Users need to relaunch the device quickly
-//      client.execute(request = RebootRequest(), serial = adb.deviceSerial)
-//      println("** Rebooting : Please Reboot Device **")
-//      Thread.sleep(LONG_TIMEOUT*4);//20sec.
-//      //Note:  the connection to the adb server will be dismissed during the rebooting
-//      println("** Require Manual Operation : Please Reboot Device **")
-//
-//      result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
-//      assertThat { result }.isNotNull()
-//      //println(result);
-//      println(result?.text)
-//
-//      // Evaluates below behaviours. Application will be triggered by LOCKED_BOOT_COMPLETED action.
-//      // 1. Check if we can access to the DES(Device Encrypted Storage)
-//      // 2. Check we can not access to the CES
-//      assertThat(result?.text).isEqualTo("des=Success,ces=Failed")
-//
-//      result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
-//      assertThat { result }.isNotNull()
-//      println(result);
-//      println(result?.text)
+
     }
   }
 

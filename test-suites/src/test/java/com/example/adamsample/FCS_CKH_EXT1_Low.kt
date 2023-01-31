@@ -41,8 +41,8 @@ import org.junit.Test
 
 class `FCS_CKH_EXT#1 - Low ` {
 
-  private val TEST_PACKAGE = "com.example.adamsample"
-  private val TEST_MODULE = "alltest-v2-debug.apk"
+  private val TEST_PACKAGE = "com.example.directboot"
+  private val TEST_MODULE = "directboot-debug.apk"
   private val LONG_TIMEOUT = 5000L
   private val SHORT_TIMEOUT = 1000L
 
