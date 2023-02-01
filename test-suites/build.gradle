@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 def homePath = System.properties['user.home']
-def applicationName = 'alltest'
+def applicationName = 'test_suites'
 android {
     namespace 'com.example.test_suites'
     compileSdk 33

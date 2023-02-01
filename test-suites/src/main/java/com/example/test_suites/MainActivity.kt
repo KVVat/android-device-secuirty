@@ -2,11 +2,9 @@ package com.example.test_suites
 
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.example.test_suites.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-  private lateinit var binding:ActivityMainBinding
   private val TAG:String = "FCS_CKH_EXT_TEST"
 
   override fun onStart() {

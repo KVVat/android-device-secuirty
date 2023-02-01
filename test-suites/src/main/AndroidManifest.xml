@@ -26,15 +26,17 @@
     >
         <activity
             android:name="com.example.test_suites.EncryptionFileActivity"
-            android:exported="false" >
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name="com.example.test_suites.MainActivity"
             android:exported="true" >
             <intent-filter>
+                <category android:name="android.intent.category.HOME" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>

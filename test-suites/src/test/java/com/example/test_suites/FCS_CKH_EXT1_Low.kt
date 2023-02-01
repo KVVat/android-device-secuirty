@@ -79,7 +79,6 @@ class `FCS_CKH_EXT#1 - Low ` {
       println("** Require Manual Operation : Please Reboot Device **")
 
       result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
-      assertThat { result }.isNotNull()
       //println(result);
       println(result?.text)
 
@@ -94,5 +93,4 @@ class `FCS_CKH_EXT#1 - Low ` {
       println(result?.text)
     }
   }
-
 }

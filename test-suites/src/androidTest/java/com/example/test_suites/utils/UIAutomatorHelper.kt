@@ -3,10 +3,12 @@ package com.example.test_suites.utils
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 
 public class UIAutomatorHelper(c:Context,d:UiDevice) {
     private val mDevice: UiDevice = d
@@ -21,6 +23,37 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
         }
     }
 
+    fun setScreenLockText(label:String,PIN:String){
+        launchSettings(Settings.ACTION_SECURITY_SETTINGS);
+        swipeUp()
+        Thread.sleep(1000);
+        safeObjectClick("Screen lock",2000)
+        safeObjectClick(label,2000)
+        for(i in 0..1) {
+            //client.execute(ShellCommandRequest("input text ${PIN}"))
+            Thread.sleep(1000);
+            mDevice.executeShellCommand("input text ${PIN}")
+            mDevice.pressEnter()
+            Thread.sleep(1000);
+        }
+        safeObjectClick("DONE",2000)
+        safeObjectClick("Done",2000)
+    }
+    fun resetScreenLockText(PIN: String) {
+        launchSettings(Settings.ACTION_SECURITY_SETTINGS);
+        swipeUp()
+        Thread.sleep(1000);
+        safeObjectClick("Screen lock",2000)
+        //safeObjectClick(label,2000)
+        //client.execute(ShellCommandRequest("input text ${PIN}"))
+        Thread.sleep(1000);
+        mDevice.executeShellCommand("input text ${PIN}")
+        mDevice.pressEnter()
+        Thread.sleep(1000);
+        safeObjectClick("None",2000)
+        safeObjectClick("Delete",2000)
+        safeObjectClick("Done",2000)
+    }
     fun launchSettings(page:String){
         val intent = Intent(page)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -41,4 +74,6 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
             mDevice.getDisplayWidth() / 2, 0, 30);
         Thread.sleep(1000);
     }
+
+
 }

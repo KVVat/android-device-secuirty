@@ -13,7 +13,8 @@ import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import com.example.test_suites.R
+
+
 import java.io.IOException
 import java.security.*
 import javax.crypto.*
@@ -41,7 +42,7 @@ class EncryptionFileActivity : AppCompatActivity() {
       keyLockEnabled = false;
       btn.isEnabled = false
       Log.w(TAG,"KeyGuard Secure is disabled. we can not try testing keys relate to it.")
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => disabled")
+      Log.d(TAG_TEST,"AUTHREQUIRED:DISABLED")
 
       return; //画面のロックが設定されていない
     }
@@ -61,10 +62,11 @@ class EncryptionFileActivity : AppCompatActivity() {
 
     try {
       tryEncrypt("key_2")
-      Log.d(TAG_TEST,"KeyFeature:setUnlockedDeviceRequired=true => success")
+      Log.d(TAG_TEST+"_UNLOCK","UNLOCKDEVICE:OK")
     } catch (e:java.lang.RuntimeException){
-      Log.d(TAG_TEST,"KeyFeature:setUnlockedDeviceRequired=true => failed")
+      Log.d(TAG_TEST+"_UNLOCK","UNLOCKDEVICE:NG")
     }
+    //Thread.sleep(2000)
   }
 
   override fun onStart() {
@@ -133,18 +135,27 @@ class EncryptionFileActivity : AppCompatActivity() {
       cipher.doFinal("test".toByteArray())
       // If the user has recently authenticated, you will reach here.
       //showAlreadyAuthenticated()
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => success")
-      Toast.makeText(this, ("Authed"), Toast.LENGTH_LONG).show()
+      if(keyname.equals("key_1")) {
+        Log.d(TAG_TEST,"AUTHREQUIRED:OK")
+        Toast.makeText(this, ("Authed"), Toast.LENGTH_LONG).show()
+      }
       return true
     } catch (e: UserNotAuthenticatedException) {
       // User is not authenticated, let's authenticate with device credentials.
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => failed")
-      showAuthenticationScreen()
+      if(keyname.equals("key_1")) {
+        Log.d(TAG_TEST,"AUTHREQUIRED:NG")
+        Toast.makeText(this, ("NG - User Not Authed"), Toast.LENGTH_LONG).show()
+        showAuthenticationScreen()
+      }
+
       return false
     } catch (e: KeyPermanentlyInvalidatedException) {
       // This happens if the lock screen has been disabled or reset after the key was
       // generated after the key was generated.
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => failed (keys are invalidated after created)")
+      if(keyname.equals("key_1")) {
+        Log.d(TAG_TEST,"AUTHREQUIRED:NG")
+        Toast.makeText(this, ("NG - Key Permanently Invalidate"), Toast.LENGTH_LONG).show()
+      }
       return false
     } catch (e: BadPaddingException) {
       throw java.lang.RuntimeException(e)

@@ -137,7 +137,7 @@ class `FIA_AFL_1_Authentication` {
       mDevice.waitForIdle()
       Thread.sleep(1000);
       swipeUp()
-      client.execute(ShellCommandRequest("input text 0413"))
+      client.execute(ShellCommandRequest("input text ${PIN}"))
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);

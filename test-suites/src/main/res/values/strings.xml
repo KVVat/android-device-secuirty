@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">adamsample</string>
+  <string name="app_name">test_module</string>
   <string name="title_activity_encryption_file_test">
     EncryptionFileTestActivity
   </string>
