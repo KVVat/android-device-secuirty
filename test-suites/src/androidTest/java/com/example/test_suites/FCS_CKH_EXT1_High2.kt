@@ -79,14 +79,18 @@ class FCS_CKH_EXT1_High2 {
   //  -e com.malinskiy.adam.android.ADB_SERIAL [Serial Number of device]
   //'adb reverse tcp:5037 tcp:5037'
   // <option name="EXTRA_OPTIONS" value="-e com.malinskiy.adam.android.ADB_PORT 5554 -e com.malinskiy.adam.android.ADB_HOST 10.0.0.2 -e com.malinskiy.adam.android.ADB_SERIAL emulator-5554" />
+
+  val TEST_PACKAGE = "com.example.test_suites";
+  val PIN="1234"
+
   @Test
-  fun test(){
-    val TEST_PACKAGE = "com.example.test_suites";
-    val PIN="1234"
+  fun testHealthyCase(){
+
     runBlocking {
       mUiHelper.sleepAndWakeUpDevice()
       mUiHelper.setScreenLockText("PIN",PIN)
-      //launch application
+
+      //Launch application
       val res = client.execute(
         ShellCommandRequest("am start ${TEST_PACKAGE}/.EncryptionFileActivity"))
       assertThat(res.output).isNotEqualTo("Starting")
@@ -95,23 +99,24 @@ class FCS_CKH_EXT1_High2 {
       println(result?.text)
       assertThat(result?.text).isEqualTo("UNLOCKDEVICE:OK")
 
-
-      // Evaluates below behaviours. Application will be triggered by LOCKED_BOOT_COMPLETED action.
-      // 1. Check if we can access to the DES(Device Encrypted Storage)
-      // 2. Check we can not access to the CES
-
       mUiHelper.safeObjectClick("TEST",2000)
-      //result = waitLogcatLine(100,"FCS_CKH_EXT1_HIGH")
-      //assertThat(result?.text).isEqualTo("AUTHREQUIRED:NG")
 
       Thread.sleep(1000);
       mDevice.executeShellCommand("input text ${PIN}")
       mDevice.pressEnter()
-      result = waitLogcatLine(20,"FCS_CKH_EXT1_HIGH")
+      result = waitLogcatLine(20,"FCS_CKH_EXT1_HIGH_AUTH")
       assertThat(result?.text).isEqualTo("AUTHREQUIRED:OK")
       Thread.sleep(1000);
+
       mUiHelper.resetScreenLockText(PIN)
     }
+  }
+  fun testAuthIsFailed(){
+    //Check FCS_CKH_EXT1_HIGH_UNLOCK check failed if device is locked
+  }
+
+  fun testDeviceIsLocked(){
+    //Check FCS_CKH_EXT1_HIGH_UNLOCK check failed if device is locked
   }
 
   fun waitLogcatLine(waitTime:Int,tagWait:String):LogcatResult? {
@@ -152,5 +157,4 @@ class FCS_CKH_EXT1_High2 {
       return null
     }
   }
-
 }

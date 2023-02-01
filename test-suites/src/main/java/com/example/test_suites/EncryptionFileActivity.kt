@@ -25,11 +25,12 @@ class EncryptionFileActivity : AppCompatActivity() {
   var keyLockEnabled = true;
   var TAG = "ADSRP_ENCRYPTION"
   var TAG_TEST = "FCS_CKH_EXT1_HIGH"
+  var TAG_TEST_AUTH = "FCS_CKH_EXT1_HIGH_AUTH"
 
   lateinit var keyGenParameterSpec1: KeyGenParameterSpec;
   lateinit var keyGenParameterSpec2: KeyGenParameterSpec;
   private val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
-
+  var click_check = false;
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_encryption_file)
@@ -57,7 +58,7 @@ class EncryptionFileActivity : AppCompatActivity() {
 
     btn.setOnClickListener {
       Log.i(TAG,"Button Clicked!")
-      tryEncrypt("key_1")
+      tryEncrypt("key_1",true)
     }
 
     try {
@@ -120,7 +121,7 @@ class EncryptionFileActivity : AppCompatActivity() {
       throw java.lang.RuntimeException("Failed to create a symmetric key", e)
     }
   }
-  private fun tryEncrypt(keyname:String): Boolean {
+  private fun tryEncrypt(keyname:String,click_check:Boolean=false): Boolean {
     try {
       val keyStore = KeyStore.getInstance("AndroidKeyStore")
       keyStore.load(null)
@@ -135,15 +136,15 @@ class EncryptionFileActivity : AppCompatActivity() {
       cipher.doFinal("test".toByteArray())
       // If the user has recently authenticated, you will reach here.
       //showAlreadyAuthenticated()
-      if(keyname.equals("key_1")) {
-        Log.d(TAG_TEST,"AUTHREQUIRED:OK")
+      if(keyname.equals("key_1") && !click_check) {
+        Log.d(TAG_TEST_AUTH,"AUTHREQUIRED:OK")
         Toast.makeText(this, ("Authed"), Toast.LENGTH_LONG).show()
       }
       return true
     } catch (e: UserNotAuthenticatedException) {
       // User is not authenticated, let's authenticate with device credentials.
-      if(keyname.equals("key_1")) {
-        Log.d(TAG_TEST,"AUTHREQUIRED:NG")
+      if(keyname.equals("key_1") && !click_check) {
+        Log.d(TAG_TEST_AUTH,"AUTHREQUIRED:NG")
         Toast.makeText(this, ("NG - User Not Authed"), Toast.LENGTH_LONG).show()
         showAuthenticationScreen()
       }
@@ -152,8 +153,8 @@ class EncryptionFileActivity : AppCompatActivity() {
     } catch (e: KeyPermanentlyInvalidatedException) {
       // This happens if the lock screen has been disabled or reset after the key was
       // generated after the key was generated.
-      if(keyname.equals("key_1")) {
-        Log.d(TAG_TEST,"AUTHREQUIRED:NG")
+      if(keyname.equals("key_1") && !click_check) {
+        Log.d(TAG_TEST_AUTH,"AUTHREQUIRED:NG")
         Toast.makeText(this, ("NG - Key Permanently Invalidate"), Toast.LENGTH_LONG).show()
       }
       return false
