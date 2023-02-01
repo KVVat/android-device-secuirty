@@ -50,16 +50,12 @@ class FCS_CKH_EXT1_High2 {
     Point(230, 850), Point(512,1500), Point(880, 1800)
   );
 
-
-  lateinit var masterKeyAlias:String;
-  lateinit var keyUnlockDeviceTest:MasterKey;
   lateinit var mContext: Context
   lateinit var mDevice: UiDevice
   lateinit var mUiHelper:UIAutomatorHelper
   @Before
   fun setup()
   {
-
     val mDevice_ = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
     mDevice = mDevice_!!;
     mContext = InstrumentationRegistry.getInstrumentation().context;
@@ -68,7 +64,6 @@ class FCS_CKH_EXT1_High2 {
     //sleepAndWakeUpDevice()
     client = adbRule.adb;
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
-
   }
   @After
   fun tearDown() {
