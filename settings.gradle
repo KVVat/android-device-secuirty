@@ -15,6 +15,7 @@ dependencyResolutionManagement {
 rootProject.name = "android-device-security"
 include ':test-suites'
 include ':uniqueid'
+include ':acvpkernel'
 include ':appupdate'
 include ':assets'
 include ':assets-reader'

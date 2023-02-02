@@ -1,0 +1,61 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
+}
+
+android {
+    namespace 'com.example.acvpkernel'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.acvpkernel"
+        minSdk 28
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.18.1"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
+
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.guava:guava:28.0-android'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.malinskiy.adam:adam:0.4.7'
+    testImplementation 'com.malinskiy.adam:android-junit4:0.4.7'
+    testImplementation 'com.malinskiy.adam:android-junit4-test-annotation-producer:0.4.7'
+    testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.25'
+    testImplementation 'org.simpleframework:simple-xml:2.7.1'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.32'
+}
