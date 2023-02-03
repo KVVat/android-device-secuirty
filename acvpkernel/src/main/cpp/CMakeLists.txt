@@ -13,7 +13,7 @@ project("acvp_kernel_harness"
         LANGUAGES C)
 
 find_library( log-lib log )
-add_executable(acvptool
+add_executable(acvp_kernel_harness
         main.c
         message.c
         util.c
@@ -23,7 +23,7 @@ add_executable(acvptool
         alg_drbg.c
         alg_hash.c)
 
-target_link_libraries(acvptool ${log-lib})
+target_link_libraries(acvp_kernel_harness ${log-lib})
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.

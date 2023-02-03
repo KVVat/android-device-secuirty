@@ -4,6 +4,8 @@
 
 #include "message.h"
 #include "util.h"
+#include <android/log.h>
+#include <assert.h>
 
 /* ======================= LOW LEVEL ACVPTOOL PROTOCOL ====================== */
 
@@ -45,6 +47,7 @@ void debug_print(message *msg) {
 message *message_from_stdin() {
     int n;
     if (fread(&n, sizeof(n), 1, stdin) != 1) {
+        //__android_log_write(ANDROID_LOG_DEBUG, "Acvptool", "no stdin exit");
         exit(1);
     }
 

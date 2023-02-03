@@ -46,3 +46,8 @@ directboot/build
 /security
 /security/*
 
+
+acvpkernel/build
+acvpkernel/src/go
+acvpkernel/src/gotest
+

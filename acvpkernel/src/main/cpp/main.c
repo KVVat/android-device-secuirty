@@ -25,14 +25,15 @@ void get_config(message *msg) {
 
 int main() {
     char **impl = read_af_alg_config();
-    __android_log_write(ANDROID_LOG_DEBUG, "Acvptool", "Launched!");
+    //__android_log_write(ANDROID_LOG_DEBUG, "Acvptool", "Launched!");
     while (1) {
         message *msg = message_from_stdin();
+        //__android_log_write(ANDROID_LOG_DEBUG, "Acvptool2", msg->buffers[0]);
         if (msg->n < 1) {
             fputs("Malformed message received", stderr);
             exit(1);
         }
-
+        //__android_log_write(ANDROID_LOG_DEBUG, "Acvptool3", msg->buffers[0]);
         if (is_command(msg, "getConfig")) {
             get_config(msg);
         } else if (is_command(msg, "SHA-1")) {
