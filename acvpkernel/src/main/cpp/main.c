@@ -8,7 +8,7 @@
 #include "alg_aead.h"
 #include "alg_drbg.h"
 #include "util.h"
-#include <android/log.h>
+
 
 void get_config(message *msg) {
     if (msg->n != 1) {

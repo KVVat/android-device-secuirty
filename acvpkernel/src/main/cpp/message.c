@@ -4,7 +4,6 @@
 
 #include "message.h"
 #include "util.h"
-#include <android/log.h>
 #include <assert.h>
 
 /* ======================= LOW LEVEL ACVPTOOL PROTOCOL ====================== */

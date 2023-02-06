@@ -61,13 +61,20 @@ class AcvpToolTest {
         runBlocking {
             //
             val OUT_PATH = "build/intermediates/cmake/debug/obj"
+            val GO_PATH  = "src/go"
             var ABI = "x86_64"
-            val acvpTool = File(Paths.get(OUT_PATH,ABI,"acvptool").toUri());
+            val acvp_tool_path = File(Paths.get(GO_PATH,"acvptool").toUri());
+            val acvp_kh_path = File(Paths.get(OUT_PATH,ABI,"acvp_kernel_harness").toUri());
             val fileConfig  =
                 File(Paths.get("src/test/resources/af_alg_config.txt").toUri());
+            val fileConfig2  =
+                File(Paths.get("src/test/resources/config.json").toUri());
 
-            pushFileToTmp(acvpTool, "775");
+
+            pushFileToTmp(acvp_tool_path, "775");
+            pushFileToTmp(acvp_kh_path, "775");
             pushFileToTmp(fileConfig, "555");
+            pushFileToTmp(fileConfig2, "555");
 
             val updates = client.execute(
                 request = ChanneledShellCommandRequest("LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/acvptool"),
