@@ -15,6 +15,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.security.crypto.MasterKey
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import java.io.IOException
 import java.security.*
 import javax.crypto.*
@@ -32,6 +34,18 @@ class MainActivity : AppCompatActivity() {
   lateinit var keyGenParameterSpec2: KeyGenParameterSpec;
   private val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
 
+
+  class CoroutineKeyCheckWorker(
+    context: Context,
+    params: WorkerParameters
+  ) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+
+      return Result.success()
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -45,7 +59,6 @@ class MainActivity : AppCompatActivity() {
       btn.isEnabled = false
       Log.w(TAG,"KeyGuard Secure is disabled. we can not try testing keys relate to it.")
       Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => disabled")
-
       return; //画面のロックが設定されていない
     }
 
@@ -62,11 +75,29 @@ class MainActivity : AppCompatActivity() {
       tryEncrypt("key_1")
     }
 
+    testUnlockedDeviceRequired()
+
+    /* Application should run ke_2 check in background
+    val request = OneTimeWorkRequestBuilder<MyWorkTestable>()
+      .build()
+
+    // Enqueue and wait for result. This also runs the Worker synchronously
+    // because we are using a SynchronousExecutor.
+    workManager.enqueue(request).result.get()
+    // Get WorkInfo
+    val workInfo = workManager.getWorkInfoById(request.id).get()
+    */
+  }
+
+  private fun testUnlockedDeviceRequired():Boolean
+  {
     try {
       tryEncrypt("key_2")
       Log.d(TAG_TEST,"KeyFeature:setUnlockedDeviceRequired=true => success")
+      return true
     } catch (e:java.lang.RuntimeException){
       Log.d(TAG_TEST,"KeyFeature:setUnlockedDeviceRequired=true => failed")
+      return false
     }
   }
 

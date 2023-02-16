@@ -106,13 +106,29 @@ class FCS_CKH_EXT1_High2 {
       mUiHelper.resetScreenLockText(PIN)
     }
   }
+
+  @Test
   fun testAuthIsFailed(){
     //Check FCS_CKH_EXT1_HIGH_UNLOCK check failed if device is locked
+    runBlocking {
+      mUiHelper.sleepAndWakeUpDevice()
+      mUiHelper.setScreenLockText("PIN",PIN)
+      // mUiHelper.sleepAndWakeUpDevice()
+      //Launch application
+      val res = client.execute(
+        ShellCommandRequest("am start ${TEST_PACKAGE}/.EncryptionFileActivity"))
+      assertThat(res.output).isNotEqualTo("Starting")
+
+      //sleep application and wait for the application return false results
+      //* application should periodically test key2
+      // var result = waitLogcatLine(100,"FCS_CKH_EXT1_HIGH_UNLOCK")
+      // waitLogcatLine(20,"FCS_CKH_EXT1_HIGH_AUTH")
+      //println(result?.text)
+
+      mUiHelper.resetScreenLockText(PIN)
+    }
   }
 
-  fun testDeviceIsLocked(){
-    //Check FCS_CKH_EXT1_HIGH_UNLOCK check failed if device is locked
-  }
 
   fun waitLogcatLine(waitTime:Int,tagWait:String):LogcatResult? {
     var found = false
