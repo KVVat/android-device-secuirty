@@ -2,6 +2,7 @@ package com.example.encryption
 
 import android.app.Activity
 import android.app.KeyguardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -16,7 +17,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.security.crypto.MasterKey
 import androidx.work.CoroutineWorker
+import androidx.work.Data
+import androidx.work.ListenableWorker
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_CLASS_NAME
+import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_PACKAGE_NAME
+import androidx.work.multiprocess.RemoteWorkerService
+import com.example.encryption.utils.CoroutineKeyCheckWorker
 import java.io.IOException
 import java.security.*
 import javax.crypto.*
@@ -35,16 +44,9 @@ class MainActivity : AppCompatActivity() {
   private val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
 
 
-  class CoroutineKeyCheckWorker(
-    context: Context,
-    params: WorkerParameters
-  ) : CoroutineWorker(context, params) {
+  private var workManager: WorkManager? =null;
+  private val PACKAGE_NAME = "com.example.encryption"
 
-    override suspend fun doWork(): Result {
-
-      return Result.success()
-    }
-  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -54,17 +56,21 @@ class MainActivity : AppCompatActivity() {
 
     mKeyGuardservice =
       getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager;
+
+    var notSecure = false;
     if (!mKeyGuardservice.isKeyguardSecure()) {
       keyLockEnabled = false;
       btn.isEnabled = false
       Log.w(TAG,"KeyGuard Secure is disabled. we can not try testing keys relate to it.")
       Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => disabled")
-      return; //画面のロックが設定されていない
+      //return; //画面のロックが設定されていない
+      notSecure = true;
     }
-
-    keyGenParameterSpec1 =
-    keyGenParameterSpec("key_1",true,false)
-    createKey(keyGenParameterSpec1)
+    if(!notSecure) {
+      keyGenParameterSpec1 =
+        keyGenParameterSpec("key_1", true, false)
+      createKey(keyGenParameterSpec1)
+    }
 
     keyGenParameterSpec2 =
       keyGenParameterSpec("key_2",false,true)
@@ -74,9 +80,20 @@ class MainActivity : AppCompatActivity() {
       Log.i(TAG,"Button Clicked!")
       tryEncrypt("key_1")
     }
-
+    Log.d(TAG_TEST,"WorkManager enque s")
     testUnlockedDeviceRequired()
 
+    /*val serviceName = RemoteWorkerService::class.java.name
+    val componentName = ComponentName(PACKAGE_NAME, serviceName)
+    val oneTimeWorkRequest = buildOneTimeWorkRemoteWorkRequest(
+      componentName,
+      CoroutineKeyCheckWorker::class.java
+    )*/
+    workManager = WorkManager.getInstance(applicationContext);
+    val request = OneTimeWorkRequest.from(CoroutineKeyCheckWorker::class.java)
+    //manager.enqueue(request)
+    workManager?.enqueue(request)
+    Log.d(TAG_TEST,"WorkManager enque")
     /* Application should run ke_2 check in background
     val request = OneTimeWorkRequestBuilder<MyWorkTestable>()
       .build()
@@ -100,7 +117,23 @@ class MainActivity : AppCompatActivity() {
       return false
     }
   }
+  private fun buildOneTimeWorkRemoteWorkRequest(
+    componentName: ComponentName
+    , listenableWorkerClass: Class<out ListenableWorker>
+  ): OneTimeWorkRequest {
 
+    // ARGUMENT_PACKAGE_NAME and ARGUMENT_CLASS_NAME are used to determine the service
+    // that a Worker binds to. By specifying these parameters, we can designate the process a
+    // Worker runs in.
+    val data: Data = Data.Builder()
+      .putString(ARGUMENT_PACKAGE_NAME, componentName.packageName)
+      .putString(ARGUMENT_CLASS_NAME, componentName.className)
+      .build()
+
+    return OneTimeWorkRequest.Builder(listenableWorkerClass)
+      .setInputData(data)
+      .build()
+  }
   override fun onStart() {
     super.onStart()
   }
@@ -152,6 +185,7 @@ class MainActivity : AppCompatActivity() {
       throw java.lang.RuntimeException("Failed to create a symmetric key", e)
     }
   }
+
   private fun tryEncrypt(keyname:String): Boolean {
     try {
       val keyStore = KeyStore.getInstance("AndroidKeyStore")

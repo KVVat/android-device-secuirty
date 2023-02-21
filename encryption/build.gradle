@@ -42,5 +42,6 @@ dependencies {
     implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
     implementation "androidx.security:security-crypto:1.1.0-alpha04"
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
+    implementation 'androidx.work:work-multiprocess:2.7.1'
 
 }
