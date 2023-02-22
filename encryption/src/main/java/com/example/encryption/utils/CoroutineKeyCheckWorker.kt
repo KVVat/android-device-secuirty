@@ -59,18 +59,13 @@ class CoroutineKeyCheckWorker(
       cipher.doFinal("test".toByteArray())
       // If the user has recently authenticated, you will reach here.
       //showAlreadyAuthenticated()
-      //Log.d(TAG_TEST, "KeyFeature:setAuthenticationRequired=true => success")
-      //Toast.makeText(context, ("Authed"), Toast.LENGTH_LONG).show()
       return true
     } catch (e: UserNotAuthenticatedException) {
       // User is not authenticated, let's authenticate with device credentials.
-      //Log.d(TAG_TEST, "KeyFeature:setAuthenticationRequired=true => failed")
-      //showAuthenticationScreen()
       return false
     } catch (e: KeyPermanentlyInvalidatedException) {
       // This happens if the lock screen has been disabled or reset after the key was
       // generated after the key was generated.
-      //Log.d(TAG_TEST, "KeyFeature:setAuthenticationRequired=true => failed (keys are invalidated after created)")
       return false
     } catch (e: BadPaddingException) {
       throw java.lang.RuntimeException(e)
