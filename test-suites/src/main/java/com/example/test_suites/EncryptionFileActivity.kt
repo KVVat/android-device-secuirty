@@ -13,6 +13,9 @@ import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import com.example.test_suites.utils.CoroutineKeyCheckWorker
 
 
 import java.io.IOException
@@ -21,12 +24,13 @@ import javax.crypto.*
 import javax.security.cert.CertificateException
 
 class EncryptionFileActivity : AppCompatActivity() {
+
   lateinit var mKeyGuardservice: KeyguardManager
   var keyLockEnabled = true;
   var TAG = "ADSRP_ENCRYPTION"
   var TAG_TEST = "FCS_CKH_EXT1_HIGH"
   var TAG_TEST_AUTH = "FCS_CKH_EXT1_HIGH_AUTH"
-
+  private var workManager: WorkManager? =null;
   lateinit var keyGenParameterSpec1: KeyGenParameterSpec;
   lateinit var keyGenParameterSpec2: KeyGenParameterSpec;
   private val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
@@ -61,12 +65,18 @@ class EncryptionFileActivity : AppCompatActivity() {
       tryEncrypt("key_1",true)
     }
 
+    workManager = WorkManager.getInstance(applicationContext);
+    val request = OneTimeWorkRequest.from(CoroutineKeyCheckWorker::class.java)
+    workManager?.enqueue(request)
+    /*
     try {
       tryEncrypt("key_2")
       Log.d(TAG_TEST+"_UNLOCK","UNLOCKDEVICE:OK")
     } catch (e:java.lang.RuntimeException){
       Log.d(TAG_TEST+"_UNLOCK","UNLOCKDEVICE:NG")
     }
+    */
+
     //Thread.sleep(2000)
   }
 
@@ -143,20 +153,25 @@ class EncryptionFileActivity : AppCompatActivity() {
       return true
     } catch (e: UserNotAuthenticatedException) {
       // User is not authenticated, let's authenticate with device credentials.
-      if(keyname.equals("key_1") && !click_check) {
-        Log.d(TAG_TEST_AUTH,"AUTHREQUIRED:NG")
-        Toast.makeText(this, ("NG - User Not Authed"), Toast.LENGTH_LONG).show()
+      Log.d(TAG_TEST_AUTH,"params ${keyname} ${click_check}")
+      if(keyname.equals("key_1") ) {
+        if(!click_check) {
+          Log.d(TAG_TEST_AUTH, "AUTHREQUIRED:NG")
+          Toast.makeText(this, ("NG - User Not Authed"), Toast.LENGTH_LONG).show()
+        }
         showAuthenticationScreen()
       }
-
+      //e.printStackTrace()
       return false
     } catch (e: KeyPermanentlyInvalidatedException) {
       // This happens if the lock screen has been disabled or reset after the key was
       // generated after the key was generated.
+      //Log.d(TAG_TEST_AUTH,e.toString())
       if(keyname.equals("key_1") && !click_check) {
         Log.d(TAG_TEST_AUTH,"AUTHREQUIRED:NG")
         Toast.makeText(this, ("NG - Key Permanently Invalidate"), Toast.LENGTH_LONG).show()
       }
+      //e.printStackTrace()
       return false
     } catch (e: BadPaddingException) {
       throw java.lang.RuntimeException(e)
@@ -192,7 +207,7 @@ class EncryptionFileActivity : AppCompatActivity() {
     if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
       // Challenge completed, proceed with using cipher
       if (resultCode == Activity.RESULT_OK) {
-        if (tryEncrypt("key_1")) { }
+        tryEncrypt("key_1",false)
       } else {
         // The user canceled or didn’t complete the lock screen
         // operation. Go to error/cancellation flow.

@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
       Log.i(TAG,"Button Clicked!")
       tryEncrypt("key_1")
     }
-    Log.d(TAG_TEST,"WorkManager enque s")
+    //Log.d(TAG_TEST,"WorkManager enque s")
     testUnlockedDeviceRequired()
 
     /*val serviceName = RemoteWorkerService::class.java.name
