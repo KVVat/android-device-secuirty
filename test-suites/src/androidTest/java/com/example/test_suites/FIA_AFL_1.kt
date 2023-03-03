@@ -12,15 +12,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import com.malinskiy.adam.junit4.android.rule.Mode
-import com.malinskiy.adam.junit4.android.rule.sandbox.SingleTargetAndroidDebugBridgeClient
-import com.malinskiy.adam.junit4.rule.AdbRule
-import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -64,10 +59,6 @@ class `FIA_AFL_1_Authentication` {
   //  1 - You should disable screen lock first
   //  2 - Try this command below before executing to ensure execute adb command with instrumentation test
   //  'adb reverse tcp:5037 tcp:5037'
-  //  3 - adam library requires extra options for execution
-  //  -e com.malinskiy.adam.android.ADB_PORT 5037
-  //  -e com.malinskiy.adam.android.ADB_HOST 127.0.0.1
-  //  -e com.malinskiy.adam.android.ADB_SERIAL [Serial Number of device]
 
 
   @Test

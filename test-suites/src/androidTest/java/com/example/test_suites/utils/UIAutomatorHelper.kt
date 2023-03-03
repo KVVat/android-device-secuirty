@@ -26,7 +26,7 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
     fun setScreenLockText(label:String,PIN:String){
         launchSettings(Settings.ACTION_SECURITY_SETTINGS);
         swipeUp()
-        Thread.sleep(1000);
+        Thread.sleep(500);
         safeObjectClick("Screen lock",2000)
         safeObjectClick(label,2000)
         for(i in 0..1) {
@@ -36,23 +36,23 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
             mDevice.pressEnter()
             Thread.sleep(1000);
         }
+        Thread.sleep(2000);
         safeObjectClick("DONE",2000)
         safeObjectClick("Done",2000)
     }
+
     fun resetScreenLockText(PIN: String) {
         launchSettings(Settings.ACTION_SECURITY_SETTINGS);
         swipeUp()
-        Thread.sleep(1000);
+        Thread.sleep(500);
         safeObjectClick("Screen lock",2000)
-        //safeObjectClick(label,2000)
-        //client.execute(ShellCommandRequest("input text ${PIN}"))
         Thread.sleep(1000);
         mDevice.executeShellCommand("input text ${PIN}")
         mDevice.pressEnter()
         Thread.sleep(1000);
         safeObjectClick("None",2000)
         safeObjectClick("Delete",2000)
-        safeObjectClick("Done",2000)
+        safeObjectClick("DONE",2000)
     }
     fun launchSettings(page:String){
         val intent = Intent(page)
@@ -64,9 +64,13 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
         val km = mContext!!.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         return km.isKeyguardSecure
     }
+
+    /**
+     * screenlock
+     */
     fun sleepAndWakeUpDevice() {
         mDevice.sleep()
-        Thread.sleep(1000)
+        Thread.sleep(100)
         mDevice.wakeUp()
     }
     fun swipeUp(){

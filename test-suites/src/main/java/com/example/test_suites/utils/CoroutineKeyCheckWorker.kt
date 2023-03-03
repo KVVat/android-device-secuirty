@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.example.test_suites.EncryptionFileActivity
 import java.io.IOException
 import java.security.InvalidKeyException
 import java.security.KeyStore
@@ -26,22 +27,35 @@ class CoroutineKeyCheckWorker(
   params: WorkerParameters
 ) : Worker(context, params) {
 
-  var TAG_TEST = "FCS_CKH_EXT1_HIGH_UNLOCK"
+  val TAG = "FCS_CKH_EXT_TEST"
+  val PREF_NAME:String = "FCS_CKH_EXT_PREF"
 
   override  fun doWork(): Result {
     repeat(10){
       try {
-        tryEncrypt("key_2")
-        Log.d(TAG_TEST,"UNLOCKDEVICE:OK")
+        tryEncrypt("key_unlock")
+        writePrefValue("UNLOCKDEVICE","OK")
         Thread.sleep(1000)
       } catch (e:Exception){
-        Log.d(TAG_TEST,"UNLOCKDEVICE:NG")
+        writePrefValue("UNLOCKDEVICE","NG")
+        Thread.sleep(1000)
         return Result.failure();
       }
-
     }
-
     return Result.success()
+  }
+  fun writePrefValue(label:String,value:String):String{
+    val sharedPref = applicationContext.getSharedPreferences(
+      PREF_NAME, Context.MODE_PRIVATE)
+    val ret = sharedPref.getString(label,"")
+    sharedPref.edit().putString(label,value).apply()
+    Log.d(TAG,"${label}:${value}")
+    if(ret==""){
+      return value;
+    } else {
+      Log.d(TAG, "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!)
+      return ret!!;
+    }
   }
 
   private fun tryEncrypt(keyname:String): Boolean {
@@ -57,8 +71,6 @@ class CoroutineKeyCheckWorker(
       // the last AUTHENTICATION_DURATION_SECONDS seconds.
       cipher.init(Cipher.ENCRYPT_MODE, secretKey)
       cipher.doFinal("test".toByteArray())
-      // If the user has recently authenticated, you will reach here.
-      //showAlreadyAuthenticated()
       return true
     } catch (e: UserNotAuthenticatedException) {
       // User is not authenticated, let's authenticate with device credentials.
