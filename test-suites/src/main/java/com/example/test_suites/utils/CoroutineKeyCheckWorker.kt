@@ -29,7 +29,7 @@ class CoroutineKeyCheckWorker(
   var TAG_TEST = "FCS_CKH_EXT1_HIGH_UNLOCK"
 
   override  fun doWork(): Result {
-    repeat(2){
+    repeat(10){
       try {
         tryEncrypt("key_2")
         Log.d(TAG_TEST,"UNLOCKDEVICE:OK")

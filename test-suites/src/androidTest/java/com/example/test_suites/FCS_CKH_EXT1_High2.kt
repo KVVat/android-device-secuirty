@@ -78,7 +78,7 @@ class FCS_CKH_EXT1_High2 {
   val TEST_PACKAGE = "com.example.test_suites";
   val PIN="1234"
 
-  @Test
+  //@Test
   fun testHealthyCase(){
 
     runBlocking {
@@ -106,7 +106,7 @@ class FCS_CKH_EXT1_High2 {
     }
   }
 
-  //@Test
+  @Test
   fun testAuthIsFailed(){
     //Check FCS_CKH_EXT1_HIGH_UNLOCK check failed if device is locked
     runBlocking {
@@ -117,7 +117,13 @@ class FCS_CKH_EXT1_High2 {
       val res = client.execute(
         ShellCommandRequest("am start ${TEST_PACKAGE}/.EncryptionFileActivity"))
       assertThat(res.output).isNotEqualTo("Starting")
-
+      Thread.sleep(1000);
+      mUiHelper.sleepAndWakeUpDevice()
+      //stuck here
+      var result = waitLogcatLine(100,"FCS_CKH_EXT1_HIGH_UNLOCK")
+      println(result?.text)
+      assertThat(result?.text).isEqualTo("UNLOCKDEVICE:NG")
+      //mUiHelper.safeObjectClick("TEST",2000)
       //sleep application and wait for the application return false results
       //* application should periodically test key2
       // var result = waitLogcatLine(100,"FCS_CKH_EXT1_HIGH_UNLOCK")

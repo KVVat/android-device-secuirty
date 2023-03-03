@@ -37,9 +37,6 @@ private const val PASSWORD = "aaaa"
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)//Execute methods in order of appearance
 class `FIA_AFL_1_Authentication` {
 
-  @get:Rule
-  val adbRule = AdbRule(mode = Mode.ASSERT)
-  lateinit var client:SingleTargetAndroidDebugBridgeClient;
 
   private lateinit var mDevice: UiDevice
   private var mContext: Context? = null
@@ -56,7 +53,6 @@ class `FIA_AFL_1_Authentication` {
     mContext = InstrumentationRegistry.getInstrumentation().context;
     mDevice.freezeRotation();
     sleepAndWakeUpDevice()
-    client = adbRule.adb;
   }
 
   @After
@@ -89,7 +85,8 @@ class `FIA_AFL_1_Authentication` {
       safeObjectClick("Screen lock",2000)
       safeObjectClick("PIN",2000)
       for(i in 0..1) {
-        client.execute(ShellCommandRequest("input text ${PIN}"))
+        mDevice.executeShellCommand("input text ${PIN}")
+        //client.execute(ShellCommandRequest("input text ${PIN}"))
         Thread.sleep(1000);
         mDevice.pressEnter()
         Thread.sleep(1000);
@@ -107,7 +104,7 @@ class `FIA_AFL_1_Authentication` {
       mDevice.waitForIdle()
       Thread.sleep(1000);
       swipeUp()
-      client.execute(ShellCommandRequest("input text ${PIN}"))
+      mDevice.executeShellCommand("input text ${PIN}")
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);
@@ -124,7 +121,7 @@ class `FIA_AFL_1_Authentication` {
         Thread.sleep(1000);
         swipeUp()
         for (i in 0..4) {
-          client.execute(ShellCommandRequest("input text 0000"))
+          mDevice.executeShellCommand("input text 0000")
           Thread.sleep(1000);
           mDevice.pressEnter()
           Thread.sleep(1000);
@@ -137,7 +134,7 @@ class `FIA_AFL_1_Authentication` {
       mDevice.waitForIdle()
       Thread.sleep(1000);
       swipeUp()
-      client.execute(ShellCommandRequest("input text ${PIN}"))
+      mDevice.executeShellCommand("input text ${PIN}")
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);
@@ -159,7 +156,7 @@ class `FIA_AFL_1_Authentication` {
       safeObjectClick("Screen lock",2000)
       safeObjectClick("Password",2000)
       for(i in 0..1) {
-        client.execute(ShellCommandRequest("input text ${PASSWORD}"))
+        mDevice.executeShellCommand("input text ${PASSWORD}")
         Thread.sleep(1000);
         mDevice.pressEnter()
         Thread.sleep(1000);
@@ -176,7 +173,7 @@ class `FIA_AFL_1_Authentication` {
       mDevice.waitForIdle()
       Thread.sleep(1000);
       swipeUp()
-      client.execute(ShellCommandRequest("input text ${PASSWORD}"))
+      mDevice.executeShellCommand("input text ${PASSWORD}")
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);
@@ -235,7 +232,7 @@ class `FIA_AFL_1_Authentication` {
       Thread.sleep(1000);
       swipeUp()
       Thread.sleep(1000);
-      client.execute(ShellCommandRequest("input text ${passInput}"))
+      mDevice.executeShellCommand("input text ${passInput}")
       mDevice.pressEnter()
       Thread.sleep(1000);
       launchSettings(Settings.ACTION_SECURITY_SETTINGS);
@@ -243,7 +240,7 @@ class `FIA_AFL_1_Authentication` {
       swipeUp()
       Thread.sleep(1000);
       safeObjectClick("Screen lock",2000)
-      client.execute(ShellCommandRequest("input text ${passInput}"))
+      mDevice.executeShellCommand("input text ${passInput}")
       mDevice.pressEnter()
       Thread.sleep(1000);
       safeObjectClick("None",2000)
@@ -264,12 +261,14 @@ class `FIA_AFL_1_Authentication` {
     val intent = Intent(page)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
     mContext!!.startActivity(intent)
-    Thread.sleep(LONG_TIMEOUT )
+    Thread.sleep(LONG_TIMEOUT)
   }
+
   fun isLockScreenEnbled():Boolean{
     val km = mContext!!.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     return km.isKeyguardSecure
   }
+
   fun sleepAndWakeUpDevice() {
     mDevice.sleep()
     Thread.sleep(1000)
