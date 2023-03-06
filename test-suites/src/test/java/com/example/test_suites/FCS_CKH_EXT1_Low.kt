@@ -74,11 +74,11 @@ class `FCS_CKH_EXT#1 - Low ` {
       //2. Users need to relaunch the device quickly
       client.execute(request = RebootRequest(), serial = adb.deviceSerial)
       println("** Rebooting : Please Reboot Device **")
-      Thread.sleep(LONG_TIMEOUT*4);//20sec.
+      Thread.sleep(LONG_TIMEOUT*5);//20sec.
       //Note:  the connection to the adb server will be dismissed during the rebooting
-      println("** Require Manual Operation : Please Reboot Device **")
+      println("** Maybe it requires manual operation : Please Reboot the target device as fast as possible **")
 
-      result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
+      result = AdamUtils.waitLogcatLine(200,"FCS_CKH_EXT_TEST",adb)
       //println(result);
       println(result?.text)
 
