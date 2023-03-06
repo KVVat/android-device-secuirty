@@ -8,6 +8,8 @@ import android.provider.Settings
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 
@@ -40,12 +42,30 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
             Log.d("TAG", "Click $objectLabel ignored")
         }
     }
+    fun safeFindObject(objectLabel:String):Boolean{
+        try {
+            val objs: List<UiObject2> =
+                mDevice.findObjects(By.text(objectLabel))
+            if(objs.size == 0){
+                return false
+            } else {
+                return true
+            }
+        } catch(ex:java.lang.NullPointerException){
+            Log.d("TAG", "Click $objectLabel ignored")
+            return false;
+        }
+    }
 
     fun setScreenLockText(label:String,PIN:String){
         launchSettings(Settings.ACTION_SECURITY_SETTINGS);
         swipeUp()
         Thread.sleep(500);
-        safeObjectClick("Device lock",2000)//accordion added after later SDK33
+
+        if(!safeFindObject("Screen lock")){
+            safeObjectClick("Device lock",2000)
+        }//accordion added after later SDK33
+
         safeObjectClick("Screen lock",2000)
         safeObjectClick(label,2000)
         for(i in 0..1) {

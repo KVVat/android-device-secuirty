@@ -20,7 +20,7 @@ import org.junit.Test
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class `FDP_ACF_EXT#1 - App Update ` {
+class FDP_ACF_EXT_Simple {
 
   @Rule
   @JvmField

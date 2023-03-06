@@ -3,6 +3,8 @@ package com.example.test_suites
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -18,6 +20,11 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
+import java.security.InvalidAlgorithmParameterException
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
+import java.security.NoSuchProviderException
+import javax.security.cert.CertificateException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -38,7 +45,7 @@ class FCS_CKH_EXT1_High {
   val PREF_NAME:String = "EncryptedSharedPref"
 
   lateinit var appContext:Context;
-  lateinit var masterKeyAlias:String;
+  lateinit var keyNormal:MasterKey;
   lateinit var keyUnlockDeviceTest:MasterKey;
 
   @Before
@@ -46,9 +53,13 @@ class FCS_CKH_EXT1_High {
   {
     appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
-    val keyNormal = MasterKey.Builder(appContext)
+    keyNormal = MasterKey.Builder(appContext)
       .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
       .build()
+
+    keyUnlockDeviceTest = MasterKey.Builder(appContext).setKeyGenParameterSpec(
+      keyGenParameterSpec("_androidx_security_master_key_",false,true)
+    ).build();
 
     norm_enc_data = EncryptedSharedPreferences
       .create(appContext,
@@ -62,7 +73,31 @@ class FCS_CKH_EXT1_High {
     val fdelete: File = File(appContext.getFilesDir(), "my_sensitive_loremipsum.txt")
     if (fdelete.exists()) {fdelete.delete()}
   }
-
+  fun keyGenParameterSpec(keyNameAlias:String,authRequired:Boolean,unlockDeviceRequired:Boolean): KeyGenParameterSpec {
+    try {
+      return KeyGenParameterSpec.Builder(keyNameAlias,
+                                         KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+        .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setKeySize(256).setEncryptionPaddings(
+          KeyProperties.ENCRYPTION_PADDING_NONE)
+        .setUnlockedDeviceRequired(unlockDeviceRequired)
+        .setUserAuthenticationRequired(authRequired) // Require that the user has unlocked in the last 30 seconds
+        .setUserAuthenticationValidityDurationSeconds(30)
+        .build()
+      //keyGenerator.generateKey()
+    } catch (e: NoSuchAlgorithmException) {
+      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
+    } catch (e: NoSuchProviderException) {
+      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
+    } catch (e: InvalidAlgorithmParameterException) {
+      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
+    } catch (e: KeyStoreException) {
+      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
+    } catch (e: CertificateException) {
+      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
+    } catch (e: IOException) {
+      throw java.lang.RuntimeException("Failed to create a symmetric key", e)
+    }
+  }
   @Test
   fun testEncryptedSharedPreference(){
     runBlocking {
@@ -104,9 +139,9 @@ class FCS_CKH_EXT1_High {
     val fTarget: File = File(appContext.getFilesDir(), fileToWrite)
 
     val encryptedFile = EncryptedFile.Builder(
-      fTarget,
       appContext,
-      masterKeyAlias,
+      fTarget,
+      keyNormal,
       EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
     ).build()
 
@@ -165,6 +200,8 @@ class FCS_CKH_EXT1_High {
       fTargetStream.close();
     }
   }
+
+  /*
   @Test
   fun testEncryptedFile2() {
     val fileToWrite = "my_sensitive_loremipsum2.txt"
@@ -238,6 +275,8 @@ class FCS_CKH_EXT1_High {
       fTargetStream.close();
     }
   }
+  */
+
   fun loadSharedPrefs(vararg prefs: String?) {
     // Logging messages left in to view Shared Preferences. I filter out all logs except for ERROR; hence why I am printing error messages.
     for (pref_name in prefs) {

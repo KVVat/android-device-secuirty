@@ -27,7 +27,7 @@ import org.xml.sax.InputSource
 import java.time.LocalDateTime
 
 //FPR_PSE.1
-class `FPR_PSE#1 - AppDev` {
+class FPR_PSE_1_Simple {
 
   private val TEST_PACKAGE = "com.example.uniqueid"
   private val TEST_MODULE = "uniqueid-debug.apk"

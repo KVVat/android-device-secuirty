@@ -17,7 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 
 //FPR_PSE.1
-class `FDP_ACC#1 - UserAssets` {
+class FDP_ACC_1_Simple {
 
   private val TEST_PACKAGE = "com.example.assets"
   private val TEST_MODULE = "assets-debug.apk"
