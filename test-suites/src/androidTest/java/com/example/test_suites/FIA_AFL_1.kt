@@ -4,7 +4,7 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Point
-import android.provider.Settings
+import android.os.Build
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -12,7 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import kotlinx.coroutines.runBlocking
+import com.example.test_suites.utils.UIAutomatorHelper
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -20,25 +20,33 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 
-private const val LONG_TIMEOUT = 5000L
-private const val SHORT_TIMEOUT = 1000L
-private const val PIN = "1234"
-private const val PASSWORD = "aaaa"
-
-/**
- *
- */
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)//Execute methods in order of appearance
-class `FIA_AFL_1_Authentication` {
+class FIA_AFL_1 {
 
+  private val LONG_TIMEOUT = 5000L
+  private val SHORT_TIMEOUT = 1000L
+  private val PIN = "1234"
+  private val PASSWORD = "aaaa"
 
   private lateinit var mDevice: UiDevice
-  private var mContext: Context? = null
+  private lateinit var mContext: Context
+  lateinit var mUiHelper:UIAutomatorHelper
 
   //Pattern Pixel 5e :
+  private var PATS:Map<String,Array<Point>> = mapOf(
+    Pair("sdk_gphone64_x86_64-33",
+         arrayOf(Point(230, 1800), Point(230, 850),Point(512,1500),Point(880, 1800))
+    ),
+    Pair("Pixel 5a-33",
+         arrayOf(Point(230, 1800), Point(230, 850),Point(512,1500),Point(880, 1800))
+    ),
+
+  )
+
   private var PAT:Array<Point> = arrayOf(Point(230, 1800),
     Point(230, 850),Point(512,1500),Point(880, 1800));
+
 
   @Before
   fun setUp() {
@@ -48,6 +56,10 @@ class `FIA_AFL_1_Authentication` {
     mContext = InstrumentationRegistry.getInstrumentation().context;
     mDevice.freezeRotation();
     sleepAndWakeUpDevice()
+
+    mUiHelper = UIAutomatorHelper(mContext,mDevice_)
+
+
   }
 
   @After
@@ -55,126 +67,167 @@ class `FIA_AFL_1_Authentication` {
     mDevice.unfreezeRotation()
   }
 
+  @Test
+  fun a(){
+    println(mUiHelper.getDeviceName());
+  }
+
   //Before to start this test cases
   //  1 - You should disable screen lock first
   //  2 - Try this command below before executing to ensure execute adb command with instrumentation test
   //  'adb reverse tcp:5037 tcp:5037'
 
-
   @Test
-  fun T10_testSetupPINLock() {
-    println("isLock=>"+isLockScreenEnbled())
-
-    if(!isLockScreenEnbled()){
-      println("** To execute this test case you should disable device lockscreen setting first **")
+  fun T01_testPINLockSuccess(){
+    if(mUiHelper.isLockScreenEnbled()){
+      println("*** It requires to disable screen lock to run this test ***");
+      assert(false)
     }
-    runBlocking {
-      sleepAndWakeUpDevice()
-      launchSettings(Settings.ACTION_SECURITY_SETTINGS);
-      swipeUp()
-      Thread.sleep(1000);
-      safeObjectClick("Screen lock",2000)
-      safeObjectClick("PIN",2000)
-      for(i in 0..1) {
-        mDevice.executeShellCommand("input text ${PIN}")
-        //client.execute(ShellCommandRequest("input text ${PIN}"))
-        Thread.sleep(1000);
-        mDevice.pressEnter()
-        Thread.sleep(1000);
-      }
-      safeObjectClick("Done",2000)
-    }
-  }
-
-  @Test
-  fun T11_unlockScreenPINSuccess() {
-    //assert(fals)
-    assert(isLockScreenEnbled())
-    runBlocking {
-      sleepAndWakeUpDevice()
+    try {
+      mUiHelper.sleepAndWakeUpDevice()
+      mUiHelper.setScreenLockText("PIN", PIN)
+      //Launch application
       mDevice.waitForIdle()
+      mUiHelper.sleepAndWakeUpDevice()//LockScreen
+
       Thread.sleep(1000);
-      swipeUp()
+      mUiHelper.swipeUp()
       mDevice.executeShellCommand("input text ${PIN}")
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);
+
+    } finally {
+      mUiHelper.resetScreenLockText(PIN)
     }
+    //if the operation above fails, there must be a problem.
+    assert(!mUiHelper.isLockScreenEnbled())
   }
 
-  @LargeTest
-  fun T12_unlockScreenPasswordFailed() {
-    assert(isLockScreenEnbled())
-    runBlocking {
-      for(j in 0 .. 1) {
-        sleepAndWakeUpDevice()
-        mDevice.waitForIdle()
-        Thread.sleep(1000);
-        swipeUp()
-        for (i in 0..4) {
-          mDevice.executeShellCommand("input text 0000")
-          Thread.sleep(1000);
-          mDevice.pressEnter()
-          Thread.sleep(1000);
-        }
-        mDevice.pressEnter()
-        Thread.sleep(30 * 1000)//wait 30 se
-      }
-      //Success
-      sleepAndWakeUpDevice()
+  @Test
+  fun T02_testPINLockFailure(){
+    if(mUiHelper.isLockScreenEnbled()){
+      println("*** It requires to disable screen lock to run this test ***");
+      assert(false)
+    }
+    try {
+      mUiHelper.sleepAndWakeUpDevice()
+      mUiHelper.setScreenLockText("PIN", PIN)
+      //Launch application
       mDevice.waitForIdle()
+      mUiHelper.sleepAndWakeUpDevice()//LockScreen
+
       Thread.sleep(1000);
-      swipeUp()
+      mUiHelper.swipeUp()
+      for (i in 0..4) {
+        mDevice.executeShellCommand("input text 0000")
+        Thread.sleep(1000);
+        mDevice.pressEnter()
+        Thread.sleep(1000);
+      }
+      //if it fails 5 times, 30 sec trial delay is applied
+      mUiHelper.safeObjectClick("OK",1000);
+      Thread.sleep(30 * 1000)//wait 30 sec
+    } finally {
+      mUiHelper.sleepAndWakeUpDevice()//LockScreen
+      Thread.sleep(1000);
+      mUiHelper.swipeUp()
+      Thread.sleep(1000);
+      //Need to unlock screen
       mDevice.executeShellCommand("input text ${PIN}")
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);
+      mUiHelper.resetScreenLockText(PIN)
     }
+    //if the operation above fails, there must be a problem.
+    assert(!mUiHelper.isLockScreenEnbled())
   }
   @Test
-  fun T13_setupLockNone(){
-    setupLockNone(PIN)
-  }
-  @Test
-  fun T20_testSetupPasswordLock() {
-    //to start this test you should disable screen lock first
-    assert(!isLockScreenEnbled())
-    runBlocking {
-      sleepAndWakeUpDevice()
-      launchSettings(Settings.ACTION_SECURITY_SETTINGS);
-      swipeUp()
-      Thread.sleep(1000);
-      safeObjectClick("Screen lock",2000)
-      safeObjectClick("Password",2000)
-      for(i in 0..1) {
-        mDevice.executeShellCommand("input text ${PASSWORD}")
-        Thread.sleep(1000);
-        mDevice.pressEnter()
-        Thread.sleep(1000);
-      }
-      safeObjectClick("Done",2000)
+  fun T11_testPassLockSuccess(){
+    if(mUiHelper.isLockScreenEnbled()){
+      println("*** It requires to disable screen lock to run this test ***");
+      assert(false)
     }
-  }
-  @Test
-  fun T21_unlockScreenPaswordSuccess() {
-    //assert(fals)
-    assert(isLockScreenEnbled())
-    runBlocking {
-      sleepAndWakeUpDevice()
+    try {
+      mUiHelper.sleepAndWakeUpDevice()
+      mUiHelper.setScreenLockText("Password", PASSWORD)
+      //Launch application
       mDevice.waitForIdle()
+      mUiHelper.sleepAndWakeUpDevice()//LockScreen
+
       Thread.sleep(1000);
-      swipeUp()
+      mUiHelper.swipeUp()
       mDevice.executeShellCommand("input text ${PASSWORD}")
       Thread.sleep(1000);
       mDevice.pressEnter()
       Thread.sleep(1000);
+
+    } finally {
+      mUiHelper.resetScreenLockText(PASSWORD)
     }
-  }
-  @Test
-  fun T23_setupLockNone(){
-    setupLockNone(PASSWORD)
+    //if the operation above fails, there must be a problem.
+    assert(!mUiHelper.isLockScreenEnbled())
   }
 
+  @Test
+  fun testPassLockFailure(){
+    if(mUiHelper.isLockScreenEnbled()){
+      println("*** It requires to disable screen lock to run this test ***");
+      assert(false)
+    }
+    try {
+      mUiHelper.sleepAndWakeUpDevice()
+      mUiHelper.setScreenLockText("Password", PASSWORD)
+      //Launch application
+      mDevice.waitForIdle()
+      mUiHelper.sleepAndWakeUpDevice()//LockScreen
+
+      Thread.sleep(1000);
+      mUiHelper.swipeUp()
+      for (i in 0..4) {
+        mDevice.executeShellCommand("input text bbbb")
+        Thread.sleep(1000);
+        mDevice.pressEnter()
+        Thread.sleep(1000);
+      }
+      //if it fails 5 times, 30 sec trial delay is applied
+      mUiHelper.safeObjectClick("OK",1000);
+      Thread.sleep(30 * 1000)//wait 30 sec
+    } finally {
+      mUiHelper.sleepAndWakeUpDevice()//LockScreen
+      Thread.sleep(1000);
+      mUiHelper.swipeUp()
+      Thread.sleep(1000);
+      //Need to unlock screen
+      mDevice.executeShellCommand("input text ${PASSWORD}")
+      Thread.sleep(1000);
+      mDevice.pressEnter()
+      Thread.sleep(1000);
+      mUiHelper.resetScreenLockText(PIN)
+    }
+    //if the operation above fails, there must be a problem.
+    assert(!mUiHelper.isLockScreenEnbled())
+
+  }
+  /*
+  @Test
+  fun testPatternSuccess(){
+    if(mUiHelper.isLockScreenEnbled()){
+      println("*** It requires to disable screen lock to run this test ***");
+      assert(false)
+    }
+  }
+  @LargeTest
+  fun testPatternFailure(){
+    if(mUiHelper.isLockScreenEnbled()){
+      println("*** It requires to disable screen lock to run this test ***");
+      assert(false)
+    }
+  }
+  */
+
+  /*
   fun T31_testSetupPatternLock() {
     assert(!isLockScreenEnbled())
     runBlocking {
@@ -238,7 +291,7 @@ class `FIA_AFL_1_Authentication` {
       safeObjectClick("Delete",2000)
     }
   }
-
+  */
   fun safeObjectClick(objectLabel:String,timeout:Long){
     //Ignore exception in case object is not found to suppress unintentional/varying behaviour
     try {

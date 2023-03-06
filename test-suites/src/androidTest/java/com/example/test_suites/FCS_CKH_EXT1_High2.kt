@@ -92,7 +92,6 @@ class FCS_CKH_EXT1_High2 {
         mDevice.pressEnter()
         Thread.sleep(2000);
       } finally {
-
         mUiHelper.resetScreenLockText(PIN)
       }
       ////////////////////////////////////////////////
@@ -135,7 +134,6 @@ class FCS_CKH_EXT1_High2 {
       } finally {
         mUiHelper.resetScreenLockText(PIN)
       }
-
       val pf:SharedPreferences =
         mTargetContext.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
       val result_auth = pf.getString("AUTHREQUIRED","")
