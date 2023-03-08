@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.directboot.databinding.ActivityMainBinding
 
 //The module simply record Unique Id to the configuration file
@@ -22,8 +23,15 @@ class MainActivity : AppCompatActivity() {
 
     binding = ActivityMainBinding.inflate(layoutInflater);
     setContentView(binding.root)
-
     receiver = BootReceiver()
+    LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+      receiver,
+      IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+    )
+    LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+      receiver,
+      IntentFilter(Intent.ACTION_BOOT_COMPLETED)
+    )
     IntentFilter(Intent.ACTION_BOOT_COMPLETED).also {
       registerReceiver(receiver,it)
     }
@@ -34,7 +42,6 @@ class MainActivity : AppCompatActivity() {
 
   override fun onStart() {
     super.onStart()
-
 
     val sharedPref = storageContext().getSharedPreferences(TAG, Context.MODE_PRIVATE)
     sharedPref.edit().putString(TAG,"Success").apply()

@@ -30,6 +30,7 @@ class FCS_CKH_EXT1_Manual {
   @JvmField
   val adb = AdbDeviceRule()
   val client = adb.adb
+
   @Before
   fun setup() {
     runBlocking {
@@ -48,6 +49,11 @@ class FCS_CKH_EXT1_Manual {
     }
   }
 
+  // test
+  // adb shell
+  // su
+  // am broadcast -a android.intent.action.BOOT_COMPLETED
+
   @Test
   fun testDeviceEncryptedStorage() {
     runBlocking {
@@ -63,12 +69,13 @@ class FCS_CKH_EXT1_Manual {
         client.execute(ShellCommandRequest("am start ${TEST_PACKAGE}/${TEST_PACKAGE}.MainActivity"),
                        adb.deviceSerial)
       }
-      Thread.sleep(2000);
 
       var result:LogcatResult?
         = AdamUtils.waitLogcatLine(50,"FCS_CKH_EXT_TEST",adb)
       assertThat { result }.isNotNull()
 
+
+      Thread.sleep(1000*10);
       //(Require)Reboot Device
       //1. We expect the bootloader of the device is unlocked.
       //2. Users need to relaunch the device quickly
