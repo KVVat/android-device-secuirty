@@ -23,7 +23,8 @@ elif [ $NUM -eq 4 ]; then
 elif [ $NUM -eq 5 ]; then
     echo " - The test depends on the device/system environment, and we test it on the pixel devices"
     echo " - The test autmatically operate the target device with UIAutomator"
-    echo " - For running this test you need to set the screenlock setting to 'None'. "
+    echo " - For running this test you need to set the Screenlock setting to 'None'. "
+    echo " - For running this test you need to set the System navigation setting to 'Gesture Navigation'. "
     echo "Start Test Cases? (Y/N)"
     read -r WARN
     ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FIA_AFL_1 connectedAndroidTest

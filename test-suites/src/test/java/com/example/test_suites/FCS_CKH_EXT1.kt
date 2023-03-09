@@ -24,7 +24,6 @@ class FCS_CKH_EXT1 {
   private val TEST_PACKAGE = "com.example.directboot"
   private val TEST_MODULE = "directboot-debug.apk"
   private val LONG_TIMEOUT = 5000L
-  private val SHORT_TIMEOUT = 1000L
 
   @Rule
   @JvmField

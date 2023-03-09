@@ -57,10 +57,27 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
         }
     }
 
+    fun versionCheck():Double
+    {
+        var ver_:String =mDevice.executeShellCommand("getprop ro.build.version.release");
+        Thread.sleep(500)
+        var ver = Math.floor(ver_.toDouble())
+
+        println(ver_)
+
+        println(ver)
+
+
+        return ver;
+    }
+
     fun setScreenLockText(label:String,PIN:String){
         launchSettings(Settings.ACTION_SECURITY_SETTINGS);
-        swipeUp()
-        Thread.sleep(500);
+
+        if(versionCheck()>=13){
+          swipeUp()
+          Thread.sleep(500);
+        }
 
         if(!safeFindObject("Screen lock")){
             safeObjectClick("Device lock",2000)
@@ -74,6 +91,8 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
             mDevice.executeShellCommand("input text ${PIN}")
             mDevice.pressEnter()
             Thread.sleep(1000);
+            if(safeFindObject("DONE")||safeFindObject("Done"))
+                break;
         }
         Thread.sleep(2000);
         safeObjectClick("DONE",2000)
@@ -82,8 +101,10 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
 
     fun setPatternLock(label:String,PIN:String){
         launchSettings(Settings.ACTION_SECURITY_SETTINGS);
-        swipeUp()
-        Thread.sleep(500);
+        if(versionCheck()>=13){
+            swipeUp()
+            Thread.sleep(500);
+        }
         safeObjectClick("Screen lock",2000)
         safeObjectClick(label,2000)
         for(i in 0..1) {
@@ -100,13 +121,21 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
 
     fun resetScreenLockText(PIN: String) {
         launchSettings(Settings.ACTION_SECURITY_SETTINGS);
-        swipeUp()
-        Thread.sleep(500);
+
+        if(versionCheck()>=13){
+            swipeUp()
+            Thread.sleep(500);
+        }
+
         safeObjectClick("Screen lock",2000)
         Thread.sleep(1000);
-        mDevice.executeShellCommand("input text ${PIN}")
-        mDevice.pressEnter()
-        Thread.sleep(1000);
+        for(i in 0..1) {
+            mDevice.executeShellCommand("input text ${PIN}")
+            mDevice.pressEnter()
+            Thread.sleep(1000);
+            if(safeFindObject("None"))
+                break;
+        }
         safeObjectClick("None",2000)
         safeObjectClick("Delete",2000)
         safeObjectClick("DONE",2000)
@@ -131,7 +160,7 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
         mDevice.wakeUp()
     }
     fun swipeUp(){
-        mDevice.swipe(mDevice.getDisplayWidth() / 2, mDevice.getDisplayHeight(),
+        mDevice.swipe(mDevice.getDisplayWidth() / 2, mDevice.getDisplayHeight()-50,
             mDevice.getDisplayWidth() / 2, 0, 30);
         Thread.sleep(1000);
     }

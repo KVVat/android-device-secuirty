@@ -31,6 +31,7 @@ class FIA_AFL_1 {
 
   private lateinit var mDevice: UiDevice
   private lateinit var mContext: Context
+  private lateinit var mTargetContext: Context
   lateinit var mUiHelper:UIAutomatorHelper
 
   //Pattern Pixel 5e :
@@ -54,6 +55,9 @@ class FIA_AFL_1 {
     mDevice = mDevice_!!;
 
     mContext = InstrumentationRegistry.getInstrumentation().context;
+    mTargetContext = InstrumentationRegistry.getInstrumentation().targetContext
+
+
     mDevice.freezeRotation();
     sleepAndWakeUpDevice()
 
