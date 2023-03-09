@@ -19,7 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class FCS_CKH_EXT1_Manual {
+class FCS_CKH_EXT1 {
 
   private val TEST_PACKAGE = "com.example.directboot"
   private val TEST_MODULE = "directboot-debug.apk"

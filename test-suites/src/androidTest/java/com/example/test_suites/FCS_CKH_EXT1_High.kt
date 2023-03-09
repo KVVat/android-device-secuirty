@@ -69,7 +69,6 @@ class FCS_CKH_EXT1_High {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
       )
 
-
     val fdelete: File = File(appContext.getFilesDir(), "my_sensitive_loremipsum.txt")
     if (fdelete.exists()) {fdelete.delete()}
   }
