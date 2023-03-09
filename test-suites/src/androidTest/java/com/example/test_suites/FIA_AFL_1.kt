@@ -71,15 +71,8 @@ class FIA_AFL_1 {
     mDevice.unfreezeRotation()
   }
 
-  @Test
-  fun a(){
-    println(mUiHelper.getDeviceName());
-  }
-
-  //Before to start this test cases
-  //  1 - You should disable screen lock first
-  //  2 - Try this command below before executing to ensure execute adb command with instrumentation test
-  //  'adb reverse tcp:5037 tcp:5037'
+  //Before running this test cases
+  //  You should disable screen lock first
 
   @Test
   fun T01_testPINLockSuccess(){

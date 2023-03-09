@@ -83,11 +83,13 @@ class FCS_CKH_EXT1_High2 {
         //Launch application
         val res = mDevice.executeShellCommand(
            "am start ${TEST_PACKAGE}/.EncryptionFileActivity")
+        println(res)
         assertThat(res).isNotEqualTo("Starting")
 
-        Thread.sleep(5000);
+        Thread.sleep(2000);
         mUiHelper.safeObjectClick("TEST",2000)
-        Thread.sleep(1000);
+        Thread.sleep(5000);
+
         mDevice.executeShellCommand("input text ${PIN}")
         mDevice.pressEnter()
         Thread.sleep(2000);
@@ -130,7 +132,7 @@ class FCS_CKH_EXT1_High2 {
         Thread.sleep(2000);
         mUiHelper.sleepAndWakeUpDevice()
         //Sleep device -> lock screen
-        Thread.sleep(2000);
+        Thread.sleep(5000);
       } finally {
         mUiHelper.resetScreenLockText(PIN)
       }
