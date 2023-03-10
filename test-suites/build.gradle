@@ -88,7 +88,9 @@ android {
             outputFileName = "${applicationName}-v${variant.versionCode}-${variant.buildType.name}.apk"
         }
     }
+
 }
+
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
