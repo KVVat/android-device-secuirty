@@ -59,7 +59,7 @@ elif [ $NUM -eq 5 ]; then
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
     ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FIA_AFL_1 connectedAndroidTest
   fi
-elif [ $NUM -eq 6 ]; then
+elif [ $NUM -eq 9 ]; then
   ./gradlew clean
 else
   echo "Please input a value included in the choices."
