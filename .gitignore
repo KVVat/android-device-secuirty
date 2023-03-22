@@ -45,7 +45,8 @@ appupdate/build
 directboot/build
 /security
 /security/*
-
+/results
+/results/*
 
 acvpkernel/build
 acvpkernel/src/go
