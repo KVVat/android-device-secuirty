@@ -63,11 +63,6 @@ public class UIAutomatorHelper(c:Context,d:UiDevice) {
         Thread.sleep(500)
         var ver = Math.floor(ver_.toDouble())
 
-        println(ver_)
-
-        println(ver)
-
-
         return ver;
     }
 

@@ -40,7 +40,7 @@ test-suites/build
 assets/build
 encryption/build
 uniqueid/build
-assets-reader/build
+networkcheck/build
 appupdate/build
 directboot/build
 /security

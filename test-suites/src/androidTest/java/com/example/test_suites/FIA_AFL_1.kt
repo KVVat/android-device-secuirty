@@ -59,11 +59,8 @@ class FIA_AFL_1 {
 
 
     mDevice.freezeRotation();
-    sleepAndWakeUpDevice()
-
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
-
-
+    
   }
 
   @After
@@ -289,35 +286,5 @@ class FIA_AFL_1 {
     }
   }
   */
-  fun safeObjectClick(objectLabel:String,timeout:Long){
-    //Ignore exception in case object is not found to suppress unintentional/varying behaviour
-    try {
-      mDevice.wait(Until.findObject(By.text(objectLabel)),timeout).click();
-    } catch(ex:java.lang.NullPointerException){
-      Log.d("TAG", "Click $objectLabel ignored")
-    }
-  }
 
-  fun launchSettings(page:String){
-    val intent = Intent(page)
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    mContext!!.startActivity(intent)
-    Thread.sleep(LONG_TIMEOUT)
-  }
-
-  fun isLockScreenEnbled():Boolean{
-    val km = mContext!!.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-    return km.isKeyguardSecure
-  }
-
-  fun sleepAndWakeUpDevice() {
-    mDevice.sleep()
-    Thread.sleep(1000)
-    mDevice.wakeUp()
-  }
-  fun swipeUp(){
-    mDevice.swipe(mDevice.getDisplayWidth() / 2, mDevice.getDisplayHeight(),
-                  mDevice.getDisplayWidth() / 2, 0, 30);
-    Thread.sleep(SHORT_TIMEOUT);
-  }
 }

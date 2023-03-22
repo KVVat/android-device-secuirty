@@ -114,6 +114,7 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.25'
     testImplementation 'org.simpleframework:simple-xml:2.7.1'
     testImplementation 'org.slf4j:slf4j-simple:1.7.32'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     androidTestImplementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
     androidTestImplementation "androidx.security:security-crypto:1.1.0-alpha04"
@@ -125,5 +126,5 @@ dependencies {
     androidTestImplementation 'com.malinskiy.adam:android-junit4-test-annotation-producer:0.4.7'
     androidTestImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.25'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
-
+    androidTestImplementation 'com.squareup.okhttp3:okhttp:4.9.0'
 }

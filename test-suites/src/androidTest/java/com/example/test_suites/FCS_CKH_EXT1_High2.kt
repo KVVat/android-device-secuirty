@@ -46,6 +46,10 @@ class FCS_CKH_EXT1_High2 {
   lateinit var mDevice: UiDevice
   lateinit var mUiHelper:UIAutomatorHelper
 
+  val TEST_PACKAGE = "com.example.test_suites";
+  val PIN="1234"
+  val PREF_NAME:String = "FCS_CKH_EXT_PREF"
+
   @Before
   fun setup()
   {
@@ -65,9 +69,7 @@ class FCS_CKH_EXT1_High2 {
    //'adb reverse tcp:5037 tcp:5037'
   // <option name="EXTRA_OPTIONS" value="-e com.malinskiy.adam.android.ADB_PORT 5554 -e com.malinskiy.adam.android.ADB_HOST 10.0.0.2 -e com.malinskiy.adam.android.ADB_SERIAL emulator-5554" />
 
-  val TEST_PACKAGE = "com.example.test_suites";
-  val PIN="1234"
-  val PREF_NAME:String = "FCS_CKH_EXT_PREF"
+
 
   @Test
   fun testHealthyCase(){

@@ -17,7 +17,7 @@ include ':test-suites'
 include ':uniqueid'
 include ':appupdate'
 include ':assets'
-include ':assets-reader'
+include ':networkcheck'
 include ':directboot'
 include ':encryption'
 
