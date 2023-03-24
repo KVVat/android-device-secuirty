@@ -65,7 +65,7 @@ class FPR_PSE_1_Simple {
       val file_apk: File =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
 
-      println("** A junit test case for FPR_PSE_1 started on "+LocalDateTime.now()+" **")
+      println("The test verifies that the apis which generate unique ids return expected values.")
 
       AdamUtils.InstallApk(file_apk, false,adb);
 
@@ -82,6 +82,7 @@ class FPR_PSE_1_Simple {
       //the map contains unique ids below : ADID,UUID,AID,WIDEVINE (see application code)
       val dictA:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
       //
+      println("Values of each api results : "+dictA.toString())
 
       //kill process (am force-stop com.package.name)
       client.execute(ShellCommandRequest("am force-stop $TEST_PACKAGE"), adb.deviceSerial);
@@ -95,14 +96,16 @@ class FPR_PSE_1_Simple {
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
 
       val dictB:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
-      //println(dictB);
+      println("Values of each api results (after reboot) : "+dictB.toString());
 
+      println("Check all api values are maintained.");
       //Expected : All unique id values should be maintained
       assertThat(dictA["UUID"]).isEqualTo(dictB["UUID"])
       assertThat(dictA["ADID"]).isEqualTo(dictB["ADID"])
       assertThat(dictA["AID"]).isEqualTo(dictB["AID"])
       assertThat(dictA["WIDEVINE"]).isEqualTo(dictB["WIDEVINE"])
 
+      println("Uninstall/Install again the target apk.");
       //uninstall application =>
       client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
       Thread.sleep(SHORT_TIMEOUT*2);
@@ -119,6 +122,7 @@ class FPR_PSE_1_Simple {
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
       val dictC:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
 
+      println("Check the api values except UUID should be maintained.");
       //Expected : UUID should be changed. Others should be maintained
       assertThat(dictA["UUID"]).isNotEqualTo(dictC["UUID"])
       assertThat(dictA["ADID"]).isEqualTo(dictC["ADID"])
