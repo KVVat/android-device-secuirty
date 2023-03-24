@@ -14,6 +14,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -43,6 +44,8 @@ class FTP_ITC_EXT {
 
     mDevice.freezeRotation();
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
+
+    println("** A Junit test case for FTP_ITC_EXT started on "+ LocalDateTime.now()+" **")
   }
 
   @After

@@ -31,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.Instant
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -60,6 +61,9 @@ class FCS_CKH_EXT1_High2 {
     mDevice.freezeRotation();
 
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
+
+    println("** A Junit test case for FCS_CKH_EXT1_High started on "+ LocalDateTime.now()+" **")
+
   }
   @After
   fun tearDown() {
@@ -73,6 +77,10 @@ class FCS_CKH_EXT1_High2 {
 
   @Test
   fun testHealthyCase(){
+
+
+    println("*** The test case verifies the encryption key options regarding screenlock/authentication ***");
+
     if(mUiHelper.isLockScreenEnbled()){
       println("*** It requires to disable screen lock to run this test ***");
       assert(false)
@@ -84,11 +92,11 @@ class FCS_CKH_EXT1_High2 {
         mUiHelper.setScreenLockText("PIN", PIN)
         //Launch application
         val res = mDevice.executeShellCommand(
-           "am start ${TEST_PACKAGE}/.EncryptionFileActivity")
-        println(res)
+           "am start -n ${TEST_PACKAGE}/.EncryptionFileActivity")
+        println("Encryption File Activity Start:"+res)
         assertThat(res).isNotEqualTo("Starting")
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         mUiHelper.safeObjectClick("TEST",2000)
         Thread.sleep(5000);
 
@@ -107,6 +115,8 @@ class FCS_CKH_EXT1_High2 {
       val result_auth = pf.getString("AUTHREQUIRED","")
       val result_unlock = pf.getString("UNLOCKDEVICE","")
       pf.edit().putString("Test","test")
+
+      println("Expected:AUTHREQUIRED:OK,UNLOCKDEVICE:OK")
       println("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock);
 
       //Verify
@@ -128,10 +138,10 @@ class FCS_CKH_EXT1_High2 {
         mUiHelper.setScreenLockText("PIN", PIN)
         //Launch application
         val res = mDevice.executeShellCommand(
-          "am start ${TEST_PACKAGE}/.EncryptionFileActivity")
+          "am start -n ${TEST_PACKAGE}/.EncryptionFileActivity")
         assertThat(res).isNotEqualTo("Starting")
         //not authenticate
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         mUiHelper.sleepAndWakeUpDevice()
         //Sleep device -> lock screen
         Thread.sleep(5000);
@@ -143,6 +153,7 @@ class FCS_CKH_EXT1_High2 {
       val result_auth = pf.getString("AUTHREQUIRED","")
       val result_unlock = pf.getString("UNLOCKDEVICE","")
       pf.edit().putString("Test","test")
+      println("Expected:AUTHREQUIRED:NG,UNLOCKDEVICE:NG")
       println("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock);
 
       //Verify

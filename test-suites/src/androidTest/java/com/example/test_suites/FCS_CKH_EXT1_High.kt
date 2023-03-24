@@ -24,6 +24,7 @@ import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStoreException
 import java.security.NoSuchAlgorithmException
 import java.security.NoSuchProviderException
+import java.time.LocalDateTime
 import javax.security.cert.CertificateException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -71,6 +72,9 @@ class FCS_CKH_EXT1_High {
 
     val fdelete: File = File(appContext.getFilesDir(), "my_sensitive_loremipsum.txt")
     if (fdelete.exists()) {fdelete.delete()}
+
+    println("** A Junit test case for FCS_CKH_EXT1_High started on "+ LocalDateTime.now()+" **")
+
   }
   fun keyGenParameterSpec(keyNameAlias:String,authRequired:Boolean,unlockDeviceRequired:Boolean): KeyGenParameterSpec {
     try {

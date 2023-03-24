@@ -17,17 +17,14 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
+        /**
+         * Please update the keys according to your settings
+         */
         bundle{
-            storeFile file("../security/rsa2048/rsa-2048.jks")
+            storeFile file("../security/release/release.jks")
             storePassword "android"
             keyPassword "android"
-            keyAlias "platform"
-        }
-        platform {
-            storeFile file('../security/platform/platform.jks')
-            storePassword "android"
-            keyPassword "android"
-            keyAlias "platform"
+            keyAlias "release"
         }
         debugkeystore {
             storeFile file(homePath+'/.android/debug.keystore')
@@ -38,13 +35,13 @@ android {
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.platform
+            signingConfig signingConfigs.bundle
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.bundle
+            signingConfig signingConfigs.debugkeystore
             debuggable true
         }
     }

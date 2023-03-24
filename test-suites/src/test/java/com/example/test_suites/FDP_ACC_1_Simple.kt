@@ -10,6 +10,7 @@ import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
 import java.io.File
 import java.nio.file.Paths
+import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -36,6 +37,8 @@ class FDP_ACC_1_Simple {
       client.execute(ShellCommandRequest("rm /data/local/tmp/$TEST_MODULE"),
                      adb.deviceSerial)
     }
+    println("** A Junit test case for FDP_ACC_1 started on "+ LocalDateTime.now()+" **")
+
   }
 
   @After

@@ -46,6 +46,8 @@ class FPR_PSE_1_Simple {
       client.execute(ShellCommandRequest("rm /data/local/tmp/$TEST_MODULE"),
                      adb.deviceSerial)
     }
+    println("** A Junit test case for FPR_PSE_1 started on "+ LocalDateTime.now()+" **")
+
   }
 
   @After

@@ -15,6 +15,7 @@ import com.malinskiy.adam.request.sync.v1.PullFileRequest
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.time.LocalDateTime
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -41,6 +42,8 @@ class FTP_ITC_EXT_1 {
                      adb.deviceSerial)
 
     }
+    println("** A Junit test case for FTP_ITC_EXT1 started on "+ LocalDateTime.now()+" **")
+
   }
   @After
   fun teardown() {

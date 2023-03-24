@@ -10,7 +10,7 @@ android {
 
     signingConfigs {
         /**
-         * Please update the keys
+         * Please update the keys according to your settings
          */
         bundle{
             storeFile file("../security/release/release.jks")

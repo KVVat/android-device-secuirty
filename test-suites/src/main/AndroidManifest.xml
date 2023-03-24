@@ -30,17 +30,21 @@
         android:defaultToDeviceProtectedStorage="true"
         tools:targetApi="31"
     >
-        <activity
-            android:name="com.example.test_suites.EncryptionFileActivity"
-            android:exported="true" >
-        </activity>
+
         <activity
             android:name="com.example.test_suites.PCAPReaderActivity"
             android:exported="true" >
             <intent-filter>
-                <category android:name="android.intent.category.HOME" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.test_suites.EncryptionFileActivity"
+            android:exported="true" >
+            <intent-filter>
+                <category android:name="android.intent.category.HOME" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         <activity

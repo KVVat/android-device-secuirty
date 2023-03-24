@@ -12,6 +12,7 @@ import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import java.io.File
 import java.nio.file.Paths
+import java.time.LocalDateTime
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -38,6 +39,8 @@ class FCS_CKH_EXT1 {
                      adb.deviceSerial)
 
     }
+    println("** A Junit test case for FCS_CKH_EXT1 started on "+ LocalDateTime.now()+" **")
+
   }
   @After
   fun teardown() {

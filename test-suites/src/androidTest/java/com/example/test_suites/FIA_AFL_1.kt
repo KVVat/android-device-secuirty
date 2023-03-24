@@ -13,6 +13,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.example.test_suites.utils.UIAutomatorHelper
+import java.time.LocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -60,7 +61,8 @@ class FIA_AFL_1 {
 
     mDevice.freezeRotation();
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
-    
+    println("** A Junit test case for FIA_AFL_1 started on "+ LocalDateTime.now()+" **")
+
   }
 
   @After

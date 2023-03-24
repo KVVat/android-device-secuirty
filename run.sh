@@ -41,12 +41,15 @@ elif [ $NUM -eq 2 ]; then
 elif [ $NUM -eq 3 ]; then
   echo "This test case automtically reboot the target device. "
   echo "Please ensure booting the target device as fast as possible.(otherwise it fails)"
+  echo "If we can see a log cat line says 'des=Success,ces=Failed'. The test was succeeded"
+  echo "*** any key to start ***"
   read -r WARN
   ./gradlew testDebug --tests com.example.test_suites.FCS_CKH_EXT1
   clone_output $NUM tests/testDebugUnitTest
 elif [ $NUM -eq 4 ]; then
-  echo " - The test autmatically operate the target device with UIAutomator"
+  echo " - The test automatically operate the target device with UIAutomator"
   echo " - For running this test you need to set the Screenlock setting to 'None'. "
+  echo "*** any key to start ***"
   read -r WARN
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High2 connectedAndroidTest
 elif [ $NUM -eq 5 ]; then

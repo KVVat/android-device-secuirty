@@ -9,6 +9,7 @@ import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import java.io.File
 import java.nio.file.Paths
+import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -36,6 +37,7 @@ class FDP_ACF_EXT_Simple {
       client.execute(ShellCommandRequest("rm /data/local/tmp/appupdate-v2-debug.apk"),
                      adb.deviceSerial)
     }
+    println("** A Junit test case for FDP_ACF_EXT started on "+ LocalDateTime.now()+" **")
   }
 
   @After
