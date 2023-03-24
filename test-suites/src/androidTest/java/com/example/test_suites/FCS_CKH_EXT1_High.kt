@@ -112,6 +112,8 @@ class FCS_CKH_EXT1_High {
   {
     val sampleString = "The quick brown fox jumps over the lazy dog";
 
+    println("Generate encrypted Shared Preferences")
+
     var editor: SharedPreferences.Editor = data.edit();
 
     editor.putInt("IntTest", 65535);
@@ -119,7 +121,7 @@ class FCS_CKH_EXT1_High {
     editor.putString("StringTest", sampleString);
     editor.apply()
     //check availability
-
+    println("Check availavility of values")
     val intSaved = data.getInt("IntTest", 1)
     assertEquals(65535,intSaved)
     val boolSaved = data.getBoolean("BooleanTest", false)
@@ -127,6 +129,7 @@ class FCS_CKH_EXT1_High {
     val strSaved = data.getString("StringTest", "")
     assertEquals(sampleString,strSaved)
     //
+    println("Check all values in the shared preference are encrypted.")
     loadSharedPrefs(prefName);
   }
 
@@ -141,6 +144,7 @@ class FCS_CKH_EXT1_High {
 
     val fTarget: File = File(appContext.getFilesDir(), fileToWrite)
 
+    println("Generate a encrypted file with EncryptedFile Class")
     val encryptedFile = EncryptedFile.Builder(
       appContext,
       fTarget,
@@ -161,6 +165,7 @@ class FCS_CKH_EXT1_High {
       throw RuntimeException("IOException")
     }
     //Check Availability
+    println("Check availability of the encrypted file")
     assert(fTarget.exists())
     val original:String;
     encryptedFile.openFileInput().use { fileInputStream ->
@@ -194,7 +199,12 @@ class FCS_CKH_EXT1_High {
       br.close()
       val encrypted = sb.toString();
       Log.d("fileContents",encrypted)
+      println("Check the file is encrypted.(means they are not identical)")
 
+      println("===original content===")
+      println(original)
+      println("===encrypeted content===")
+      println(encrypted)
       assertNotEquals(original,encrypted)
     } catch (ex: Exception) {
       // Error occurred opening raw file for reading.
@@ -203,82 +213,6 @@ class FCS_CKH_EXT1_High {
       fTargetStream.close();
     }
   }
-
-  /*
-  @Test
-  fun testEncryptedFile2() {
-    val fileToWrite = "my_sensitive_loremipsum2.txt"
-
-    val isLoremIpsum: InputStream = appContext.resources.openRawResource(
-      appContext.resources.getIdentifier("loremipsum",
-                                         "raw", appContext.packageName));
-    val content = isLoremIpsum.bufferedReader().use(BufferedReader::readText)
-
-    val fTarget= File(appContext.getFilesDir(), fileToWrite)
-
-    val encryptedFile = EncryptedFile.Builder(
-      appContext,
-      fTarget,
-      keyUnlockDeviceTest,
-      EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-    ).build()
-
-    //Write loaded file with EncryptedFile class
-    try {
-      val outputStream: FileOutputStream? = encryptedFile.openFileOutput()
-      outputStream?.apply {
-        write(content.toByteArray(Charset.forName("UTF-8")))
-        flush()
-        close()
-      }
-
-    } catch (ex: IOException) {
-      throw RuntimeException("IOException")
-    }
-    //Check Availability
-    assert(fTarget.exists())
-    val original:String;
-    encryptedFile.openFileInput().use { fileInputStream ->
-      try {
-        val sb = StringBuilder()
-        val br = BufferedReader(InputStreamReader(fileInputStream) as Reader?)
-        br.readLine()
-          .forEach {
-            sb.append(it)
-          }
-        br.close()
-        original = sb.toString()
-        Log.d("fileContents", original)
-
-      } catch (ex: Exception) {
-        // Error occurred opening raw file for reading.
-        throw RuntimeException("IOException")
-      } finally {
-        fileInputStream.close()
-      }
-    }
-    //Check the file is encrypted (Read the file with BufferedReader)
-    val fTargetStream = FileInputStream(fTarget);
-    try {
-      val sb = StringBuilder()
-      val br = BufferedReader(InputStreamReader(fTargetStream) as Reader?)
-      br.readLine()
-        .forEach {
-          sb.append(it)
-        }
-      br.close()
-      val encrypted = sb.toString();
-      Log.d("fileContents",encrypted)
-
-      assertNotEquals(original,encrypted)
-    } catch (ex: Exception) {
-      // Error occurred opening raw file for reading.
-      throw RuntimeException("IOException")
-    } finally {
-      fTargetStream.close();
-    }
-  }
-  */
 
   fun loadSharedPrefs(vararg prefs: String?) {
     // Logging messages left in to view Shared Preferences. I filter out all logs except for ERROR; hence why I am printing error messages.
