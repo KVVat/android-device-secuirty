@@ -1,6 +1,7 @@
 package com.example.test_suites
 
 import android.content.Context
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -34,6 +35,10 @@ class FTP_ITC_EXT {
   private lateinit var mTargetContext: Context
   lateinit var mUiHelper:UIAutomatorHelper
 
+  fun println_(line:String){
+    Log.i(this.javaClass.canonicalName,line)
+  }
+
   @Before
   fun setUp() {
     val mDevice_ = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
@@ -45,7 +50,7 @@ class FTP_ITC_EXT {
     mDevice.freezeRotation();
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
 
-    println("** A Junit test case for FTP_ITC_EXT started on "+ LocalDateTime.now()+" **")
+    println_("** A Junit test case for FTP_ITC_EXT started on "+ LocalDateTime.now()+" **")
   }
 
   @After
@@ -62,8 +67,8 @@ class FTP_ITC_EXT {
     //adb shell am force-stop com.emanuelf.remote_capture
     //adb pull /storage/emulated/0/Download/PCAPdroid/traffic.pcap
 
-    println(mContext.packageName);//com.example.test_suites.test
-    println(mTargetContext.packageName);//com.example.test_suites
+    println_(mContext.packageName);//com.example.test_suites.test
+    println_(mTargetContext.packageName);//com.example.test_suites
 
     //insall PCAPDroid into the TSF
     //Run PCAPDroid for scanning

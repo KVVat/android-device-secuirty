@@ -42,7 +42,7 @@ elif [ $NUM -eq 2 ]; then
 elif [ $NUM -eq 3 ]; then
   echo "This test case automtically reboot the target device. "
   echo "Please ensure booting the target device as fast as possible.(otherwise it fails)"
-  echo "If we can see a log cat line says 'des=Success,ces=Failed'. The test was succeeded"
+  echo "Note : If a logcat line says 'des=Success,ces=Failed'. The test was succeeded"
   echo "*** any key to start ***"
   read -r WARN
   ./gradlew testDebug --tests com.example.test_suites.FCS_CKH_EXT1

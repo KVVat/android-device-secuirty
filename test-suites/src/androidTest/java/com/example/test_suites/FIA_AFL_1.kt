@@ -34,7 +34,9 @@ class FIA_AFL_1 {
   private lateinit var mContext: Context
   private lateinit var mTargetContext: Context
   lateinit var mUiHelper:UIAutomatorHelper
-
+  fun println_(line:String){
+    Log.i(this.javaClass.canonicalName,line)
+  }
   //Pattern Pixel 5e :
   private var PATS:Map<String,Array<Point>> = mapOf(
     Pair("sdk_gphone64_x86_64-33",
@@ -61,7 +63,7 @@ class FIA_AFL_1 {
 
     mDevice.freezeRotation();
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
-    println("** A Junit test case for FIA_AFL_1 started on "+ LocalDateTime.now()+" **")
+    println_("** A Junit test case for FIA_AFL_1 started on "+ LocalDateTime.now()+" **")
 
   }
 
@@ -70,22 +72,22 @@ class FIA_AFL_1 {
     mDevice.unfreezeRotation()
   }
 
-  //Before running this test cases
-  //  You should disable screen lock first
 
   @Test
   fun T01_testPINLockSuccess(){
     if(mUiHelper.isLockScreenEnbled()){
-      println("*** It requires to disable screen lock to run this test ***");
+      println_("*** It requires to disable screen lock to run this test ***");
       assert(false)
     }
     try {
+      println_("Test succeed to set PIN lock.")
       mUiHelper.sleepAndWakeUpDevice()
       mUiHelper.setScreenLockText("PIN", PIN)
       //Launch application
       mDevice.waitForIdle()
       mUiHelper.sleepAndWakeUpDevice()//LockScreen
 
+      println_("Test succeed to unlock screen with PIN.")
       Thread.sleep(1000);
       mUiHelper.swipeUp()
       mDevice.executeShellCommand("input text ${PIN}")
@@ -94,6 +96,7 @@ class FIA_AFL_1 {
       Thread.sleep(1000);
 
     } finally {
+      println_("Try to reset the screen lock")
       mUiHelper.resetScreenLockText(PIN)
     }
     //if the operation above fails, there must be a problem.
@@ -103,10 +106,11 @@ class FIA_AFL_1 {
   @Test
   fun T02_testPINLockFailure(){
     if(mUiHelper.isLockScreenEnbled()){
-      println("*** It requires to disable screen lock to run this test ***");
+      println_("*** It requires to disable screen lock to run this test ***");
       assert(false)
     }
     try {
+      println_("Test succeed to set PIN lock.")
       mUiHelper.sleepAndWakeUpDevice()
       mUiHelper.setScreenLockText("PIN", PIN)
       //Launch application
@@ -115,16 +119,20 @@ class FIA_AFL_1 {
 
       Thread.sleep(1000);
       mUiHelper.swipeUp()
+
       for (i in 0..4) {
+        println_("Test failure to unlock screen with PIN({$i+1} attempt).")
         mDevice.executeShellCommand("input text 0000")
         Thread.sleep(1000);
         mDevice.pressEnter()
         Thread.sleep(1000);
       }
       //if it fails 5 times, 30 sec trial delay is applied
+      println_("Wait 30 sec for retry.")
       mUiHelper.safeObjectClick("OK",1000);
       Thread.sleep(30 * 1000)//wait 30 sec
     } finally {
+      println_("Try to reset the screen lock.")
       mUiHelper.sleepAndWakeUpDevice()//LockScreen
       Thread.sleep(1000);
       mUiHelper.swipeUp()
@@ -142,16 +150,17 @@ class FIA_AFL_1 {
   @Test
   fun T11_testPassLockSuccess(){
     if(mUiHelper.isLockScreenEnbled()){
-      println("*** It requires to disable screen lock to run this test ***");
+      println_("*** It requires to disable screen lock to run this test ***");
       assert(false)
     }
     try {
+      println_("Test succeed to set Password lock.")
       mUiHelper.sleepAndWakeUpDevice()
       mUiHelper.setScreenLockText("Password", PASSWORD)
       //Launch application
       mDevice.waitForIdle()
       mUiHelper.sleepAndWakeUpDevice()//LockScreen
-
+      println_("Test succeed to unlock screen with Password.")
       Thread.sleep(1000);
       mUiHelper.swipeUp()
       mDevice.executeShellCommand("input text ${PASSWORD}")
@@ -160,6 +169,7 @@ class FIA_AFL_1 {
       Thread.sleep(1000);
 
     } finally {
+      println_("Try to reset the screen lock")
       mUiHelper.resetScreenLockText(PASSWORD)
     }
     //if the operation above fails, there must be a problem.
@@ -167,12 +177,13 @@ class FIA_AFL_1 {
   }
 
   @Test
-  fun testPassLockFailure(){
+  fun T12_testPassLockFailure(){
     if(mUiHelper.isLockScreenEnbled()){
-      println("*** It requires to disable screen lock to run this test ***");
+      println_("*** It requires to disable screen lock to run this test ***");
       assert(false)
     }
     try {
+      println_("Test succeed to set Password lock.")
       mUiHelper.sleepAndWakeUpDevice()
       mUiHelper.setScreenLockText("Password", PASSWORD)
       //Launch application
@@ -182,15 +193,19 @@ class FIA_AFL_1 {
       Thread.sleep(1000);
       mUiHelper.swipeUp()
       for (i in 0..4) {
+        println_("Test failure to unlock screen with PIN({$i+1} attempt).")
         mDevice.executeShellCommand("input text bbbb")
         Thread.sleep(1000);
         mDevice.pressEnter()
         Thread.sleep(1000);
       }
       //if it fails 5 times, 30 sec trial delay is applied
+      println_("Wait 30 sec for retry.")
       mUiHelper.safeObjectClick("OK",1000);
       Thread.sleep(30 * 1000)//wait 30 sec
     } finally {
+      println_("Try to reset the screen lock")
+
       mUiHelper.sleepAndWakeUpDevice()//LockScreen
       Thread.sleep(1000);
       mUiHelper.swipeUp()
