@@ -36,6 +36,7 @@ if [ $NUM -eq 1 ]; then
   # copy test results to the result directory
   clone_output $NUM tests/testDebugUnitTest
 elif [ $NUM -eq 2 ]; then
+   echo "Those test cases run on the target device. please check logcat to confirm the process of the test."
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High connectedAndroidTest
   clone_output $NUM androidTests
 elif [ $NUM -eq 3 ]; then
