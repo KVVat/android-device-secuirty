@@ -11,7 +11,9 @@ import com.malinskiy.adam.request.misc.RebootRequest
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
+import com.malinskiy.adam.request.sync.v1.PullFileRequest
 import java.io.File
+import java.nio.file.Path
 import java.nio.file.Paths
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -50,50 +52,27 @@ class FTP_ITC_EXT_1 {
   }
 
 
-  @Test
-  fun testTlsCapture2() {
 
-
-  }
 
   @Test
   fun testTlsCapture() {
     runBlocking {
-      //install an application file
-      val file_apk: File =
-        File(Paths.get("src", "test", "resources", TEST_MODULE).toUri())
-      var res = AdamUtils.InstallApk(file_apk, false,adb)
-      assertThat(res.output).startsWith("Success")
+      //need to execute target instrumented test at least once
       var response: ShellCommandResult
-      val ser = adb.deviceSerial;
       //Launch packet capture software
       response =   client.execute(ShellCommandRequest(
-        "am start -n com.emanuelef.remote_capture/.activities.CaptureCtrl"+
-          " -e action start"+
-          " -e capture_auto true"+
-          " -e pcap_dump_mode pcap_file"+
-          " -e pcap_name traffic.pcap"
-
-      ),ser)
-      Thread.sleep(5000*2);
-      //Launch test application
-
-      response =   client.execute(
-        ShellCommandRequest("am start -e type okhttp3 -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), ser);
-      Thread.sleep(5000);
-      assertThat(response.output).startsWith("Starting")
-      println(response.output);
+        "am instrument -w -e class com.example.test_suites.FTP_ITC_EXT"+
+          " com.example.test_suites.test/androidx.test.runner.AndroidJUnitRunner"
+      ),adb.deviceSerial)
       Thread.sleep(1000*10);
-      client.execute(
-        ShellCommandRequest("am force-stop $TEST_PACKAGE"),ser);
-
-      //client.execute(ShellCommandRequest(
-      //  "am start -n com.emanuelef.remote_capture/.activities.CaptureCtrl"+
-      //    " -e action stop"),ser);
-
-      //client.execute(
+      println(response.output);
+      //adb pull /storage/emulated/0/Download/PCAPdroid/traffic.pcap traffic.pcap
+      var p: Path = kotlin.io.path.createTempFile("t", ".pcap")
+      client.execute(PullFileRequest(
+        "/storage/emulated/0/Download/PCAPdroid/traffic.pcap",
+                  p.toFile()),scope=this,adb.deviceSerial);
       //  ShellCommandRequest("am force-stop com.emanuelf.remote_capture"),ser);
-
+      println(p.toAbsolutePath());
     }
   }
 }

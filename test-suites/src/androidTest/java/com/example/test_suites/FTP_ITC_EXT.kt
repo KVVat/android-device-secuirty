@@ -5,6 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import com.example.test_suites.utils.NetworkHelper
 import com.example.test_suites.utils.UIAutomatorHelper
 import java.io.BufferedReader
@@ -56,6 +58,7 @@ class FTP_ITC_EXT {
     // -e app_filter com.exmple.test_suites
     //adb shell am force-stop com.emanuelf.remote_capture
     //adb pull /storage/emulated/0/Download/PCAPdroid/traffic.pcap
+
     println(mContext.packageName);//com.example.test_suites.test
     println(mTargetContext.packageName);//com.example.test_suites
 
@@ -66,11 +69,10 @@ class FTP_ITC_EXT {
             " -e action start"+
             " -e pcap_dump_mode pcap_file"+
             " -e pcap_name traffic_expire.pcap"
-            //" -e app_filter com.exmple.test_suites.test"
     )
+    //To execute this operation correctly we shouldn't sleep the target devices
     //action =>  start stop status
     //click button placed outside the process
-    //add an option for skiping consent dialogue to the PCAPdroid application
     val packageName:String = "com.emanuelef.remote_capture"
     val fullCartButtonResourceId = packageName + ":id/allow_btn";
     val allowButton = mDevice.findObject(UiSelector().resourceId(fullCartButtonResourceId))
@@ -80,21 +82,18 @@ class FTP_ITC_EXT {
       allowButton.click()
     }
     Thread.sleep(1000*10);
-    //test url connection
-    //https://www.twilio.com/ja/blog/5-ways-to-make-http-requests-in-java-jp
-
     //Open a connection(?) on the URL(??) and cast the response(???)
     var ret:Int = NetworkHelper.testHttpURLConnection("https://expired.badssl.com/")
     //var ret:Int = NetworkHelper.testHttpURLConnection("https://www.google.com")
-
-    Thread.sleep(1000*10);
+    Thread.sleep(1000*5);
+    assertThat(ret).isEqualTo(400)
     // adb shell am force-stop com.emanuelf.remote_capture
     mDevice.executeShellCommand(
       "am force-stop com.emanuelf.remote_capture")
     Thread.sleep(1000*5);
 
-    println("Type below command to pull the catpure file :")
-    println("adb pull /storage/emulated/0/Download/PCAPdroid/traffic.pcap traffic.pcap")
+    //If we want to pull a result file without pain, we should pull a file from
+    //host-side test case (Junit test case).
     /*
     //tls check
     ret = NetworkHelper.testHttpURLConnection("https://tls-v1-0.badssl.com:1010/")
