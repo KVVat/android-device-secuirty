@@ -112,6 +112,7 @@ dependencies {
     testImplementation 'org.simpleframework:simple-xml:2.7.1'
     testImplementation 'org.slf4j:slf4j-simple:1.7.32'
     testImplementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    testImplementation 'com.jcraft:jsch:0.1.55'
 
     androidTestImplementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
     androidTestImplementation "androidx.security:security-crypto:1.1.0-alpha04"

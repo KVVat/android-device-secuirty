@@ -20,4 +20,4 @@ include ':assets'
 include ':networkcheck'
 include ':directboot'
 include ':encryption'
-
+include ':acvpkernel'

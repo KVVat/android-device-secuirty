@@ -1,27 +1,21 @@
 package com.example.test_suites
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotNull
-import assertk.assertions.startsWith
 import com.example.test_suites.rule.AdbDeviceRule
-import com.example.test_suites.utils.AdamUtils
-import com.example.test_suites.utils.LogcatResult
-import com.malinskiy.adam.request.misc.RebootRequest
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
 import com.malinskiy.adam.request.sync.v1.PullFileRequest
 import java.io.File
+import java.net.URI
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDateTime
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+
 
 class FTP_ITC_EXT_1 {
 
@@ -43,7 +37,6 @@ class FTP_ITC_EXT_1 {
 
     }
     println("** A Junit test case for FTP_ITC_EXT1 started on "+ LocalDateTime.now()+" **")
-
   }
   @After
   fun teardown() {
@@ -55,7 +48,42 @@ class FTP_ITC_EXT_1 {
   }
 
 
+  @Test
+  fun testShellScript()
+  {
+    var p1: URI = Paths.get("src", "test", "resources", "traffic.pcap").toUri()
 
+
+  }
+
+
+  fun testPcapReader(filePath:String) {
+    val file_pcap: File =
+      File(Paths.get("src", "test", "resources", "traffic.pcap").toUri());
+   // check the availavility of tshark
+    /*
+    if ! command -v <the_command> &> /dev/null
+    then
+    echo "<the_command> could not be found"
+    exit
+    fi
+    */
+
+    /*val pcap: Pcap = Pcap.openStream(file_pcap)
+    pcap.loop(TcpUdpPacketHandler())
+    pcap.close()*/
+
+    //output data as pdml then analysis it.
+    //
+    //tshark -r  t6690574987861344402.pcap -o ssl.debug_file:ssldebug.log
+    // -o ssl.desegment_ssl_records:TRUE -o ssl.desegment_ssl_application_data:TRUE -V -T pdml
+    var cmd:String="""
+    tshark -r $filePath
+     -o ssl.debug_file:ssldebug.log
+     -o ssl.desegment_ssl_records:TRUE
+     -o ssl.desegment_ssl_application_data:TRUE -V > dtea analysis.xml
+    """
+  }
 
   @Test
   fun testTlsCapture() {

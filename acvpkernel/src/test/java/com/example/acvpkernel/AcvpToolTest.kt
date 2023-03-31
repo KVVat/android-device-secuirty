@@ -1,7 +1,7 @@
 package com.example.acvpkernel
 
-import assertk.assertThat
-import assertk.assertions.contains
+//import assertk.assertThat
+//import assertk.assertions.contains
 import com.example.acvpkernel.rule.AdbDeviceRule
 import com.malinskiy.adam.request.shell.v1.ChanneledShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
@@ -18,6 +18,10 @@ import java.nio.file.Paths
 
 class AcvpToolTest {
 
+    @Rule
+    @JvmField
+    val adb = AdbDeviceRule()
+    val client = adb.adb
 
     @Before
     fun setup() {
@@ -36,7 +40,7 @@ class AcvpToolTest {
     fun test(){
 
     }
-    /*
+
     fun pushFileToTmp(objFile: File, permission:String="") {
         runBlocking {
             val fileName = objFile.name
@@ -63,7 +67,8 @@ class AcvpToolTest {
             //
             val OUT_PATH = "build/intermediates/cmake/debug/obj"
             val GO_PATH  = "src/go"
-            var ABI = "x86_64"
+           //var ABI = "x86_64"
+            var ABI = "armeabi-v7a"
             val acvp_tool_path = File(Paths.get(GO_PATH,"acvptool").toUri());
             val acvp_kh_path = File(Paths.get(OUT_PATH,ABI,"acvp_kernel_harness").toUri());
             val fileConfig  =
@@ -87,8 +92,8 @@ class AcvpToolTest {
                 println(lines)
                 line = lines;
             }
-            assertThat(line).contains("PASSED");
+            //assertThat(line).contains("PASSED");
         }
     }
-     */
+
 }
