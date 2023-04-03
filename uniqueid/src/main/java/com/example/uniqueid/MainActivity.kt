@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     GlobalScope.launch {
       getPrefValueOrWrite("ADID", UniqueId.getAdId(applicationContext));
     }
+    getPrefValueOrWrite("IMEI1",UniqueId.getIMEI1());
+    getPrefValueOrWrite("IMEI2",UniqueId.getIMEI2(context = applicationContext));
   }
 
   fun getPrefValueOrWrite(label:String,value:String):String{
