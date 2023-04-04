@@ -104,6 +104,8 @@ class FPR_PSE_1_Simple {
       assertThat(dictA["ADID"]).isEqualTo(dictB["ADID"])
       assertThat(dictA["AID"]).isEqualTo(dictB["AID"])
       assertThat(dictA["WIDEVINE"]).isEqualTo(dictB["WIDEVINE"])
+      assertThat(dictA["IMEI1"]).isEqualTo("")
+      assertThat(dictA["IMEI2"]).isEqualTo("")
 
       println("Uninstall/Install again the target apk.");
       //uninstall application =>
@@ -128,6 +130,8 @@ class FPR_PSE_1_Simple {
       assertThat(dictA["ADID"]).isEqualTo(dictC["ADID"])
       assertThat(dictA["AID"]).isEqualTo(dictC["AID"])
       assertThat(dictA["WIDEVINE"]).isEqualTo(dictC["WIDEVINE"])
+      assertThat(dictA["IMEI1"]).isEqualTo("")
+      assertThat(dictA["IMEI2"]).isEqualTo("")
     }
   }
 
