@@ -90,6 +90,7 @@ class FTP_ITC_EXT_1 {
     runBlocking {
       //need to execute target instrumented test at least once
       var response: ShellCommandResult
+      //Need to install instrumented test before testing
       //Launch packet capture software
       response =   client.execute(ShellCommandRequest(
         "am instrument -w -e class com.example.test_suites.FTP_ITC_EXT"+
@@ -99,8 +100,9 @@ class FTP_ITC_EXT_1 {
       println(response.output);
       //adb pull /storage/emulated/0/Download/PCAPdroid/traffic.pcap traffic.pcap
       var p: Path = kotlin.io.path.createTempFile("t", ".pcap")
+      //"/storage/emulated/0/Download/PCAPdroid/traffic.pcap"
       client.execute(PullFileRequest(
-        "/storage/emulated/0/Download/PCAPdroid/traffic.pcap",
+        "/sdcard/Download/PCAPdroid/traffic_expire.pcap",
                   p.toFile()),scope=this,adb.deviceSerial);
       //  ShellCommandRequest("am force-stop com.emanuelf.remote_capture"),ser);
       println(p.toAbsolutePath());

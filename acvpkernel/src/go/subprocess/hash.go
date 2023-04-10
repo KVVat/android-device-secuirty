@@ -91,6 +91,7 @@ func (h *hashPrimitive) Process(vectorSet []byte, m Transactable) (interface{}, 
 			case "AFT":
 				result, err := m.Transact(h.algo, 1, msg)
 				if err != nil {
+
 					panic(h.algo + " hash operation failed: " + err.Error())
 				}
 

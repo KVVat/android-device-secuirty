@@ -6,7 +6,7 @@ def homePath = System.properties['user.home']
 
 android {
     namespace 'com.example.appupdate'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.appupdate"

@@ -49,6 +49,3 @@ directboot/build
 /results/*
 
 acvpkernel/build
-acvpkernel/src/go
-acvpkernel/src/gotest
-
