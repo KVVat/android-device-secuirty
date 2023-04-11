@@ -26,6 +26,7 @@ echo "2: ** All automatable AndroidJUnit cases **"
 echo "3: FCS_CKH_EXT1_Low (DirectBoot)"
 echo "4: FCS_CKH_EXT1_High (File Encryption)"
 echo "5: FIA_AFL_1 (ScreenLock Password)"
+echo "6: (Kernel Acvp Test)"
 echo "9: Clean test"
 echo "Results will be stored in $rdir"
 echo -n ">"
@@ -62,6 +63,24 @@ elif [ $NUM -eq 5 ]; then
   read -r WARN
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
     ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FIA_AFL_1 connectedAndroidTest
+  fi
+elif [ $NUM -eq 6 ]; then
+  echo " - This test runs ACVP harness for FIPS 140-2 certifications."
+  echo " - The test require a device with custom android build which enables certain kernel features.(see comment or design doc)"
+  # CONFIG_CRYPTO_FIPS140_MOD=y
+  # CONFIG_CRYPTO_DRBG_HASH=y
+  # CONFIG_CRYPTO_DRBG_CTR=y
+  # CONFIG_CRYPTO_USER_API_HASH=y
+  # CONFIG_CRYPTO_USER_API_SKCIPHER=y
+  # CONFIG_CRYPTO_USER_API_RNG=y
+  # CONFIG_CRYPTO_USER_API_RNG_CAVP=y
+  # CONFIG_CRYPTO_USER_API_AEAD=y
+  echo " - The target device os need to be rooted ,and should be singing with debug key. "
+  echo "Start This Test Case? (y/n)"
+  read -r WARN
+  if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
+   ./gradlew testDebug --tests com.example.test_suites.KernelAcvpTest.testKernelAcvp
+   clone_output $NUM tests/testDebugUnitTest
   fi
 elif [ $NUM -eq 9 ]; then
   ./gradlew clean

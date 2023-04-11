@@ -2,10 +2,13 @@ package com.example.test_suites.utils
 
 import com.example.test_suites.rule.AdbDeviceRule
 import com.malinskiy.adam.AndroidDebugBridgeClient
+import com.malinskiy.adam.request.adbd.RestartAdbdRequest
+import com.malinskiy.adam.request.adbd.RootAdbdMode
 import com.malinskiy.adam.request.logcat.ChanneledLogcatRequest
 import com.malinskiy.adam.request.logcat.LogcatSinceFormat
 import com.malinskiy.adam.request.pkg.InstallRemotePackageRequest
 import com.malinskiy.adam.request.prop.GetSinglePropRequest
+import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
 import com.malinskiy.adam.request.sync.v1.PushFileRequest
 import java.io.File
@@ -24,6 +27,30 @@ import kotlinx.coroutines.runBlocking
 class AdamUtils {
   companion object{
 
+
+    fun root(adb:AdbDeviceRule):String{
+      var ret:String
+      runBlocking {
+       ret = adb.adb.execute(
+         request = RestartAdbdRequest(RootAdbdMode),
+         serial = adb.deviceSerial)
+      }
+
+      println(ret)
+      return ret;
+    }
+    fun shellRequest(shellCommand:String,adb:AdbDeviceRule):ShellCommandResult{
+      var ret:ShellCommandResult
+      runBlocking {
+        ret = adb.adb.execute(
+          ShellCommandRequest(shellCommand),
+          adb.deviceSerial)
+      }
+      println(ret.exitCode)
+      println(ret.output)
+
+      return ret
+    }
     fun waitLogcatLine(waitTime:Int,tagWait:String,adb:AdbDeviceRule):LogcatResult? {
       var found = false
       var text:String = ""
