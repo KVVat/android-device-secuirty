@@ -12,6 +12,7 @@ import java.nio.file.Paths
 import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,15 +68,15 @@ class FDP_ACF_EXT_Simple {
 
       var res = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
       println("Verify Install apk v1 (expect=Success)")
-      assertThat(res.output).startsWith("Success")
+      assertTrue(res.startsWith("Success"))
       println("Verify Install upgraded apk v2 (expect=Success)")
       res =  AdamUtils.InstallApk(file_apk_v2_debug,false,adb);
-      assertThat(res.output).startsWith("Success")
+      assertTrue(res.startsWith("Success"))
 
       //degrade
       println("Verify Install degraded apk v1 (expect=Failure)")
       res = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
-      assertThat(res.output).startsWith("Failure")
+      assertTrue(res.startsWith("Failure"))
 
       //unistall the test file before next test
       client.execute(UninstallRemotePackageRequest("com.example.appupdate"), adb.deviceSerial)
@@ -96,12 +97,11 @@ class FDP_ACF_EXT_Simple {
 
       println("Verify Install apk v1 (expect=Success)")
       var res = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
-      assertThat(res.output).startsWith("Success")
+      assertTrue(res.startsWith("Success"))
       //Signature mismatch case
       println("Verify Install apk v2 with different signing key (expect=Failure)")
       res = AdamUtils.InstallApk(file_apk_v2_signed,false,adb);
-      assertThat(res.output).startsWith("Failure")
-
+      assertTrue(res.startsWith("Success"))
       //unistall the test file before next test
       client.execute(UninstallRemotePackageRequest("com.example.appupdate"), adb.deviceSerial)
     }

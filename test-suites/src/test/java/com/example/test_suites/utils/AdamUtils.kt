@@ -2,16 +2,22 @@ package com.example.test_suites.utils
 
 import com.example.test_suites.rule.AdbDeviceRule
 import com.malinskiy.adam.AndroidDebugBridgeClient
+import com.malinskiy.adam.request.Feature
 import com.malinskiy.adam.request.adbd.RestartAdbdRequest
 import com.malinskiy.adam.request.adbd.RootAdbdMode
 import com.malinskiy.adam.request.logcat.ChanneledLogcatRequest
 import com.malinskiy.adam.request.logcat.LogcatSinceFormat
+import com.malinskiy.adam.request.misc.FetchHostFeaturesRequest
 import com.malinskiy.adam.request.pkg.InstallRemotePackageRequest
 import com.malinskiy.adam.request.prop.GetSinglePropRequest
-import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
-import com.malinskiy.adam.request.shell.v1.ShellCommandResult
-import com.malinskiy.adam.request.sync.v1.PushFileRequest
+import com.malinskiy.adam.request.shell.v2.ShellCommandRequest
+import com.malinskiy.adam.request.shell.v2.ShellCommandResult
+import com.malinskiy.adam.request.shell.v2.ShellCommandInputChunk
+import com.malinskiy.adam.request.sync.v2.PushFileRequest
+import com.malinskiy.adam.request.sync.v2.PullFileRequest
 import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -19,9 +25,12 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onClosed
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class AdamUtils {
@@ -41,14 +50,14 @@ class AdamUtils {
     }
     fun shellRequest(shellCommand:String,adb:AdbDeviceRule):ShellCommandResult{
       var ret:ShellCommandResult
+
       runBlocking {
+
         ret = adb.adb.execute(
           ShellCommandRequest(shellCommand),
           adb.deviceSerial)
       }
       println(ret.exitCode)
-      println(ret.output)
-
       return ret
     }
     fun waitLogcatLine(waitTime:Int,tagWait:String,adb:AdbDeviceRule):LogcatResult? {
@@ -90,14 +99,31 @@ class AdamUtils {
         return null
       }
     }
-
-    fun InstallApk(apkFile: File, reinstall: Boolean = false, adb:AdbDeviceRule): ShellCommandResult {
-      var stdio: ShellCommandResult
+    fun pullfile(sourcePath:String,destDir:String,adb: AdbDeviceRule){
+      runBlocking {
+        var p: Path = Paths.get(sourcePath);
+        val destPath: Path = Paths.get(destDir, p.fileName.toString());
+        val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
+        val channel = adb.adb.execute(
+          PullFileRequest(sourcePath,destPath.toFile(),
+                          supportedFeatures = features,null,coroutineContext),
+          this,
+          adb.deviceSerial);
+        var percentage = 0
+        for (percentageDouble in channel) {
+          percentage = (percentageDouble * 100).toInt()
+          println(percentage)
+        }
+      }
+    }
+    fun InstallApk(apkFile: File, reinstall: Boolean = false, adb:AdbDeviceRule): String {
+      var stdio: com.malinskiy.adam.request.shell.v1.ShellCommandResult
       var client:AndroidDebugBridgeClient = adb.adb;
 
       runBlocking {
+        val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
         val fileName = apkFile.name
-        val channel = client.execute(PushFileRequest(apkFile, "/data/local/tmp/$fileName"),
+        val channel = client.execute(PushFileRequest(apkFile, "/data/local/tmp/$fileName",features),
                                      GlobalScope,
                                      serial = adb.deviceSerial)
         while (!channel.isClosedForReceive) {
@@ -109,7 +135,7 @@ class AdamUtils {
         stdio = client.execute(InstallRemotePackageRequest(
           "/data/local/tmp/$fileName", reinstall, listOf("-g")), serial = adb.deviceSerial)
       }
-      return stdio
+      return stdio.output;
     }
   }
 }

@@ -1,8 +1,5 @@
 package com.example.test_suites
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotEqualTo
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.AdamUtils
 import com.malinskiy.adam.request.Feature
@@ -22,6 +19,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.*
 
 class KernelAcvpTest {
 
@@ -90,23 +88,7 @@ class KernelAcvpTest {
     return true
   }
 
-  fun pullfile(sourcePath:String,destDir:String){
-    runBlocking {
-      var p:Path = Paths.get(sourcePath);
-      val destPath:Path = Paths.get(destDir,p.fileName.toString());
-      val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
-      val channel = client.execute(
-        PullFileRequest(sourcePath,destPath.toFile(),
-                        supportedFeatures = features,null,coroutineContext),
-        this,
-        adb.deviceSerial);
-      var percentage = 0
-      for (percentageDouble in channel) {
-        percentage = (percentageDouble * 100).toInt()
-        println(percentage)
-      }
-    }
-  }
+
 
 
   @Test
@@ -116,7 +98,7 @@ class KernelAcvpTest {
 
     //Check kernel settings
 
-    //If the system does not require  the test should be faile.
+    //If the system does not require  the test should be fail.
 
     //install test modules
     val ret = AdamUtils.root(adb)
@@ -165,11 +147,12 @@ class KernelAcvpTest {
     AdamUtils.shellRequest("cd /data/local/tmp/;tar -zcvf diffs.tar.gz diffs",adb)
     //Pull worklog, actual, diff file into results dir from device
 
-    pullfile("/data/local/tmp/acvptest.log","../results/kernelacvp/")
-    pullfile("/data/local/tmp/diffs.tar.gz","../results/kernelacvp/")
-    pullfile("/data/local/tmp/actual.tar.gz","../results/kernelacvp/")
+    AdamUtils.pullfile("/data/local/tmp/acvptest.log","../results/kernelacvp/",adb)
+    AdamUtils.pullfile("/data/local/tmp/diffs.tar.gz","../results/kernelacvp/",adb)
+    AdamUtils.pullfile("/data/local/tmp/actual.tar.gz","../results/kernelacvp/",adb)
 
-    assertThat(foundError).isNotEqualTo(false)
+    assertEquals(false,foundError)
+
     //Clean the system
   }
 }

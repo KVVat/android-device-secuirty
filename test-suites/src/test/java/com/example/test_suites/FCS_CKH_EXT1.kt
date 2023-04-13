@@ -1,9 +1,7 @@
 package com.example.test_suites
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotNull
-import assertk.assertions.startsWith
+
+
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.AdamUtils
 import com.example.test_suites.utils.LogcatResult
@@ -19,6 +17,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.*
 
 class FCS_CKH_EXT1 {
 
@@ -64,7 +63,8 @@ class FCS_CKH_EXT1 {
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri())
 
       var res = AdamUtils.InstallApk(file_apk, false,adb)
-      assertThat(res.output).startsWith("Success")
+      assertTrue(res.startsWith("Success"))
+
       //launch application to write a file into the storage
       //am start -a com.example.ACTION_NAME -n com.package.name/com.package.name.ActivityName
       async {
@@ -74,8 +74,8 @@ class FCS_CKH_EXT1 {
 
       var result:LogcatResult?
         = AdamUtils.waitLogcatLine(50,"FCS_CKH_EXT_TEST",adb)
-      assertThat { result }.isNotNull()
-
+      //assertThat { result }.isNotNull()
+      assertNotNull(result)
 
       Thread.sleep(1000*10);
       //(Require)Reboot Device
@@ -94,10 +94,12 @@ class FCS_CKH_EXT1 {
       // Evaluates below behaviours. Application will be triggered by LOCKED_BOOT_COMPLETED action.
       // 1. Check if we can access to the DES(Device Encrypted Storage)
       // 2. Check we can not access to the CES
-      assertThat(result?.text).isEqualTo("des=Success,ces=Failed")
-
+      //assertThat(result?.text).isEqualTo("des=Success,ces=Failed")
+      assertEquals("des=Success,ces=Failed",result?.text)
       result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
-      assertThat { result }.isNotNull()
+      //assertThat { result }.isNotNull()
+      assertNotNull(result)
+
       println(result);
       println(result?.text)
     }
