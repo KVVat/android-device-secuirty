@@ -110,7 +110,7 @@ class KernelAcvpTest {
       "acvptool:775","acvp_kernel_harness_arm64:775","af_alg_config.txt",
       "config.json"
     ))
-    //based on recent test cases.
+    //based on a recent test cases.
     val vectors:List<String> = listOf(
       "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
       "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC","ACVP-AES-CBC-CS3",

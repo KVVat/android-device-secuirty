@@ -35,8 +35,6 @@ import kotlinx.coroutines.runBlocking
 
 class AdamUtils {
   companion object{
-
-
     fun root(adb:AdbDeviceRule):String{
       var ret:String
       runBlocking {
