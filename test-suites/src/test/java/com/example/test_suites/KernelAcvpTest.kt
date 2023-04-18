@@ -82,6 +82,7 @@ class KernelAcvpTest {
           target = targetarg[0]
           mode = targetarg[1]
         }
+        println("Process:"+Paths.get(source_,target).toUri()+"=>"+dest_)
         pushFileToTmp(File(Paths.get(source_,target).toUri()),mode,dest_)
       }
     }
@@ -111,16 +112,25 @@ class KernelAcvpTest {
       "config.json"
     ))
     //based on a recent test cases.
+
+    // val vectors:List<String> = listOf(
+    //   "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
+    //   "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC","ACVP-AES-CBC-CS3",
+    //   "ACVP-AES-CTR","ACVP-AES-XTS","ACVP-AES-GCM"
+    // )
     val vectors:List<String> = listOf(
-      "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
-      "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC","ACVP-AES-CBC-CS3",
-      "ACVP-AES-CTR","ACVP-AES-XTS","ACVP-AES-GCM"
+    "1044265_SHA2-224",            "1044271_HMAC-SHA2-256",       "1044266_SHA2-256",            "1044263_CMAC-AES",
+    "1044258_ACVP-AES-ECB",        "1044272_HMAC-SHA2-384",       "1044270_HMAC-SHA2-224",       "1044267_SHA2-384",
+    "1044259_ACVP-AES-CBC",        "1044261_ACVP-AES-CTR",        "1044269_HMAC-SHA-1",          "1044268_SHA2-512",
+    "1044274_hmacDRBG",
+    "1044273_HMAC-SHA2-512",       "1044264_SHA-1",               "1044262_ACVP-AES-XTS"       /*,"1044275_hmacDRBG"*/
     )
+
     //
     val fnames:Array<String> = vectors.map{ "$it.bz2" }.toTypedArray()
     //
-    batch_install(RES_PATH+"/vectors/","/data/local/tmp/vectors/",fnames)
-    batch_install(RES_PATH+"/expected/","/data/local/tmp/expected/",fnames)
+    batch_install(RES_PATH+"/vectors-android/","/data/local/tmp/vectors/",fnames)
+    batch_install(RES_PATH+"/expected-android/","/data/local/tmp/expected/",fnames)
     // For in case not be configured :
     // Because the key and DRBG entropy are set with setsockopt,
     // tests can fail on certain inputs if sysctl_optmem_max is too low.
