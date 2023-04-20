@@ -34,6 +34,8 @@ class FTP_ITC_EXT_1 {
   val adb = AdbDeviceRule()
   val client = adb.adb
 
+
+
   @Before
   fun setup() {
     runBlocking {
@@ -52,13 +54,6 @@ class FTP_ITC_EXT_1 {
                      adb.deviceSerial)
     }
   }
-
-
-
-
-
-
-
 
   fun selectNodesValues(target:Node,name:String):List<String>{
     val nodes = target.selectNodes(".//field[@name='"+name+"']")
@@ -190,9 +185,9 @@ class FTP_ITC_EXT_1 {
       //adb pull /storage/emulated/0/Download/PCAPdroid/traffic.pcap traffic.pcap
       var p: Path = kotlin.io.path.createTempFile("t", ".pcap")
       //"/storage/emulated/0/Download/PCAPdroid/traffic.pcap"
-      client.execute(PullFileRequest(
-        "/sdcard/Download/PCAPdroid/traffic_expire.pcap",
-                  p.toFile()),scope=this,adb.deviceSerial);
+      //client.execute(PullFileRequest(
+      //  "/sdcard/Download/PCAPdroid/traffic_expire.pcap",
+      //            p.toFile()),scope=this,adb.deviceSerial);
       //  ShellCommandRequest("am force-stop com.emanuelf.remote_capture"),ser);
       println(p.toAbsolutePath());
     }

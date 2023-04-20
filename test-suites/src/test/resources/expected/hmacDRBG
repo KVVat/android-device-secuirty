@@ -1,0 +1,31 @@
+[{
+    "time": "2021-09-03T15:11:58-07:00",
+    "url": "acvp/v1/testSessions/198629",
+    "vectorSetUrls": [
+        "/acvp/v1/testSessions/198629/vectorSets/689770"
+    ]
+},{
+    "algorithm": "hmacDRBG",
+    "testGroups": [
+        {
+            "tgId": 1,
+            "tests": [
+                {
+                    "tcId": 11,
+                    "returnedBits": "a5cb54f2d7fb379562b0d3af1721e6b1b10a8b6046dbb0c86330c9979ac2d955"
+                }
+            ]
+        },
+        {
+            "tgId": 2,
+            "tests": [
+                {
+                    "tcId": 26,
+                    "returnedBits": "076165cb054d0e163ea5960a0dbf988ea6b171f224d801204f446b4399e454b9"
+                }
+            ]
+        }
+    ],
+    "vsId": 689770
+}]
+EOF.

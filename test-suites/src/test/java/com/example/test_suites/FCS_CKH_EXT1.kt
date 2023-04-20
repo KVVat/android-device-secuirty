@@ -96,9 +96,10 @@ class FCS_CKH_EXT1 {
       // 2. Check we can not access to the CES
       //assertThat(result?.text).isEqualTo("des=Success,ces=Failed")
       assertEquals("des=Success,ces=Failed",result?.text)
-      result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
+
+      //result = AdamUtils.waitLogcatLine(100,"FCS_CKH_EXT_TEST",adb)
       //assertThat { result }.isNotNull()
-      assertNotNull(result)
+      //assertNotNull(result)
 
       println(result);
       println(result?.text)

@@ -25,7 +25,6 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 
 import java.time.LocalDateTime
-
 //FPR_PSE.1
 class FPR_PSE_1_Simple {
 

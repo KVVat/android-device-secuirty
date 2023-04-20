@@ -101,7 +101,7 @@ class FDP_ACF_EXT_Simple {
       //Signature mismatch case
       println("Verify Install apk v2 with different signing key (expect=Failure)")
       res = AdamUtils.InstallApk(file_apk_v2_signed,false,adb);
-      assertTrue(res.startsWith("Success"))
+      assertTrue(res.startsWith("Failure"))
       //unistall the test file before next test
       client.execute(UninstallRemotePackageRequest("com.example.appupdate"), adb.deviceSerial)
     }
