@@ -3,6 +3,7 @@ package com.example.test_suites
 
 
 import com.example.test_suites.rule.AdbDeviceRule
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
 import com.example.test_suites.utils.LogcatResult
 import com.malinskiy.adam.request.misc.RebootRequest
@@ -18,6 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.*
+import org.junit.rules.TestWatcher
 
 class FCS_CKH_EXT1 {
 
@@ -30,6 +32,9 @@ class FCS_CKH_EXT1 {
   val adb = AdbDeviceRule()
   val client = adb.adb
 
+  @Rule @JvmField
+  public var watcher: TestWatcher = ADSRPTestWatcher()
+
   @Before
   fun setup() {
     runBlocking {
@@ -38,7 +43,6 @@ class FCS_CKH_EXT1 {
                      adb.deviceSerial)
 
     }
-    println("** A Junit test case for FCS_CKH_EXT1 started on "+ LocalDateTime.now()+" **")
 
   }
   @After

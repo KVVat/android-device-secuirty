@@ -3,6 +3,7 @@ package com.example.test_suites
 import assertk.assertThat
 import assertk.assertions.isNotNull
 import com.example.test_suites.rule.AdbDeviceRule
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
 import com.example.test_suites.utils.LogcatResult
 import com.example.test_suites.utils.SFR
@@ -17,6 +18,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestWatcher
 
 //FPR_PSE.1
 
@@ -41,6 +43,9 @@ class FDP_ACC_1_Simple {
   val adb = AdbDeviceRule()
   val client = adb.adb
 
+  @Rule @JvmField
+  public var watcher: TestWatcher = ADSRPTestWatcher()
+
   /*
   val myClass = MyClass::class
   val authorAnnotation = myClass.getAnnotations().first { it.annotationClass == Author::class }
@@ -55,8 +60,6 @@ class FDP_ACC_1_Simple {
       client.execute(ShellCommandRequest("rm /data/local/tmp/$TEST_MODULE"),
                      adb.deviceSerial)
     }
-    println("** A Junit test case for FDP_ACC_1 started on "+ LocalDateTime.now()+" **")
-
   }
 
   @After

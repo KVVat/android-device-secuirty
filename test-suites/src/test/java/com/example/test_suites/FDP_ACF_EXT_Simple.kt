@@ -4,6 +4,7 @@ package com.example.test_suites
 import assertk.assertThat
 import assertk.assertions.startsWith
 import com.example.test_suites.rule.AdbDeviceRule
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
@@ -16,6 +17,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestWatcher
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -29,6 +31,9 @@ class FDP_ACF_EXT_Simple {
   val adb = AdbDeviceRule()
   val client = adb.adb
 
+  @Rule @JvmField
+  public var watcher: TestWatcher = ADSRPTestWatcher()
+
   @Before
   fun setup() {
     runBlocking {
@@ -38,8 +43,7 @@ class FDP_ACF_EXT_Simple {
       client.execute(ShellCommandRequest("rm /data/local/tmp/appupdate-v2-debug.apk"),
                      adb.deviceSerial)
     }
-    println("** A Junit test case for FDP_ACF_EXT started on "+ LocalDateTime.now()+" **")
-  }
+   }
 
   @After
   fun teardown() {

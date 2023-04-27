@@ -2,6 +2,7 @@ package com.example.test_suites
 
 import assertk.assertions.support.show
 import com.example.test_suites.rule.AdbDeviceRule
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.HostShellHelper
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
@@ -21,13 +22,16 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-
+import org.junit.rules.TestWatcher
 
 
 class FTP_ITC_EXT_1 {
 
   private val TEST_PACKAGE = "com.example.networkcheck"
   private val TEST_MODULE = "networkcheck-debug.apk"
+
+  @Rule @JvmField
+  public var watcher: TestWatcher = ADSRPTestWatcher()
 
   @Rule
   @JvmField
@@ -44,8 +48,7 @@ class FTP_ITC_EXT_1 {
                      adb.deviceSerial)
 
     }
-    println("** A Junit test case for FTP_ITC_EXT1 started on "+ LocalDateTime.now()+" **")
-  }
+   }
   @After
   fun teardown() {
     runBlocking {

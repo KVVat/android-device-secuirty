@@ -1,6 +1,7 @@
 package com.example.test_suites
 
 import com.example.test_suites.rule.AdbDeviceRule
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
 import com.malinskiy.adam.request.Feature
 import com.malinskiy.adam.request.misc.FetchHostFeaturesRequest
@@ -20,6 +21,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.*
+import org.junit.rules.TestWatcher
 
 class KernelAcvpTest {
 
@@ -27,6 +29,9 @@ class KernelAcvpTest {
   @JvmField
   val adb = AdbDeviceRule()
   val client = adb.adb
+
+  @Rule @JvmField
+  public var watcher: TestWatcher = ADSRPTestWatcher()
 
   @Before
   fun setup() {
