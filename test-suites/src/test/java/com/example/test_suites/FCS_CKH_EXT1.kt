@@ -50,11 +50,6 @@ class FCS_CKH_EXT1 {
     }
   }
 
-  // test
-  // adb shell
-  // su
-  // am broadcast -a android.intent.action.BOOT_COMPLETED
-
   @Test
   fun testDeviceEncryptedStorage() {
     runBlocking {

@@ -47,5 +47,12 @@ directboot/build
 /security/*
 /results
 /results/*
-
+/instrumentation-reports
+/instrumentation-reports/*
+/instrumentation-results
+/instrumentation-results/*
+/test-reports
+/test-reports/*
+/test-results
+/test-results/*
 acvpkernel/build

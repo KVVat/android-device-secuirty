@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.test_suites.FPR_PSE_1_Simple" tests="1" skipped="0" failures="1" errors="0" timestamp="2023-04-25T06:45:04" hostname="wkouki-macbookpro.roam.corp.google.com" time="15.972">
+  <properties>
+    <property name="SFR.name" value="FDP_ACF_EXT.1" />
+    <property name="SFR.description" value="
+ - FCS_CKH.1.2/Low The TSF shall ensure that all keys in the key hierarchy are derived and/or
+ generated according to [assignment: description of how each key in the hierarchy is derived
+ and/or generated, with which key lengths and according to which standards] ensuring that
+ the key hierarchy uses the DUK directly or indirectly in the derivation of the data encryption key(s) for Low user data assets.
+ - FCS_CKH.1.3/Low The TSF shall ensure that all keys in the key hierarchy and all data used in
+ deriving the keys in the hierarchy are protected according to [assignment: rules].
+" />
+    <property name="target.device" value="Pixel 6" />
+    <property name="target.system" value="Android 13" />
+    <property name="target.signature" value="" />
+  </properties>
+  <testcase name="testUniqueIDs" description="" classname="com.example.test_suites.FPR_PSE_1_Simple" time="15.972">
+    <failure message="org.opentest4j.AssertionFailedError: expected:&lt;&quot;[]&quot;&gt; but was:&lt;&quot;[357403130005940]&quot;&gt;" type="org.opentest4j.AssertionFailedError">
+      org.opentest4j.AssertionFailedError: expected:&lt;&quot;[]&quot;&gt; but was:&lt;&quot;[357403130005940]&quot;&gt;
+      at app//com.example.test_suites.FPR_PSE_1_Simple$testUniqueIDs$1.invokeSuspend(FPR_PSE_1_Simple.kt:107)
+      [..... Stack Trace .....]
+    </failure>
+  </testcase>
+  <system-out><![CDATA[
+** A Junit test case for FPR_PSE_1 started on 2023-04-25T15:45:05.618878 **
+The test verifies that the apis which generate unique ids return expected values.
+[step=1] Values of each api results : {ADID=3f51aafb-9435-4073-88bc-719187bfbf38, IMEI1=, IMEI2=357403130005940, UUID=9f859879-68d6-4bd9-bbcf-8cb760502e98, AID=d4749024e1cde6e9, WIDEVINE=cea362de56efc3ff965f0e8a699e7d9cf4f65348f088534340a1227f7ba6ee61}
+[step=2] Values of each api results (after reboot) : {ADID=3f51aafb-9435-4073-88bc-719187bfbf38, IMEI1=, IMEI2=357403130005940, UUID=9f859879-68d6-4bd9-bbcf-8cb760502e98, AID=d4749024e1cde6e9, WIDEVINE=cea362de56efc3ff965f0e8a699e7d9cf4f65348f088534340a1227f7ba6ee61}
+Check all api values are maintained.
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

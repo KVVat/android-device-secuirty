@@ -5,6 +5,7 @@ import assertk.assertions.isNotNull
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.AdamUtils
 import com.example.test_suites.utils.LogcatResult
+import com.example.test_suites.utils.SFR
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
@@ -18,6 +19,16 @@ import org.junit.Rule
 import org.junit.Test
 
 //FPR_PSE.1
+
+@SFR("FDP_ACC_1", """
+ - FCS_CKH.1.1/Low The TSF shall support a key hierarchy for the data encryption key(s) for Low user data assets.
+ - FCS_CKH.1.2/Low The TSF shall ensure that all keys in the key hierarchy are derived and/or 
+ generated according to [assignment: description of how each key in the hierarchy is derived 
+ and/or generated, with which key lengths and according to which standards] ensuring that 
+ the key hierarchy uses the DUK directly or indirectly in the derivation of the data encryption key(s) for Low user data assets. 
+ - FCS_CKH.1.3/Low The TSF shall ensure that all keys in the key hierarchy and all data used in 
+ deriving the keys in the hierarchy are protected according to [assignment: rules].
+""")
 class FDP_ACC_1_Simple {
 
   private val TEST_PACKAGE = "com.example.assets"
@@ -30,6 +41,13 @@ class FDP_ACC_1_Simple {
   val adb = AdbDeviceRule()
   val client = adb.adb
 
+  /*
+  val myClass = MyClass::class
+  val authorAnnotation = myClass.getAnnotations().first { it.annotationClass == Author::class }
+  val author = authorAnnotation.getValue("name")
+
+  println(author) // John Doe
+*/
   @Before
   fun setup() {
     runBlocking {

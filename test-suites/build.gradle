@@ -4,6 +4,7 @@ plugins {
 }
 def homePath = System.properties['user.home']
 def applicationName = 'test_suites'
+
 android {
     namespace 'com.example.test_suites'
     compileSdk 33
@@ -87,8 +88,21 @@ android {
         }
     }
 
+    testOptions {
+        reportDir=file("$rootDir/instrumentation-reports/")
+        resultsDir=file("$rootDir/instrumentation-results/")
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            test {
+                reports.junitXml.destination = file("$rootDir/test-reports/")
+                reports.html.destination = file("$rootDir/test-results/")
+                onOutput { descriptor, event ->
+                    //logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+                }
+            }
+        }
+    }
 }
-
 dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
@@ -110,14 +124,14 @@ dependencies {
     testImplementation 'com.malinskiy.adam:android-junit4:0.4.7'
     testImplementation 'com.malinskiy.adam:android-junit4-test-annotation-producer:0.4.7'
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.25'
-    testImplementation 'org.simpleframework:simple-xml:2.7.1'
-    testImplementation 'org.slf4j:slf4j-simple:1.7.32'
+    //testImplementation 'org.simpleframework:simple-xml:2.7.1'
+    //testImplementation 'org.slf4j:slf4j-simple:1.7.32'
     testImplementation 'com.squareup.okhttp3:okhttp:4.9.0'
     testImplementation 'com.jcraft:jsch:0.1.55'
     testImplementation 'jaxen:jaxen:1.1.6'
     testImplementation 'org.dom4j:dom4j:2.1.1'
     testImplementation gradleTestKit()
-
+    testImplementation 'io.netty:netty-all:4.1.68.Final'
     androidTestImplementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
     androidTestImplementation "androidx.security:security-crypto:1.1.0-alpha04"
 
