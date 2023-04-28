@@ -1,6 +1,6 @@
 package com.example.test_suites
 
-import assertk.assertions.support.show
+
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.HostShellHelper

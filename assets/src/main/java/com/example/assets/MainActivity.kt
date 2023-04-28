@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     var res:Array<Boolean> = arrayOf(true,true,true,true);
     //Access Check
 
+
+
     res[0] = "Success".equals(getPrefValueOrWrite("SampleValue",""));
     Log.d("Info/"+TAG,"Preference:" +res[0])
 

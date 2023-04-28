@@ -94,9 +94,6 @@ class KernelAcvpTest {
     return true
   }
 
-
-
-
   @Test
   fun testKernelAcvp() {
 

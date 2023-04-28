@@ -1,12 +1,11 @@
 package com.example.test_suites
 
-import assertk.assertThat
-import assertk.assertions.isNotNull
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
 import com.example.test_suites.utils.LogcatResult
 import com.example.test_suites.utils.SFR
+import com.example.test_suites.utils.TestAssertLogger
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
@@ -14,11 +13,18 @@ import java.io.File
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.core.IsEqual
+import org.hamcrest.core.StringStartsWith
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
+import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
+import org.hamcrest.CoreMatchers.`is` as Is
 
 //FPR_PSE.1
 
@@ -45,14 +51,13 @@ class FDP_ACC_1_Simple {
 
   @Rule @JvmField
   public var watcher: TestWatcher = ADSRPTestWatcher()
+  @Rule @JvmField
+  public var name: TestName = TestName();
+  //Asset Log
+  public var a: TestAssertLogger = TestAssertLogger(name)
+  @Rule @JvmField
+  public var errs: ErrorCollector = ErrorCollector()
 
-  /*
-  val myClass = MyClass::class
-  val authorAnnotation = myClass.getAnnotations().first { it.annotationClass == Author::class }
-  val author = authorAnnotation.getValue("name")
-
-  println(author) // John Doe
-*/
   @Before
   fun setup() {
     runBlocking {
@@ -70,6 +75,11 @@ class FDP_ACC_1_Simple {
     }
   }
 
+
+  // inline fun <T> checkThatNow(reason:String, value:T, matcher:Matcher<T>){
+  //   errs.checkThat(reason, value, matcher).
+  //
+  // }
   @Test
   fun testUserAssets()
   {
@@ -77,37 +87,53 @@ class FDP_ACC_1_Simple {
       val file_apk: File =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
 
-      AdamUtils.InstallApk(file_apk,false,adb)
-      Thread.sleep(SHORT_TIMEOUT*2);
-
       var response: ShellCommandResult
       var result: LogcatResult?
+      var ret = AdamUtils.InstallApk(file_apk,false,adb)
+      assertThat(a.Msg("Install Package"),
+                 ret,StringStartsWith("Success"))
+
+
+      Thread.sleep(SHORT_TIMEOUT*2);
 
       //launch application and prepare
       response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.PrepareActivity"), adb.deviceSerial);
-      assertThat(response?.output).equals("Starting")
+      assertThat(a.Msg("Preparing Test Files with opening PrepareActivity"),
+                 response.output,StringStartsWith("Starting"))
+
       Thread.sleep(LONG_TIMEOUT);
       response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
-      assertThat(response?.output).equals("Starting")
+      assertThat(a.Msg("Check file acccess via MainActivity"),
+                 response.output,StringStartsWith("Starting"))
+
+
+      println("Test result shows the file acccess status below. 0=Preference/1=Private File/2=Media Storage/3=Database")
       result = AdamUtils.waitLogcatLine(100,"FDP_ACC_1_TEST",adb)
-      assert(result != null)
-      assertThat( result ).isNotNull()
-      assertThat(result?.text).equals("Test Result:true/true/true/true")
+      assertThat(a.Msg("Check Output of the Test Package"),
+                 result?.text,IsEqual("Test Result:true/true/true/true"))
 
       //uninstall application =>
       response = client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
+      println(response.output)
+      assertThat(a.Msg("Uninstall Test Package"),
+                 response.output,IsEqual("Starting"))
       //install application => files execpt media storage will be removed,
 
       //The app will lost the access permission to the owner file once uninstall it.
       //so we should reinstall it with -g option to enable read_media_storage permission
-      AdamUtils.InstallApk(file_apk,false,adb)
+      ret = AdamUtils.InstallApk(file_apk,false,adb)
+      assertThat(a.Msg("Install Package"),
+                 ret,StringStartsWith("Success"))
+      Thread.sleep(SHORT_TIMEOUT*2);
 
       response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
-      //Thread.sleep(LONG_TIMEOUT);
-      result = AdamUtils.waitLogcatLine(5,"FDP_ACC_1_TEST",adb)
-      assertThat { result }.isNotNull()
-      //println(result?.text)
-      assertThat{result?.text}.equals("Test Result:false/false/true/false")
+      assertThat(a.Msg("Check file acccess via MainActivity"),
+                 response.output,IsEqual("Starting"))
+
+      result = AdamUtils.waitLogcatLine(100,"FDP_ACC_1_TEST",adb)
+      println(result?.text)
+      assertThat(a.Msg("Check Output of the Test Package"),
+                 result?.text,IsEqual("Test Result:true/true/true/true"))
     }
   }
 

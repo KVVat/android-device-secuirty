@@ -1,8 +1,5 @@
 package com.example.test_suites
 
-
-import assertk.assertThat
-import assertk.assertions.startsWith
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils

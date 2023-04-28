@@ -1,12 +1,9 @@
 package com.example.test_suites
 
-
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotEqualTo
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
+import com.example.test_suites.utils.TestAssertLogger
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
@@ -27,6 +24,7 @@ import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
@@ -47,6 +45,9 @@ class FPR_PSE_1_Simple {
   public var watcher:TestWatcher = ADSRPTestWatcher()
   @Rule @JvmField
   public var name:TestName  = TestName();
+
+  //Asset Log
+  public var a:TestAssertLogger = TestAssertLogger(name)
 
   @Rule
   @JvmField
@@ -110,20 +111,16 @@ class FPR_PSE_1_Simple {
       println("Values of each api results (after reboot) : "+dictB.toString());
       println("Check all api values are maintained.");
 
-      var i = 1
 
       //Expected : All unique id values should be maintained
       //Note : Each test should not interrupt execution of the test case
-      //errs.checkThat(getAssertMsg(i++),"A",IsEqual("B"))
-      //errs.checkThat(getAssertMsg(i++),"B",IsEqual("B"))
-      //errs.checkThat(getAssertMsg(i++),"C",IsEqual("B"))
 
-      errs.checkThat(getAssertMsg(i++),dictA["UUID"],IsEqual(dictB["UUID"]))
-      errs.checkThat(getAssertMsg(i++),dictA["ADID"],IsEqual(dictB["ADID"]))
-      errs.checkThat(getAssertMsg(i++),dictA["AID"],IsEqual(dictB["AID"]))
-      errs.checkThat(getAssertMsg(i++),dictA["WIDEVINE"],IsEqual(dictB["WIDEVINE"]))
-      errs.checkThat(getAssertMsg(i++),dictA["IMEI1"],IsEqual(""))
-      errs.checkThat(getAssertMsg(i++),dictA["IMEI2"],IsEqual(""))
+      errs.checkThat(a.Msg("Verify UUID same"),dictA["UUID"],IsEqual(dictB["UUID"]))
+      errs.checkThat(a.Msg("Verify ADID same"),dictA["ADID"],IsEqual(dictB["ADID"]))
+      errs.checkThat(a.Msg("Verify AID same"),dictA["AID"],IsEqual(dictB["AID"]))
+      errs.checkThat(a.Msg("Verify WIDEVINE same"),dictA["WIDEVINE"],IsEqual(dictB["WIDEVINE"]))
+      errs.checkThat(a.Msg("Verify IMEI1 is blank"),dictA["IMEI1"],IsEqual(""))
+      errs.checkThat(a.Msg("Verify IMEI2 is blank"),dictA["IMEI2"],IsEqual(""))
 
       println(">Uninstall/Install again the target apk.");
       //uninstall application =>
@@ -140,6 +137,7 @@ class FPR_PSE_1_Simple {
       //check preference and compare included values against A and B
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
+
       val dictC:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
 
       println(">Check the api values except UUID should be maintained.");
@@ -147,20 +145,16 @@ class FPR_PSE_1_Simple {
       //You should set allowbackup option in module's androidmanifest.xml to false
       //for passing this test.(the option makes application a bit vulnerable to attack)
       //Note : Each test should not interrupt execution of the test case
-      errs.checkThat(getAssertMsg(i++),dictA["UUID"],Is(not(dictC["UUID"])))
-      errs.checkThat(getAssertMsg(i++),dictA["ADID"],IsEqual(dictC["ADID"]))
-      errs.checkThat(getAssertMsg(i++),dictA["AID"],IsEqual(dictC["AID"]))
-      errs.checkThat(getAssertMsg(i++),dictA["WIDEVINE"],IsEqual(dictB["WIDEVINE"]))
-      errs.checkThat(getAssertMsg(i++),dictA["IMEI1"],IsEqual(""))
-      errs.checkThat(getAssertMsg(i++),dictA["IMEI2"],IsEqual(""))
+      errs.checkThat(a.Msg("Verify UUID changes"),dictA["UUID"],Is(not(dictC["UUID"])))
+      errs.checkThat(a.Msg("Verify ADID same"),dictA["ADID"],IsEqual(dictC["ADID"]))
+      errs.checkThat(a.Msg("Verify AID same"),dictA["AID"],IsEqual(dictC["AID"]))
+      errs.checkThat(a.Msg("Verify WIDEVINE same"),dictA["WIDEVINE"],IsEqual(dictC["WIDEVINE"]))
+      errs.checkThat(a.Msg("Verify IMEI1 is blank"),dictA["IMEI1"],IsEqual(""))
+      errs.checkThat(a.Msg("Verify IMEI2 is blank"),dictA["IMEI2"],IsEqual(""))
 
     }
   }
-  private fun getAssertMsg(idx: Int): String? {
-    val id = DecimalFormat("000").format(idx);
-    println(">Check values:"+id)
-    return name.methodName + " : step=" + DecimalFormat("000").format(idx)
-  }
+
   fun fromPrefMapListToDictionary(xml:String):Map<String,String>{
     val source = InputSource(StringReader(xml))
 
