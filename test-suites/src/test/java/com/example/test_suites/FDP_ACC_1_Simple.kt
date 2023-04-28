@@ -106,19 +106,16 @@ class FDP_ACC_1_Simple {
       assertThat(a.Msg("Check file acccess via MainActivity"),
                  response.output,StringStartsWith("Starting"))
 
-
-      println("Test result shows the file acccess status below. 0=Preference/1=Private File/2=Media Storage/3=Database")
+      println("> Test result shows the file acccess status below. 0=Preference/1=Private File/2=Media Storage/3=Database")
       result = AdamUtils.waitLogcatLine(100,"FDP_ACC_1_TEST",adb)
       assertThat(a.Msg("Check Output of the Test Package"),
                  result?.text,IsEqual("Test Result:true/true/true/true"))
-
+      println(result?.text!!.trim())
       //uninstall application =>
       response = client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
-      println(response.output)
       assertThat(a.Msg("Uninstall Test Package"),
-                 response.output,IsEqual("Starting"))
+                 response.output,StringStartsWith("Success"))
       //install application => files execpt media storage will be removed,
-
       //The app will lost the access permission to the owner file once uninstall it.
       //so we should reinstall it with -g option to enable read_media_storage permission
       ret = AdamUtils.InstallApk(file_apk,false,adb)
@@ -128,12 +125,12 @@ class FDP_ACC_1_Simple {
 
       response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
       assertThat(a.Msg("Check file acccess via MainActivity"),
-                 response.output,IsEqual("Starting"))
+                 response.output,StringStartsWith("Starting"))
 
       result = AdamUtils.waitLogcatLine(100,"FDP_ACC_1_TEST",adb)
-      println(result?.text)
+      println(result?.text!!.trim())
       assertThat(a.Msg("Check Output of the Test Package"),
-                 result?.text,IsEqual("Test Result:true/true/true/true"))
+                 result?.text,IsEqual("Test Result:false/false/true/false"))
     }
   }
 
