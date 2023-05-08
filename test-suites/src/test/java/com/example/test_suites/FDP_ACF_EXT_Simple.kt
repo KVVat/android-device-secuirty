@@ -31,7 +31,7 @@ import org.hamcrest.core.StringStartsWith
  */
 
 @SFR("FDP_ACF_EXT.1", """
-  FDP_ACF_EXT.1. App Update
+  FDP_ACF_EXT.1 App Update
 
   FDP_ACF.1 Security attribute based access control allows the TSF to enforce access based upon 
   security attributes and named groups of attributes. Furthermore, the TSF may have the ability to

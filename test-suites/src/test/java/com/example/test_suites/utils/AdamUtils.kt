@@ -81,7 +81,7 @@ class AdamUtils {
             }
 
           if(!lines.isEmpty()){
-            //println(lines);
+            println("matched logcat line found:"+lines.size);
             tag = lines.get(0).tag
             text = lines.get(0).text
             found = true

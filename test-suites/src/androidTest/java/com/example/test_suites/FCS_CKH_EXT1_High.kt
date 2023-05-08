@@ -11,6 +11,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.test_suites.utils.ADSRPTestWatcher
+import com.example.test_suites.utils.TestAssertLogger
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -27,9 +29,16 @@ import java.security.NoSuchProviderException
 import java.time.LocalDateTime
 import javax.security.cert.CertificateException
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.CoreMatchers.`is` as Is
+import org.hamcrest.CoreMatchers.`not` as Not
+import org.hamcrest.core.StringStartsWith
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
+import org.junit.rules.TestName
+import org.junit.rules.TestWatcher
 import org.junit.runner.RunWith
 
 
@@ -41,6 +50,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FCS_CKH_EXT1_High {
   //https://github.com/stravag/android-sample-biometric-prompt/blob/master/app/src/main/java/ch/ranil/sample/android/biometricpromptsample/BiometricPromptManager.kt
+  @Rule @JvmField
+  var watcher: TestWatcher = ADSRPTestWatcher()
+  @Rule @JvmField
+  var errs: ErrorCollector = ErrorCollector()
+  @Rule @JvmField
+  var name: TestName = TestName();
+  //Asset Log
+  public var a: TestAssertLogger = TestAssertLogger(name)
 
   private lateinit var norm_enc_data: SharedPreferences
   val PREF_NAME:String = "EncryptedSharedPref"
@@ -49,7 +66,7 @@ class FCS_CKH_EXT1_High {
   lateinit var keyNormal:MasterKey;
   lateinit var keyUnlockDeviceTest:MasterKey;
   fun println_(line:String){
-    Log.i(this.javaClass.canonicalName,line)
+    Log.d(this.javaClass.canonicalName,line)
   }
   @Before
   fun setup()
@@ -114,7 +131,7 @@ class FCS_CKH_EXT1_High {
   {
     val sampleString = "The quick brown fox jumps over the lazy dog";
 
-    println_("Generate encrypted Shared Preferences")
+    println_("> Generate encrypted Shared Preferences")
 
     var editor: SharedPreferences.Editor = data.edit();
 
@@ -124,12 +141,22 @@ class FCS_CKH_EXT1_High {
     editor.apply()
     //check availability
     println_("Check availavility of values")
+
     val intSaved = data.getInt("IntTest", 1)
-    assertEquals(65535,intSaved)
+    //assertEquals(65535,intSaved)
+    errs.checkThat(a.Msg("Evaluate Encrypted integer value matches"),
+                   intSaved,Is(65535))
+
+
     val boolSaved = data.getBoolean("BooleanTest", false)
-    assertEquals(true,boolSaved)
+    errs.checkThat(a.Msg("Evaluate Encrypted boolean value matches"),
+                   boolSaved,Is(true))
+
+
     val strSaved = data.getString("StringTest", "")
-    assertEquals(sampleString,strSaved)
+    errs.checkThat(a.Msg("Evaluate Encrypted String value matches"),
+                   strSaved,Is(sampleString))
+
     //
     println_("Check all values in the shared preference are encrypted.")
     loadSharedPrefs(prefName);
@@ -167,8 +194,9 @@ class FCS_CKH_EXT1_High {
       throw RuntimeException("IOException")
     }
     //Check Availability
-    println_("Check availability of the encrypted file")
-    assert(fTarget.exists())
+    errs.checkThat(a.Msg("Check availability of the encrypted file"),
+                   fTarget.exists(),Is(true))
+
     val original:String;
     encryptedFile.openFileInput().use { fileInputStream ->
       try {
@@ -180,8 +208,6 @@ class FCS_CKH_EXT1_High {
           }
         br.close()
         original = sb.toString()
-        Log.d("fileContents", original)
-
       } catch (ex: Exception) {
         // Error occurred opening raw file for reading.
         throw RuntimeException("IOException")
@@ -200,14 +226,16 @@ class FCS_CKH_EXT1_High {
         }
       br.close()
       val encrypted = sb.toString();
-      Log.d("fileContents",encrypted)
       println_("Check the file is encrypted.(means they are not identical)")
 
       println_("===original content===")
       println_(original)
       println_("===encrypeted content===")
       println_(encrypted)
-      assertNotEquals(original,encrypted)
+
+      errs.checkThat(a.Msg("Check the file is encrypted.it means these are not identical"),
+                     original,Is(Not(encrypted)))
+
     } catch (ex: Exception) {
       // Error occurred opening raw file for reading.
       throw RuntimeException("IOException")

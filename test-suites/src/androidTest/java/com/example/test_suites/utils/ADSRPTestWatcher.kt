@@ -2,7 +2,6 @@ package com.example.test_suites.utils
 
 import java.text.MessageFormat
 import java.time.LocalDateTime
-import org.junit.Rule
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description
 
