@@ -3,6 +3,7 @@ package com.example.test_suites
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
+import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
@@ -32,6 +33,14 @@ import org.xml.sax.InputSource
 import org.hamcrest.CoreMatchers.`is` as Is
 
 //FPR_PSE.1
+
+@SFR("FPR_PSE.1", """
+ FPR_PSE.1 Pseudonymity
+ 
+ Pseudonymity requires that a set of users and/or subjects are
+ unable to determine the identity of a user bound to a subject or operation, but
+ that this user is still responsible for its actions.
+  """)
 class FPR_PSE_1_Simple {
 
   private val TEST_PACKAGE = "com.example.uniqueid"
@@ -40,11 +49,11 @@ class FPR_PSE_1_Simple {
   private val SHORT_TIMEOUT = 1000L
 
   @Rule @JvmField
-  public var errs:ErrorCollector = ErrorCollector()
+  var errs:ErrorCollector = ErrorCollector()
   @Rule @JvmField
-  public var watcher:TestWatcher = ADSRPTestWatcher()
+  var watcher:TestWatcher = ADSRPTestWatcher()
   @Rule @JvmField
-  public var name:TestName  = TestName();
+  var name:TestName  = TestName();
 
   //Asset Log
   public var a:TestAssertLogger = TestAssertLogger(name)
@@ -75,6 +84,7 @@ class FPR_PSE_1_Simple {
   fun testUniqueIDs()
   {
     runBlocking {
+
       val file_apk: File =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
 
@@ -110,7 +120,6 @@ class FPR_PSE_1_Simple {
       val dictB:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
       println("Values of each api results (after reboot) : "+dictB.toString());
       println("Check all api values are maintained.");
-
 
       //Expected : All unique id values should be maintained
       //Note : Each test should not interrupt execution of the test case
