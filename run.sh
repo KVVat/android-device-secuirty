@@ -25,8 +25,8 @@ echo "1: ** All automatable JUnit cases **"
 echo "2: ** All automatable AndroidJUnit cases **"
 echo "3: FCS_CKH_EXT1_Low (DirectBoot)"
 echo "4: FCS_CKH_EXT1_High (File Encryption)"
-echo "5: FIA_AFL_1 (ScreenLock Password)"
-echo "6: FCS_COP_1 (Kernel Acvp Test)"
+# echo "5: FIA_AFL_1 (ScreenLock Password)"
+# echo "6: FCS_COP_1 (Kernel Acvp Test)"
 echo "9: Clean test"
 echo "Results will be stored in $rdir"
 echo -n ">"
@@ -54,6 +54,7 @@ elif [ $NUM -eq 4 ]; then
   echo "*** any key to start ***"
   read -r WARN
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High2 connectedAndroidTest
+  clone_output $NUM instrumentation-results
 elif [ $NUM -eq 5 ]; then
   echo " - The test depends on the device/system environment, and we test it on the pixel devices"
   echo " - The test automatically operate the target device with UIAutomator"

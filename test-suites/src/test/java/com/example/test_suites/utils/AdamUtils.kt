@@ -43,7 +43,7 @@ class AdamUtils {
          serial = adb.deviceSerial)
       }
 
-      println(ret)
+      println("Restart adb=>$ret")
       return ret;
     }
     fun shellRequest(shellCommand:String,adb:AdbDeviceRule):ShellCommandResult{
@@ -55,7 +55,8 @@ class AdamUtils {
           ShellCommandRequest(shellCommand),
           adb.deviceSerial)
       }
-      println(ret.exitCode)
+      println("Run shell command(${ret.exitCode}):$shellCommand")
+
       return ret
     }
     fun waitLogcatLine(waitTime:Int,tagWait:String,adb:AdbDeviceRule):LogcatResult? {
@@ -107,10 +108,15 @@ class AdamUtils {
                           supportedFeatures = features,null,coroutineContext),
           this,
           adb.deviceSerial);
+
+        println("Process(Pull):"+sourcePath+"=>"+destDir)
+
         var percentage = 0
         for (percentageDouble in channel) {
           percentage = (percentageDouble * 100).toInt()
-          println(percentage)
+          if(percentage%10==0) {
+            println("Pulling a file($sourcePath) " + percentage + "% done")
+          }
         }
       }
     }
