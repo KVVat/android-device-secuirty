@@ -25,11 +25,11 @@ class ADSRPTestWatcher():TestWatcher() {
     )
   }
 
-  private fun getFileFromPath(obj: Any, fileName: String): File? {
+  //private fun getFileFromPath(obj: Any, fileName: String): File? {
     //val classLoader = obj.javaClass.classLoader
     //val resource = classLoader.getResource(fileName)
-    return File(fileName)
-  }
+    //return File(fileName)
+  //}
   override fun finished(desc: Description?) {
     println(MessageFormat.format("[Test Finished] : {0}", desc))
 
@@ -41,13 +41,11 @@ class ADSRPTestWatcher():TestWatcher() {
     //access the outputfile. confirm if it's oka
     val packageName = desc!!.testClass.canonicalName
     val fname = String.format("../test-results/TEST-%s.xml",packageName)
-    val f:File? = getFileFromPath(this,fname)
+    val f:File? = File(fname)
 
     println(fname)
     println(f.toString()+","+f!!.exists())
     //find a file
-
-
 
   }
 }

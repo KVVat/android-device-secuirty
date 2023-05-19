@@ -3,6 +3,7 @@ package com.example.test_suites
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
+import com.example.test_suites.utils.TestAssertLogger
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.flipkart.zjsonpatch.DiffFlags
@@ -15,6 +16,10 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.apache.commons.compress.utils.FileNameUtils
+import org.hamcrest.MatcherAssert
+import org.hamcrest.core.IsEqual
+import org.hamcrest.core.StringStartsWith
 import org.jsfr.json.JsonPathListener
 import org.jsfr.json.JsonSurfer
 import org.jsfr.json.JsonSurferJackson
@@ -23,6 +28,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
+import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
 import java.io.BufferedInputStream
 import java.io.BufferedReader
@@ -46,7 +53,14 @@ class KernelAcvpTest {
   val client = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher()
+  var errs: ErrorCollector = ErrorCollector()
+  @Rule @JvmField
+  var watcher:TestWatcher = ADSRPTestWatcher()
+  @Rule @JvmField
+  var name: TestName = TestName();
+
+  //Asset Log
+  var a: TestAssertLogger = TestAssertLogger(name)
 
   @Before
   fun setup() {
@@ -110,7 +124,7 @@ class KernelAcvpTest {
     return true
   }
 
-  fun bz2reader(fileURI: URI): String? {
+  private fun bz2reader(fileURI: URI): String? {
     try {
       FileInputStream(File(fileURI)).use {
         BufferedInputStream(it).use {
@@ -123,7 +137,7 @@ class KernelAcvpTest {
       throw ex
     }
   }
-  fun targz_reader(fileURI: URI, callback: (String,String) -> Unit)  {
+  private fun targz_reader(fileURI: URI, callback: (String, String) -> Unit)  {
     try {
       FileInputStream(File(fileURI)).use { fin ->
         GzipCompressorInputStream(fin).use { gzin->
@@ -152,13 +166,14 @@ class KernelAcvpTest {
 
     }
   }
-  fun evaluateResultFiles()
+  private fun evaluateResultFiles(expectedDir:String)
   {
     //Compare output file against the expected files.
 
     targz_reader(Paths.get(OUT_PATH,"actual.tar.gz").toUri()) { name, tartext ->
       val fname: String = Paths.get(name).fileName.toString()
-      val uri:URI = Paths.get(RES_PATH+"/expected-20230509/","$fname.bz2").toUri();
+      var result = true;
+      val uri:URI = Paths.get(RES_PATH+expectedDir,"$fname.bz2").toUri();
       try {
         val br2text = bz2reader(uri);//.readText()
         if (br2text !== null) {
@@ -169,35 +184,42 @@ class KernelAcvpTest {
           val jsonT: JsonNode = jacksonObjectMapper().readTree(tartext_)//actual
 
           //analyze test stats
-          val surfer: JsonSurfer = JsonSurferJackson.INSTANCE
+          //val surfer: JsonSurfer = JsonSurferJackson.INSTANCE
 
           val flags: EnumSet<DiffFlags> = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
           val patch: JsonNode = JsonDiff.asJson(jsonT, jsonB,flags)
           //to suppress the differences of the format due to the revison of the files.
           val ignoreList = mutableListOf<String>("/1/revision","/1/issample")
           if(patch.isArray()){
+
             patch.forEach {
               jsonNode ->
               val nodepath = jsonNode.get("path").textValue()
               if(!ignoreList.contains(nodepath)){
-                println("Found unmatches: $nodepath:"+jsonNode.toString())
+                val resp = jsonNode.toString();
+                println("Found unmatches in $fname:$resp")
+                result = false;
               }
             }
           } else {
             println("??? patch is blank ???")
+            result = false
           }
         }
       } catch (ex:IOException){
-        println("! error to read "+uri.toString())
+        println("[error to read]: $fname")
+        result = false
       } catch (ex:java.lang.Exception){
-        println("! process error:"+uri.toString())
+        println("[process error]: $fname (${ex.message})")
+        result = false
       }
+      errs.checkThat(a.Msg("Evaluate $fname"),result, IsEqual(true))
     }
   }
 
 
   @Test
-  fun testKernelAcvp2() {
+  fun testKernelAcvp() {
     val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm XXX")
 
     //Check kernel settings
@@ -214,13 +236,15 @@ class KernelAcvpTest {
       "config.json"
     ))
 
-    //based on a recent test cases.
-    // val vectors:List<String> = listOf(
-    //   "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
-    //   "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC","ACVP-AES-CBC-CS3",
-    //   "ACVP-AES-CTR","ACVP-AES-XTS","ACVP-AES-GCM"
+    // Test Set 1
+    //
+    //val vectors:List<String> = listOf(
+    // "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
+    // "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC-CS3",
+    // "ACVP-AES-CTR","ACVP-AES-XTS","ACVP-AES-GCM","ctrDRBG","hmacDRBG"
     // )
 
+    // Test Set 2
     // val vectors:List<String> = listOf(
     // "1044265_SHA2-224",            "1044271_HMAC-SHA2-256",       "1044266_SHA2-256",            "1044263_CMAC-AES",
     // "1044258_ACVP-AES-ECB",        "1044272_HMAC-SHA2-384",       "1044270_HMAC-SHA2-224",       "1044267_SHA2-384",
@@ -234,26 +258,32 @@ class KernelAcvpTest {
         "1633595-ACVP-AES-CBC-CS3",	"1633604-HMAC-SHA-1", "1633596-ACVP-AES-CTR",	"1633605-HMAC-SHA2-224",
         "1633597-ACVP-AES-XTS",	"1633606-HMAC-SHA2-256", "1633598-CMAC-AES","1633607-HMAC-SHA2-384",
         "1633599-SHA-1","1633608-HMAC-SHA2-512", "1633600-SHA2-224","1633609-hmacDRBG", "1633601-SHA2-256")
-    //
+
+    val vectorsDir  = "/vectors-20230509/"
+    val expectedDir = "/expected-20230509/"
+
     val fnames:Array<String> = vectors.map{ "$it.bz2" }.toTypedArray()
     //
-    batch_install(RES_PATH+"/vectors-20230509/","/data/local/tmp/vectors/",fnames)
+    batch_install(RES_PATH+vectorsDir,"/data/local/tmp/vectors/",fnames)
+
     // For in case not be configured :
     // Because the key and DRBG entropy are set with setsockopt,
     // tests can fail on certain inputs if sysctl_optmem_max is too low.
     AdamUtils.shellRequest("sysctl -w net.core.optmem_max=204800",adb)
     //extract datas
     AdamUtils.shellRequest("bzip2 -dk /data/local/tmp/vectors/*.bz2",adb)
-    AdamUtils.shellRequest("cd /data/local/tmp/;mkdir actual;mkdir diffs",adb)
+    AdamUtils.shellRequest("cd /data/local/tmp/;rm -rf actual;mkdir actual",adb)
 
     vectors.forEach(){
       val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
       var line="";
+      errs.checkThat(a.Msg("Execute acvptool $it"),sr.exitCode, IsEqual(0))
       if(sr.exitCode!==0) {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
       } else {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()
       }
+
       AdamUtils.shellRequest("cd /data/local/tmp/;echo $line >> acvptest.log",adb)
     }
     AdamUtils.shellRequest("cd /data/local/tmp/;tar -zcvf actual.tar.gz actual",adb)
@@ -262,13 +292,11 @@ class KernelAcvpTest {
     AdamUtils.pullfile("/data/local/tmp/acvptest.log","../results/kernelacvp/",adb)
     AdamUtils.pullfile("/data/local/tmp/actual.tar.gz","../results/kernelacvp/",adb)
 
-
-    evaluateResultFiles()
-
+    evaluateResultFiles(expectedDir)
   }
 
   //@Test
-  fun testKernelAcvp() {
+  fun testKernelAcvp_() {
 
     val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm XXX")
 
@@ -307,8 +335,6 @@ class KernelAcvpTest {
     "1633595-ACVP-AES-CBC-CS3",	"1633604-HMAC-SHA-1", "1633596-ACVP-AES-CTR",	"1633605-HMAC-SHA2-224",
     "1633597-ACVP-AES-XTS",	"1633606-HMAC-SHA2-256", "1633598-CMAC-AES","1633607-HMAC-SHA2-384",
     "1633599-SHA-1","1633608-HMAC-SHA2-512", "1633600-SHA2-224","1633609-hmacDRBG", "1633601-SHA2-256")
-
-
 
     //
     val fnames:Array<String> = vectors.map{ "$it.bz2" }.toTypedArray()
@@ -352,9 +378,6 @@ class KernelAcvpTest {
     AdamUtils.pullfile("/data/local/tmp/acvptest.log","../results/kernelacvp/",adb)
     //AdamUtils.pullfile("/data/local/tmp/diffs.tar.gz","../results/kernelacvp/",adb)
     AdamUtils.pullfile("/data/local/tmp/actual.tar.gz","../results/kernelacvp/",adb)
-
-
-    // assertEquals(false,foundError)
 
     //Clean the system
   }

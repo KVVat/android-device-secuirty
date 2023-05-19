@@ -26,7 +26,7 @@ echo "2: ** All automatable AndroidJUnit cases **"
 echo "3: FCS_CKH_EXT1_Low (DirectBoot)"
 echo "4: FCS_CKH_EXT1_High (File Encryption)"
 # echo "5: FIA_AFL_1 (ScreenLock Password)"
-# echo "6: FCS_COP_1 (Kernel Acvp Test)"
+echo "6: FCS_COP_1 (Kernel Acvp Test)"
 echo "9: Clean test"
 echo "Results will be stored in $rdir"
 echo -n ">"
@@ -68,15 +68,7 @@ elif [ $NUM -eq 5 ]; then
 elif [ $NUM -eq 6 ]; then
   echo " - This test runs ACVP harness for FIPS 140-2 certifications."
   echo " - The test require a device with custom android build which enables certain kernel features.(see comment or design doc)"
-  # CONFIG_CRYPTO_FIPS140_MOD=y
-  # CONFIG_CRYPTO_DRBG_HASH=y
-  # CONFIG_CRYPTO_DRBG_CTR=y
-  # CONFIG_CRYPTO_USER_API_HASH=y
-  # CONFIG_CRYPTO_USER_API_SKCIPHER=y
-  # CONFIG_CRYPTO_USER_API_RNG=y
-  # CONFIG_CRYPTO_USER_API_RNG_CAVP=y
-  # CONFIG_CRYPTO_USER_API_AEAD=y
-  echo " - The target device os need to be rooted ,and should be singing with debug key. "
+  echo " - The target device os need to be rooted , and it should be singing with debug key. "
   echo "Start This Test Case? (y/n)"
   read -r WARN
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
@@ -91,3 +83,13 @@ else
 fi
 
 exit 0
+
+# For acvpkernel test you should compile kernel with the settings below...
+  # CONFIG_CRYPTO_FIPS140_MOD=y
+  # CONFIG_CRYPTO_DRBG_HASH=y
+  # CONFIG_CRYPTO_DRBG_CTR=y
+  # CONFIG_CRYPTO_USER_API_HASH=y
+  # CONFIG_CRYPTO_USER_API_SKCIPHER=y
+  # CONFIG_CRYPTO_USER_API_RNG=y
+  # CONFIG_CRYPTO_USER_API_RNG_CAVP=y
+  # CONFIG_CRYPTO_USER_API_AEAD=y

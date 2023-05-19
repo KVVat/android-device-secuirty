@@ -23,8 +23,6 @@ class HostShellHelper {
       } finally {
         tempScript.delete()
       }
-      return -1
-
     }
 
     @Throws(IOException::class)

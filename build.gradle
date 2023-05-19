@@ -4,3 +4,39 @@ plugins {
     id 'com.android.library' version '7.3.0' apply false
     id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
 }
+
+task exportPackage {
+    println(delegate)
+    println(delegate.class)
+
+    doFirst {
+        mkdir "$buildDir/package"
+        mkdir "$buildDir/package/gradle"
+        mkdir "$buildDir/package/test-suites"
+
+        copy {
+            includeEmptyDirs = false
+            from "test-suites"
+            into "$buildDir/package/test-suites"
+            exclude '**/build/**'
+            exclude '**/.cxx/**'
+            exclude '**/.gradle/**'
+        }
+        copy {
+            includeEmptyDirs = false
+            from "gradle"
+            into "$buildDir/package/gradle"
+        }
+        copy {
+            from "."
+            into "$buildDir/package"
+            include "gradle.properties"
+            include "README.md"
+            include "gradlew*"
+            include "run.sh"
+            include "settings.gradle"
+            include "build.gradle"
+            include "settings.gradle"
+        }
+    }
+}

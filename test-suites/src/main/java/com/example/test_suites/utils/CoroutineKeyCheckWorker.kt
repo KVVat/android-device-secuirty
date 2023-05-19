@@ -54,7 +54,7 @@ class CoroutineKeyCheckWorker(
       return value;
     } else {
       Log.d(TAG, "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!)
-      return ret!!;
+      return ret;
     }
   }
 
