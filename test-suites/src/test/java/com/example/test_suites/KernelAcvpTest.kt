@@ -3,6 +3,7 @@ package com.example.test_suites
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.AdamUtils
+import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -45,6 +46,9 @@ import java.util.Date
 import java.util.EnumSet
 
 
+@SFR("Kernel ACVP Test Case", """
+FIPS 140-2 test case
+""")
 class KernelAcvpTest {
 
   @Rule
@@ -55,7 +59,7 @@ class KernelAcvpTest {
   @Rule @JvmField
   var errs: ErrorCollector = ErrorCollector()
   @Rule @JvmField
-  var watcher:TestWatcher = ADSRPTestWatcher()
+  var watcher:TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
   var name: TestName = TestName();
 
@@ -64,9 +68,7 @@ class KernelAcvpTest {
 
   @Before
   fun setup() {
-    runBlocking {
-
-    }
+    runBlocking {}
   }
 
   @After

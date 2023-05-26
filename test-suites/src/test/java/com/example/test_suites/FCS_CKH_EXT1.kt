@@ -8,6 +8,7 @@ import com.example.test_suites.utils.AdamUtils
 import com.example.test_suites.utils.LogcatResult
 import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
+import com.malinskiy.adam.AndroidDebugBridgeClient
 import com.malinskiy.adam.request.misc.RebootRequest
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
@@ -51,10 +52,10 @@ class FCS_CKH_EXT1 {
   @Rule
   @JvmField
   val adb = AdbDeviceRule()
-  val client = adb.adb
+  private val client:AndroidDebugBridgeClient = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher()
+  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
   var errs: ErrorCollector = ErrorCollector()
   @Rule @JvmField
@@ -69,6 +70,8 @@ class FCS_CKH_EXT1 {
       client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
       client.execute(ShellCommandRequest("rm /data/local/tmp/$TEST_MODULE"),
                      adb.deviceSerial)
+
+
 
     }
 

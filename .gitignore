@@ -56,3 +56,5 @@ directboot/build
 /test-results
 /test-results/*
 acvpkernel/build
+/xml-patches
+/xml-patches/*

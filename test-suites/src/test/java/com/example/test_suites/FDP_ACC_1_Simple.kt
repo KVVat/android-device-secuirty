@@ -53,14 +53,13 @@ class FDP_ACC_1_Simple {
   val client = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher()
+  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
   public var name: TestName = TestName();
   //Asset Log
   public var a: TestAssertLogger = TestAssertLogger(name)
   @Rule @JvmField
   public var errs: ErrorCollector = ErrorCollector()
-
   @Before
   fun setup() {
     runBlocking {

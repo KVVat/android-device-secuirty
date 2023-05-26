@@ -30,13 +30,15 @@ class FTP_ITC_EXT_1 {
   private val TEST_PACKAGE = "com.example.networkcheck"
   private val TEST_MODULE = "networkcheck-debug.apk"
 
-  @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher()
-
   @Rule
   @JvmField
   val adb = AdbDeviceRule()
   val client = adb.adb
+
+  @Rule @JvmField
+  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
+
+
 
 
 

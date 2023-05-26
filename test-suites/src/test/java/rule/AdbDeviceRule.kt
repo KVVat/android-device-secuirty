@@ -30,7 +30,9 @@ class AdbDeviceRule(val deviceType: DeviceType = DeviceType.ANY, vararg val requ
   lateinit var deviceSerial: String
   lateinit var supportedFeatures: List<Feature>
   lateinit var lineSeparator: String
-
+  lateinit var osversion: String
+  lateinit var system: String
+  lateinit var productmodel: String
   val adb = AndroidDebugBridgeClientFactory().build()
   val initTimeout: Duration = Duration.ofSeconds(10)
 
@@ -79,6 +81,19 @@ class AdbDeviceRule(val deviceType: DeviceType = DeviceType.ANY, vararg val requ
                 supportedFeatures.containsAll(requiredFeatures.asList())
             )
           }
+          //sdb shell getprop ro.build.version.release
+          osversion = adb.execute(
+            ShellCommandRequest("getprop ro.build.version.release"),
+            device.serial).output
+
+          system = adb.execute(
+            ShellCommandRequest("getprop ro.build.display.id"),
+            device.serial).output
+
+          productmodel = adb.execute(
+            ShellCommandRequest("getprop ro.product.model"),
+            device.serial).output
+
 
           lineSeparator = adb.execute(
             ShellCommandRequest("echo"),

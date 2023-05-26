@@ -45,7 +45,7 @@ class FDP_ACF_EXT_Simple {
   val client = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher()
+  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
   public var name: TestName = TestName();
   //Asset Log
@@ -102,6 +102,7 @@ class FDP_ACF_EXT_Simple {
                  ret,StringStartsWith("Failure"))
 
       //unistall the test file before next test
+
       client.execute(UninstallRemotePackageRequest("com.example.appupdate"), adb.deviceSerial)
     }
   }
@@ -122,8 +123,9 @@ class FDP_ACF_EXT_Simple {
       var ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
       assertThat(a.Msg("Verify Install apk v1 (expect=Success)"),
                  ret,StringStartsWith("Success"))
+
       //Signature mismatch case
-      println("Verify Install apk v2 with different signing key (expect=Failure)")
+      println("Verify Install apk v2 with different signing key (expect=Failure)a")
       ret = AdamUtils.InstallApk(file_apk_v2_signed,false,adb);
       assertThat(a.Msg("Verify Install apk v2 with different signing key (expect=Failure)"),
                  ret,StringStartsWith("Failure"))

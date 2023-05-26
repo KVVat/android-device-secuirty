@@ -43,6 +43,11 @@ import org.hamcrest.CoreMatchers.`is` as Is
   """)
 class FPR_PSE_1_Simple {
 
+  @Rule
+  @JvmField
+  val adb = AdbDeviceRule()
+  val client = adb.adb
+
   private val TEST_PACKAGE = "com.example.uniqueid"
   private val TEST_MODULE = "uniqueid-debug.apk"
   private val LONG_TIMEOUT = 5000L
@@ -51,17 +56,14 @@ class FPR_PSE_1_Simple {
   @Rule @JvmField
   var errs:ErrorCollector = ErrorCollector()
   @Rule @JvmField
-  var watcher:TestWatcher = ADSRPTestWatcher()
+  var watcher:TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
   var name:TestName  = TestName();
 
   //Asset Log
-  public var a:TestAssertLogger = TestAssertLogger(name)
+  var a:TestAssertLogger = TestAssertLogger(name)
 
-  @Rule
-  @JvmField
-  val adb = AdbDeviceRule()
-  val client = adb.adb
+
 
   @Before
   fun setup() {
@@ -137,7 +139,7 @@ class FPR_PSE_1_Simple {
       Thread.sleep(SHORT_TIMEOUT*2);
       //println(response.output)
       //install application again
-      var respstring = AdamUtils.InstallApk(file_apk, false,adb);
+      AdamUtils.InstallApk(file_apk, false,adb);
       Thread.sleep(SHORT_TIMEOUT*2);
       //println(respstring)
       //launch application

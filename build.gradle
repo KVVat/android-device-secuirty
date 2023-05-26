@@ -1,9 +1,25 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.github.dnault:xml-patch:0.2.0"
+    }
+}
 plugins {
     id 'com.android.application' version '7.3.0' apply false
     id 'com.android.library' version '7.3.0' apply false
     id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
 }
+
+import com.github.dnault.xmlpatch.filter.XmlPatch
+import com.github.dnault.xmlpatch.CommandLineDriver;
+import com.github.dnault.xmlpatch.filter.multi.XmlMultiPatch
+import com.github.dnault.xmlpatch.filter.multi.XmlPatchSpec
+
+apply plugin: 'java'
 
 task exportPackage {
     println(delegate)
@@ -39,4 +55,73 @@ task exportPackage {
             include "settings.gradle"
         }
     }
+}
+
+ext {
+    patchDir = "xml-patches"
+}
+
+
+
+
+// Copy a directory, selectively applying a single-target patch.
+//
+// Use this single-target technique if you're only patching a few documents
+// and don't require multi-patch composition.
+//
+
+//try {
+//    File input = File.createTempFile("xml-patch-input-", ".xml");
+//    try {
+//        output = File.createTempFile("xml-patch-result-", ".xml");
+//
+//        try (FileOutputStream os = new FileOutputStream(input);
+//             Writer writer = new OutputStreamWriter(os, UTF_8);
+//             Reader reader = in) {
+//            IOUtils.copy(reader, writer);
+//        }
+//
+//        CommandLineDriver.main(input.getAbsolutePath(), patch, output.getAbsolutePath());
+//        in = new FileReader(output);
+//
+//    } finally {
+//        FileUtils.deleteQuietly(input);
+//    }
+//
+//} catch (Exception e) {
+//    throw new RuntimeException(e);
+//}
+
+tasks.register("xmlPatchAfterExecute") {
+    def patchDir = "$rootDir/xml-patches"
+
+    Properties properties = new Properties()
+    File propertiesFile = new File(patchDir+"/patch.prop")
+    propertiesFile.withInputStream {
+        properties.load(it)
+    }
+    def names_ = properties.get("classname")
+    def names = names_.split(",")
+    println(names)
+    for(name in names){
+        println(name)
+        try {
+            def source = "$rootDir/test-results/TEST-"+name+".xml"
+            def output = "$rootDir/results/TEST-"+name+".xml"
+            def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
+
+            //InputStream inputStream = input.equals("-") ? System.in : new FileInputStream(input);
+            //InputStream patchStream = patch.equals("-") ? System.in : new FileInputStream(patch);
+            //OutputStream outputStream = output.equals("-") ? System.out : new FileOutputStream(output);
+            //Patcher.patch(inputStream, patchStream, outputStream);
+
+            CommandLineDriver.main(source, patch, output)
+        } catch (Exception ex){
+            //ignore
+            ex.printStackTrace()
+        }
+
+
+    }
+
 }

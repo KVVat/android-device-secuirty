@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
 # relative path
-$(dirname $0)
+echo $(dirname $0)
 # full path
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ### prepare a result directory to the current dir
 rdir="$DIR/results"
+xmldir="$DIR/xml-patches"
 ### Check for dir, if not found create it using the mkdir ##
+if [ -d "$xmldir" ]; then rm -Rf $xmldir; fi
 [ ! -d "$rdir" ] && mkdir -p "$rdir"
+[ ! -d "$xmldir" ] && mkdir -p "$xmldir"
+
 
 clone_output () {
   echo $1 $2 #arg $1=test key $2=test type
@@ -34,8 +38,9 @@ read -r NUM
 
 if [ $NUM -eq 1 ]; then
   ./gradlew testDebug --tests com.example.test_suites.\*_Simple
+  ./gradlew task xmlPatchAfterExecute
   # copy test results to the result directory
-  clone_output $NUM test-results
+  #clone_output $NUM test-results
 elif [ $NUM -eq 2 ]; then
    echo "Those test cases run on the target device. please check logcat to confirm the process of the test."
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High connectedAndroidTest
@@ -47,7 +52,7 @@ elif [ $NUM -eq 3 ]; then
   echo "*** any key to start ***"
   read -r WARN
   ./gradlew testDebug --tests com.example.test_suites.FCS_CKH_EXT1
-  clone_output $NUM test-results
+  ./gradlew task xmlPatchAfterExecute
 elif [ $NUM -eq 4 ]; then
   echo " - The test automatically operate the target device with UIAutomator"
   echo " - For running this test you need to set the Screenlock setting to 'None'. "
@@ -73,7 +78,9 @@ elif [ $NUM -eq 6 ]; then
   read -r WARN
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
    ./gradlew testDebug --tests com.example.test_suites.KernelAcvpTest.testKernelAcvp
-   clone_output $NUM test-results
+   ./gradlew task xmlPatchAfterExecute
+   #./gradlew task singleTargetPatchExample -Poutdir=$NUM
+   #clone_output $NUM test-results
   fi
 elif [ $NUM -eq 9 ]; then
   ./gradlew clean
