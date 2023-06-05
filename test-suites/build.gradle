@@ -5,10 +5,6 @@ plugins {
 def homePath = System.properties['user.home']
 def applicationName = 'test_suites'
 
-import com.github.dnault.xmlpatch.filter.XmlPatch
-import com.github.dnault.xmlpatch.filter.multi.XmlMultiPatch
-import com.github.dnault.xmlpatch.filter.multi.XmlPatchSpec
-
 android {
     namespace 'com.example.test_suites'
     compileSdk 33
@@ -101,57 +97,13 @@ android {
             test {
                 reports.junitXml.destination = file("$rootDir/test-results/")
                 reports.html.destination = file("$rootDir/test-reports/")
-                //beforeTest { descriptor ->
-                //    logger.lifecycle("Running test: " + descriptor)
-                //}
-                //onOutput { descriptor, event ->
-                //logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
-                //}
-                //singleTargetPatch
-//                afterTest {  desc ,  result  ->
-//                    def className = desc.name
-//                    def re = result.resultType
-//                    logger.lifecycle(className)
-//                    logger.lifecycle("After Test $className $re")
-//                    //logger.lifecycle(''+result)
-//                    //tasks.singleTargetPatch
-//                }singleTargetPatch
-
-                //AfterSuite com.example.test_suites.FDP_ACF_EXT_Simple com.example.test_suites.FDP_ACF_EXT_Simple com.example.test_suites.FDP_ACF_EXT_Simple SUCCESS
-                //AfterSuite null Gradle Test Executor 4 Gradle Test Executor 4 SUCCESS
-                //AfterSuite null Gradle Test Run :test-suites:testDebugUnitTest Gradle Test Run :test-suites:testDebugUnitTest SUCCESS
-//                afterSuite { desc, result ->
-//                    //we can't grab files at this timing
-//                    def className = desc.className
-//                    //check if the suite has a classname
-//                    if(className !== null){
-//                        //record classname to patch file
-//                    }
-//                        //check if a result file is available
-//                            //modify output
-//                    def name = desc.name
-//                    def disp = desc.displayName
-//                    def re = result.resultType
-//                    sleep(5)
-//                    logger.lifecycle("AfterSuite $className $name $disp $re")
-//                    def className2 = "com.example.test_suites.FDP_ACC_1_Simple"
-//                    def file = file("$rootDir/test-results/TEST-"+className2+".xml")
-//                    if(file.exists()){
-//                        logger.lifecycle("file exist")
-//                    } else {
-//                        logger.lifecycle("file not exist")
-//                    }
-//                }
             }
-
         }
     }
 }
 
-tasks.register('singleTargetPatch', Copy) {
-   //udeEmptyDirs = false
-    //include '**/TEST-*.xml'
-}
+
+
 
 dependencies {
 

@@ -49,6 +49,7 @@ class EncryptionFileActivity : AppCompatActivity() {
 
     mKeyGuardservice =
       getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager;
+
     if (!mKeyGuardservice.isKeyguardSecure()) {
       keyLockEnabled = false;
       btn.isEnabled = false
@@ -86,12 +87,8 @@ class EncryptionFileActivity : AppCompatActivity() {
       return value;
     } else {
       Log.d(TAG, "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!)
-      return ret!!;
+      return ret;
     }
-  }
-
-  override fun onStart() {
-    super.onStart()
   }
 
   private fun createKey(keyGenParameterSpec: KeyGenParameterSpec) {

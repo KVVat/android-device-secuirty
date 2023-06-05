@@ -48,7 +48,7 @@ class FCS_CKH_EXT1_High2 {
   lateinit var mDevice: UiDevice
   lateinit var mUiHelper:UIAutomatorHelper
 
-  val TEST_PACKAGE = "com.example.test_suites";
+  val TEST_PACKAGE = "com.example.test_suites"
   val PIN="1234"
   val PREF_NAME:String = "FCS_CKH_EXT_PREF"
   fun println_(line:String){
@@ -57,15 +57,21 @@ class FCS_CKH_EXT1_High2 {
   @Before
   fun setup()
   {
-    val mDevice_ = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-    mDevice = mDevice_!!;
-    mContext = InstrumentationRegistry.getInstrumentation().context;
+    val mDevice_ = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    mDevice = mDevice_!!
+    mContext = InstrumentationRegistry.getInstrumentation().context
     mTargetContext = InstrumentationRegistry.getInstrumentation().targetContext
-    mDevice.freezeRotation();
+    mDevice.freezeRotation()
 
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
 
-    println_("** A Junit test case for FCS_CKH_EXT1_High started on "+ LocalDateTime.now()+" **")
+    //println_("** A Junit test case for FCS_CKH_EXT1_High started on "+ LocalDateTime.now()+" **")
+    println(mDevice.productName)
+    //mDevice.
+    //<property name="device" value="${deviceType}" />
+    //<property name="osversion" value="${osversion}" />
+    //<property name="system" value="${system}" />
+    //<property name="signature" value="${deviceSerial}" />
 
   }
   @After
@@ -81,11 +87,10 @@ class FCS_CKH_EXT1_High2 {
   @Test
   fun testHealthyCase(){
 
-
-    println_("*** The test case verifies the encryption key options regarding screenlock/authentication ***");
+    println_("*** The test case verifies the encryption key options regarding screenlock/authentication ***")
 
     if(mUiHelper.isLockScreenEnbled()){
-      println_("*** It requires to disable screen lock to run this test ***");
+      println_("*** It requires to disable screen lock to run this test ***")
       assert(false)
     }
 
@@ -99,13 +104,13 @@ class FCS_CKH_EXT1_High2 {
         println_("Encryption File Activity Start:"+res)
         assertThat(res).isNotEqualTo("Starting")
 
-        Thread.sleep(1000);
+        Thread.sleep(1000)
         mUiHelper.safeObjectClick("TEST",2000)
-        Thread.sleep(5000);
+        Thread.sleep(5000)
 
         mDevice.executeShellCommand("input text ${PIN}")
         mDevice.pressEnter()
-        Thread.sleep(2000);
+        Thread.sleep(2000)
       } finally {
         mUiHelper.resetScreenLockText(PIN)
       }
@@ -120,7 +125,7 @@ class FCS_CKH_EXT1_High2 {
       pf.edit().putString("Test","test")
 
       println_("Expected:AUTHREQUIRED:OK,UNLOCKDEVICE:OK")
-      println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock);
+      println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock)
 
       //Verify
       assertThat(result_auth).isEqualTo("OK")
@@ -131,7 +136,7 @@ class FCS_CKH_EXT1_High2 {
   @Test
   fun testAuthIsFailed(){
     if(mUiHelper.isLockScreenEnbled()){
-      println_("*** It requires to disable screen lock to run this test ***");
+      println_("*** It requires to disable screen lock to run this test ***")
       assert(false)
     }
     //Check FCS_CKH_EXT1_HIGH_UNLOCK check failed if device is locked
@@ -140,28 +145,38 @@ class FCS_CKH_EXT1_High2 {
         mUiHelper.sleepAndWakeUpDevice()
         mUiHelper.setScreenLockText("PIN", PIN)
         //Launch application
+
+
+        Thread.sleep(1000)
+        mUiHelper.sleepAndWakeUpDevice()
+
         val res = mDevice.executeShellCommand(
           "am start -n ${TEST_PACKAGE}/.EncryptionFileActivity")
         assertThat(res).isNotEqualTo("Starting")
         //not authenticate
-        Thread.sleep(1000);
-        mUiHelper.sleepAndWakeUpDevice()
+        mUiHelper.swipeUp()
         //Sleep device -> lock screen
-        Thread.sleep(5000);
+        Thread.sleep(3000)
+        val pf:SharedPreferences =
+          mTargetContext.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
+        val result_auth = pf.getString("AUTHREQUIRED","")
+        val result_unlock = pf.getString("UNLOCKDEVICE","")
+
+        pf.edit().putString("Test","test")
+        println_("Expected:AUTHREQUIRED:OK,UNLOCKDEVICE:NG")
+        println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock)
+        assertThat(result_auth).isEqualTo("OK")
+        assertThat(result_unlock).isEqualTo("NG")
       } finally {
+        mDevice.executeShellCommand("input text ${PIN}")
+        Thread.sleep(1000);
+        mDevice.pressEnter()
         mUiHelper.resetScreenLockText(PIN)
       }
-      val pf:SharedPreferences =
-        mTargetContext.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
-      val result_auth = pf.getString("AUTHREQUIRED","")
-      val result_unlock = pf.getString("UNLOCKDEVICE","")
-      pf.edit().putString("Test","test")
-      println_("Expected:AUTHREQUIRED:NG,UNLOCKDEVICE:NG")
-      println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock);
+
 
       //Verify
-      assertThat(result_auth).isEqualTo("NG")
-      assertThat(result_unlock).isEqualTo("NG")
+
     }
   }
 }

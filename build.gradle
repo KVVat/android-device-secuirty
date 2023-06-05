@@ -6,6 +6,7 @@ buildscript {
 
     dependencies {
         classpath "com.github.dnault:xml-patch:0.2.0"
+        classpath "org.apache.commons:commons-text:1.2"
     }
 }
 plugins {
@@ -14,10 +15,11 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
 }
 
-import com.github.dnault.xmlpatch.filter.XmlPatch
-import com.github.dnault.xmlpatch.CommandLineDriver;
-import com.github.dnault.xmlpatch.filter.multi.XmlMultiPatch
-import com.github.dnault.xmlpatch.filter.multi.XmlPatchSpec
+
+import com.github.dnault.xmlpatch.CommandLineDriver
+import org.json.JSONObject
+import java.util.regex.Pattern
+import org.apache.commons.text.StringEscapeUtils;
 
 apply plugin: 'java'
 
@@ -61,7 +63,9 @@ ext {
     patchDir = "xml-patches"
 }
 
-
+dependencies {
+    implementation project(path: ':test-suites')
+}
 
 
 // Copy a directory, selectively applying a single-target patch.
@@ -92,6 +96,141 @@ ext {
 //    throw new RuntimeException(e);
 //}
 
+tasks.register('xmlPatchForInst') {
+    dependsOn("xmlPatchAfterExecuteI")
+    //def className =("com.example.test_suites.FCS_CKH_EXT1_High")
+    //Directory name indicates target device
+    def dirs = []
+    fileTree("$rootDir/instrumentation-results/connected").
+            visit { FileVisitDetails details ->
+        if(details.file.isDirectory())
+            dirs << details.file.name
+        //println(details.file.name)
+    }
+    //println(dirs)
+    for(d in dirs){
+        def xmlFile = new File("$rootDir/instrumentation-results/connected/TEST-$d-_test-suites-.xml");//")
+        //availability check
+        if(xmlFile.exists()){
+            //println(path.name+" exists")
+            def list = new ArrayList<String>()
+            def LOG_LINE_RE = Pattern.compile(
+                    "((?:(\\d\\d\\d\\d)-)?(\\d\\d)-(\\d\\d)\\s+(\\d\\d):(\\d\\d):(\\d\\d)\\.(\\d\\d\\d)\\s+(\\d+)\\s+(\\d+)\\s+(.)\\s+)(.*?):\\s(.*)",
+                    Pattern.MULTILINE
+            )
+
+            def specDone = false;
+            //def specTest="{}";
+            fileTree("$rootDir/instrumentation-results/connected/$d")
+                .include("**/logcat-*.txt").visit { FileVisitDetails details ->
+                    if(details.file.isFile()){
+                        //standard output file
+                        def tokens = details.file.name.split('-');
+                        if(tokens.length >= 2){
+                            def method = tokens[2]
+                            method=method.substring(0,method.indexOf('.'))
+                            //println(pkg+","+method)
+                            StringWriter writer = new StringWriter()
+                            def pid =""
+                            details.file.eachLine {
+                                def ma= LOG_LINE_RE.matcher(it).find() { ArrayList m->
+                                     return m
+                                }
+                                if(ma.size()>=14) {
+                                    if (pid == "") pid = ma[10]
+                                    if (pid == ma[10]) {
+                                        //def label = ""+ma[12]
+                                        //check label to find additional properties
+                                        def text = ma[13]
+                                        //def level = ""+ma[11]
+                                        def token = text.split(":")
+                                        def label = ""
+                                        def json="{}"
+                                        if(token.size()>=2){
+                                            label = token[0].trim()
+                                            json = text.substring(text.indexOf(':')+1).trim()
+                                            json = json.replaceAll("^\"|\"\$" , "")
+                                        }
+
+                                        if(label.equals("[TestSpec]") && !specDone){
+                                            specDone = true
+                                            JSONObject j = new JSONObject(json)
+list.add("""<add sel="/testsuite/properties"><property name="SFR.name" value="${j['SFR.name']}" />
+<property name="SFR.description" value="${j['SFR.desc']}" />
+<property name="device" value="${j['device']}" />
+<property name="osversion" value="${j['osversion']}" />
+<property name="system" value="${j['system']}" />
+<property name="signature" value="${j['deviceserial']}" />
+</add>""".trim())
+                                        }
+                                        writer <<  text +"\n"
+                                        return true
+                                    }
+                                }
+                                return false
+                            }
+                            //println(writer.toString())
+                            def stdout = writer.toString()
+                            //remove time stamp and pid ...
+                            stdout = StringEscapeUtils.escapeXml11(stdout)
+                            //[name='${method}']
+                            list.add("""<add sel="/testsuite/testcase[contains(@name, '$method')] ">
+<system-out><![CDATA[${stdout}]]></system-out></add>""")
+                        }
+                    }
+            }
+            //StringWriter writer = new StringWriter()
+            def f = new File("$rootDir/xml-patches/PATCH-$d-_test-suites-.xml")
+            f.createNewFile()
+            FileWriter fwriter = new FileWriter(f)
+            fwriter << "<diff>\n"
+            for(item in list){
+                fwriter << item +"\n"
+            }
+            fwriter << "</diff>"
+            fwriter.flush()
+            fwriter.close()
+            def f2 = new File("$rootDir/xml-patches/patch.prop")
+            f2.createNewFile()
+            fwriter = new FileWriter(f2)
+            fwriter << "classname=$d-_test-suites-"
+            fwriter.flush()
+            fwriter.close()
+            //println(writer.toString())
+            println("Done generate patch :"+f.getAbsolutePath())
+        }
+    }
+}
+
+tasks.register("xmlPatchAfterExecuteI") {
+
+    def patchDir = "$rootDir/xml-patches"
+
+    Properties properties = new Properties()
+    File propertiesFile = new File(patchDir+"/patch.prop")
+    propertiesFile.withInputStream {
+        properties.load(it)
+    }
+    def names_ = properties.get("classname")
+    def names = names_.split(",")
+    // println(names)
+    for(name in names){
+        //println(name)
+        try {
+            def source = "$rootDir/instrumentation-results/connected/TEST-"+name+".xml"
+            def output = "$rootDir/results/TEST-"+name+".xml"
+            def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
+
+            CommandLineDriver.main(source, patch, output)
+        } catch (Exception ex){
+            //ignore
+            ex.printStackTrace()
+        }
+    }
+    println("Done merege")
+
+}
+
 tasks.register("xmlPatchAfterExecute") {
     def patchDir = "$rootDir/xml-patches"
 
@@ -102,26 +241,18 @@ tasks.register("xmlPatchAfterExecute") {
     }
     def names_ = properties.get("classname")
     def names = names_.split(",")
-    println(names)
+   // println(names)
     for(name in names){
-        println(name)
+        //println(name)
         try {
             def source = "$rootDir/test-results/TEST-"+name+".xml"
             def output = "$rootDir/results/TEST-"+name+".xml"
             def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
-
-            //InputStream inputStream = input.equals("-") ? System.in : new FileInputStream(input);
-            //InputStream patchStream = patch.equals("-") ? System.in : new FileInputStream(patch);
-            //OutputStream outputStream = output.equals("-") ? System.out : new FileOutputStream(output);
-            //Patcher.patch(inputStream, patchStream, outputStream);
 
             CommandLineDriver.main(source, patch, output)
         } catch (Exception ex){
             //ignore
             ex.printStackTrace()
         }
-
-
     }
-
 }

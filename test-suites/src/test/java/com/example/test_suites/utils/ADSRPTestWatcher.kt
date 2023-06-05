@@ -48,7 +48,6 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
 
   override fun starting(desc: Description?) {
     println(MessageFormat.format("==========================================\n[Test Start] : {0} on {1}", desc, LocalDateTime.now()))
-
   }
 
   override fun succeeded(desc: Description?) {
@@ -137,15 +136,16 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
     this.system=adbDeviceRule.system.trim()
     val title = sfr!!.title.trim()
     val desc = sfr!!.description.trim()
+
     val diffText:String = """
 <diff>
    <add sel="/testsuite/properties">
        <property name="SFR.name" value="${title}" />
        <property name="SFR.description" value="${desc}" />
-       <property name="target.device" value="${deviceType}" />
-       <property name="target.osversion" value="${osversion}" />
-       <property name="target.system" value="${system}" />
-       <property name="target.signature" value="${deviceSerial}" />
+       <property name="device" value="${deviceType}" />
+       <property name="osversion" value="${osversion}" />
+       <property name="system" value="${system}" />
+       <property name="signature" value="${deviceSerial}" />
    </add>
 </diff>
     """

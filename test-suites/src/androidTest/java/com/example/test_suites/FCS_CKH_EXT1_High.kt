@@ -12,6 +12,7 @@ import androidx.security.crypto.MasterKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.test_suites.utils.ADSRPTestWatcher
+import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
 import java.io.BufferedReader
 import java.io.File
@@ -47,6 +48,19 @@ import org.junit.runner.RunWith
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
+
+@SFR("FCS_CKH_EXT.1/High", """
+  FCS_CKH_EXT.1/High
+
+  FCS_CKH.1.1/Low The TSF shall support a key hierarchy for the data encryption key(s) 
+  for Low user data assets.
+  
+  FCS_CKH.1.2/Low The TSF shall ensure that all keys in the key hierarchy are derived and/or 
+  generated according to [assignment: description of how each key in the hierarchy is derived and/or
+  generated, with which key lengths and according to which standards] ensuring that the key hierarchy
+  uses the DUK directly or indirectly in the derivation of the data encryption key(s) for Low user 
+  data assets. 
+  """)
 @RunWith(AndroidJUnit4::class)
 class FCS_CKH_EXT1_High {
   //https://github.com/stravag/android-sample-biometric-prompt/blob/master/app/src/main/java/ch/ranil/sample/android/biometricpromptsample/BiometricPromptManager.kt
@@ -57,7 +71,7 @@ class FCS_CKH_EXT1_High {
   @Rule @JvmField
   var name: TestName = TestName();
   //Asset Log
-  public var a: TestAssertLogger = TestAssertLogger(name)
+  var a: TestAssertLogger = TestAssertLogger(name)
 
   private lateinit var norm_enc_data: SharedPreferences
   val PREF_NAME:String = "EncryptedSharedPref"

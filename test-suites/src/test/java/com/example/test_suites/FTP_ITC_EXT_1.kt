@@ -36,11 +36,7 @@ class FTP_ITC_EXT_1 {
   val client = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
-
-
-
-
+  var watcher: TestWatcher = ADSRPTestWatcher(adb)
 
   @Before
   fun setup() {

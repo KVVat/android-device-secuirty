@@ -31,14 +31,14 @@ class CoroutineKeyCheckWorker(
   val PREF_NAME:String = "FCS_CKH_EXT_PREF"
 
   override  fun doWork(): Result {
-    repeat(10){
+    repeat(50){
       try {
         tryEncrypt("key_unlock")
         writePrefValue("UNLOCKDEVICE","OK")
-        Thread.sleep(1000)
+        Thread.sleep(100)
       } catch (e:Exception){
         writePrefValue("UNLOCKDEVICE","NG")
-        Thread.sleep(1000)
+        Thread.sleep(100)
         return Result.failure();
       }
     }
