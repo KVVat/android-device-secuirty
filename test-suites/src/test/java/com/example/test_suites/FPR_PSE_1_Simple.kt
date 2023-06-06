@@ -132,6 +132,7 @@ class FPR_PSE_1_Simple {
       errs.checkThat(a.Msg("Verify WIDEVINE same"),dictA["WIDEVINE"],IsEqual(dictB["WIDEVINE"]))
       errs.checkThat(a.Msg("Verify IMEI1 is blank"),dictA["IMEI1"],IsEqual(""))
       errs.checkThat(a.Msg("Verify IMEI2 is blank"),dictA["IMEI2"],IsEqual(""))
+      errs.checkThat(a.Msg("Verify DeviceSerial is blank"),dictA["DeviceSerial"],IsEqual(""))
 
       println(">Uninstall/Install again the target apk.");
       //uninstall application =>
@@ -162,6 +163,7 @@ class FPR_PSE_1_Simple {
       errs.checkThat(a.Msg("Verify WIDEVINE same"),dictA["WIDEVINE"],IsEqual(dictC["WIDEVINE"]))
       errs.checkThat(a.Msg("Verify IMEI1 is blank"),dictA["IMEI1"],IsEqual(""))
       errs.checkThat(a.Msg("Verify IMEI2 is blank"),dictA["IMEI2"],IsEqual(""))
+      errs.checkThat(a.Msg("Verify DeviceSerial is blank"),dictA["DeviceSerial"],IsEqual(""))
 
     }
   }
