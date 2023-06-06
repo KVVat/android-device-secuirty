@@ -18,6 +18,14 @@ plugins {
 
 import com.github.dnault.xmlpatch.CommandLineDriver
 import org.json.JSONObject
+
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPath
+import javax.xml.xpath.XPathFactory
+import org.w3c.dom.Document
+
+import javax.xml.xpath.XPathConstants;
 import java.util.regex.Pattern
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -118,6 +126,12 @@ tasks.register('xmlPatchForInst') {
                     "((?:(\\d\\d\\d\\d)-)?(\\d\\d)-(\\d\\d)\\s+(\\d\\d):(\\d\\d):(\\d\\d)\\.(\\d\\d\\d)\\s+(\\d+)\\s+(\\d+)\\s+(.)\\s+)(.*?):\\s(.*)",
                     Pattern.MULTILINE
             )
+            //read testsuite name : <testsuite name="com.example.test_suites.FCS_CKH_EXT1_High2">
+            DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = db.parse(xmlFile);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            def classname = (String)xpath.evaluate("//testsuite/@name", doc, XPathConstants.STRING);
+            //println("attribuut"+name)
 
             def specDone = false;
             //def specTest="{}";
@@ -190,10 +204,12 @@ list.add("""<add sel="/testsuite/properties"><property name="SFR.name" value="${
             fwriter << "</diff>"
             fwriter.flush()
             fwriter.close()
+
             def f2 = new File("$rootDir/xml-patches/patch.prop")
             f2.createNewFile()
             fwriter = new FileWriter(f2)
-            fwriter << "classname=$d-_test-suites-"
+            fwriter << "classname=$d-_test-suites-\n"
+            fwriter << "testname=$classname\n"
             fwriter.flush()
             fwriter.close()
             //println(writer.toString())
@@ -212,20 +228,26 @@ tasks.register("xmlPatchAfterExecuteI") {
         properties.load(it)
     }
     def names_ = properties.get("classname")
+    def classname = properties.get("testname")
     def names = names_.split(",")
     // println(names)
+    def i=0;
     for(name in names){
-        //println(name)
         try {
             def source = "$rootDir/instrumentation-results/connected/TEST-"+name+".xml"
-            def output = "$rootDir/results/TEST-"+name+".xml"
+            def classname_=classname
+            if(i>0){
+                classname_ = classname+i
+            }
+            def output = "$rootDir/results/TEST-"+classname_+".xml"
             def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
-
+            println("output path=>"+output)
             CommandLineDriver.main(source, patch, output)
         } catch (Exception ex){
             //ignore
             ex.printStackTrace()
         }
+        i=i+1
     }
     println("Done merege")
 
