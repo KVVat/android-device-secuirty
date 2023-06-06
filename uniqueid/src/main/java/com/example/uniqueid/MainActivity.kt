@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     }
     getPrefValueOrWrite("IMEI1",UniqueId.getIMEI1());
     getPrefValueOrWrite("IMEI2",UniqueId.getIMEI2(context = applicationContext));
+    getPrefValueOrWrite("DeviceSerial",UniqueId.getIMEI3());
   }
 
   fun getPrefValueOrWrite(label:String,value:String):String{

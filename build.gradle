@@ -150,7 +150,10 @@ tasks.register('xmlPatchForInst') {
                                 def ma= LOG_LINE_RE.matcher(it).find() { ArrayList m->
                                      return m
                                 }
-                                if(ma.size()>=14) {
+                                if(ma == null){
+                                    println("File error:"+details.file.name)
+                                }
+                                if(ma!=null && ma.size()>=14) {
                                     if (pid == "") pid = ma[10]
                                     if (pid == ma[10]) {
                                         //def label = ""+ma[12]

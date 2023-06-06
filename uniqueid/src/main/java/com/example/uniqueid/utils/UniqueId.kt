@@ -2,6 +2,7 @@ package com.example.uniqueid.utils
 
 import android.content.Context
 import android.media.MediaDrm
+import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
@@ -77,6 +78,10 @@ class UniqueId {
     //Simple Unique ID
     fun generateUuid():String{
       return UUID.randomUUID().toString()
+    }
+
+    fun getIMEI3():String{
+      return  Build.getSerial()
     }
     fun getIMEI1():String{
       try {
