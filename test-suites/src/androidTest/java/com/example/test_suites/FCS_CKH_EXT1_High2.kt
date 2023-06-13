@@ -14,9 +14,11 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isNotNull
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.LogLine
 import com.example.test_suites.utils.LogcatResult
 import com.example.test_suites.utils.SFR
+import com.example.test_suites.utils.TestAssertLogger
 import com.example.test_suites.utils.UIAutomatorHelper
 import com.malinskiy.adam.junit4.android.rule.Mode
 import com.malinskiy.adam.junit4.android.rule.sandbox.SingleTargetAndroidDebugBridgeClient
@@ -27,10 +29,14 @@ import com.malinskiy.adam.request.prop.GetSinglePropRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.CoreMatchers
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
+import org.junit.rules.TestName
+import org.junit.rules.TestWatcher
 import org.junit.runner.RunWith
 import java.time.Instant
 import java.time.LocalDateTime
@@ -56,6 +62,16 @@ import java.util.*
 @RunWith(AndroidJUnit4::class)
 class FCS_CKH_EXT1_High2 {
 
+  @Rule @JvmField
+  var watcher: TestWatcher = ADSRPTestWatcher()
+  @Rule @JvmField
+  var errs: ErrorCollector = ErrorCollector()
+  @Rule @JvmField
+  var name: TestName = TestName();
+  //Asset Log
+  var a: TestAssertLogger = TestAssertLogger(name)
+
+
   lateinit var mContext: Context
   lateinit var mTargetContext: Context //Application Context
   lateinit var mDevice: UiDevice
@@ -77,26 +93,11 @@ class FCS_CKH_EXT1_High2 {
     mDevice.freezeRotation()
 
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
-
-    //println_("** A Junit test case for FCS_CKH_EXT1_High started on "+ LocalDateTime.now()+" **")
-    println(mDevice.productName)
-    //mDevice.
-    //<property name="device" value="${deviceType}" />
-    //<property name="osversion" value="${osversion}" />
-    //<property name="system" value="${system}" />
-    //<property name="signature" value="${deviceSerial}" />
-
   }
   @After
   fun tearDown() {
     mDevice.unfreezeRotation()
   }
-
-   //'adb reverse tcp:5037 tcp:5037'
-  // <option name="EXTRA_OPTIONS" value="-e com.malinskiy.adam.android.ADB_PORT 5554 -e com.malinskiy.adam.android.ADB_HOST 10.0.0.2 -e com.malinskiy.adam.android.ADB_SERIAL emulator-5554" />
-
-
-
   @Test
   fun testHealthyCase(){
 
@@ -140,9 +141,12 @@ class FCS_CKH_EXT1_High2 {
       println_("Expected:AUTHREQUIRED:OK,UNLOCKDEVICE:OK")
       println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock)
 
-      //Verify
-      assertThat(result_auth).isEqualTo("OK")
-      assertThat(result_unlock).isEqualTo("OK")
+      errs.checkThat(a.Msg("Evaluate AuthRequired State in Background."),
+        result_auth, CoreMatchers.`is`("OK")
+      )
+      errs.checkThat(a.Msg("Evaluate UnlockDevice State in Background."),
+        result_unlock, CoreMatchers.`is`("OK")
+      )
     }
   }
 
@@ -178,17 +182,24 @@ class FCS_CKH_EXT1_High2 {
         pf.edit().putString("Test","test")
         println_("Expected:AUTHREQUIRED:OK,UNLOCKDEVICE:NG")
         println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock)
-        assertThat(result_auth).isEqualTo("OK")
-        assertThat(result_unlock).isEqualTo("NG")
+
+
+        errs.checkThat(a.Msg("Evaluate AuthRequired State in Background."),
+          result_auth, CoreMatchers.`is`("OK")
+        )
+        errs.checkThat(a.Msg("Evaluate UnlockDevice State in Background."),
+          result_unlock, CoreMatchers.`is`("NG")
+        )
+
+        //assertThat(result_auth).isEqualTo("OK")
+        //assertThat(result_unlock).isEqualTo("NG")
+
       } finally {
         mDevice.executeShellCommand("input text ${PIN}")
         Thread.sleep(1000);
         mDevice.pressEnter()
         mUiHelper.resetScreenLockText(PIN)
       }
-
-
-      //Verify
 
     }
   }

@@ -8,7 +8,9 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.example.test_suites.utils.ADSRPTestWatcher
 import com.example.test_suites.utils.NetworkHelper
+import com.example.test_suites.utils.TestAssertLogger
 import com.example.test_suites.utils.UIAutomatorHelper
 import java.io.BufferedReader
 import java.io.InputStream
@@ -19,7 +21,11 @@ import java.time.LocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
+import org.junit.rules.TestName
+import org.junit.rules.TestWatcher
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 
@@ -34,6 +40,17 @@ class FTP_ITC_EXT {
   private lateinit var mContext: Context
   private lateinit var mTargetContext: Context
   lateinit var mUiHelper:UIAutomatorHelper
+  @Rule
+  @JvmField
+  var watcher: TestWatcher = ADSRPTestWatcher()
+  @Rule
+  @JvmField
+  var errs: ErrorCollector = ErrorCollector()
+  @Rule
+  @JvmField
+  var name: TestName = TestName();
+  //Asset Log
+  var a: TestAssertLogger = TestAssertLogger(name)
 
   fun println_(line:String){
     Log.i(this.javaClass.canonicalName,line)
@@ -55,9 +72,21 @@ class FTP_ITC_EXT {
 
   @After
   fun tearDown() {
-    mDevice.unfreezeRotation()
+    //mDevice.unfreezeRotation()
   }
 
+  @Test
+  fun launchPCapReader(){
+    println("test launched")
+    val packageName:String = "com.emanuelef.remote_capture"
+    val fullCartButtonResourceId = packageName + ":id/allow_btn";
+    val allowButton = mDevice.findObject(UiSelector().resourceId(fullCartButtonResourceId))
+    if(allowButton.exists()){
+      allowButton.click()
+      Thread.sleep(500);
+      allowButton.click()
+    }
+  }
   @Test
   fun testLaunchPcap()
   {

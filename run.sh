@@ -29,7 +29,7 @@ echo "1: ** All automatable JUnit cases **"
 echo "2: FCS_CKH_EXT1_High 1"
 echo "3: FCS_CKH_EXT1_Low (DirectBoot)"
 echo "4: FCS_CKH_EXT1_High 2(File Encryption)"
-# echo "5: FIA_AFL_1 (ScreenLock Password)"
+echo "5: FIA_AFL_1 (ScreenLock Password)"
 echo "6: FCS_COP_1 (Kernel Acvp Test)"
 echo "9: Clean test"
 echo "Results will be stored in $rdir"
@@ -56,22 +56,24 @@ elif [ $NUM -eq 3 ]; then
   ./gradlew task xmlPatchAfterExecute
 elif [ $NUM -eq 4 ]; then
   echo " - The test automatically operate the target device with UIAutomator"
-  echo " - For running this test you need to set the Screenlock setting to 'None'. "
+  echo " - For running this test you need to set the ScreenLock setting to 'None'. "
+  echo " - For running this test you need to set the System navigation setting to 'Gesture Navigation'. "
   echo " - For avoiding screen timeout during the test, set Display->Screen Timeout to 5 min - ."
   echo "*** any key to start ***"
   read -r WARN
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High2 connectedAndroidTest
   ./gradlew xmlPatchForInst
-   #clone_output $NUM instrumentation-results
 elif [ $NUM -eq 5 ]; then
   echo " - The test depends on the device/system environment, and we test it on the pixel devices"
   echo " - The test automatically operate the target device with UIAutomator"
-  echo " - For running this test you need to set the Screenlock setting to 'None'. "
+  echo " - For running this test you need to set the ScreenLock setting to 'None'. "
   echo " - For running this test you need to set the System navigation setting to 'Gesture Navigation'. "
+  echo " - For avoiding screen timeout during the test, set Display->Screen Timeout to 5 min - ."
   echo "Start This Test Case? (y/n)"
   read -r WARN
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
     ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FIA_AFL_1 connectedAndroidTest
+    ./gradlew xmlPatchForInst
   fi
 elif [ $NUM -eq 6 ]; then
   echo " - This test runs ACVP harness for FIPS 140-2 certifications."
@@ -82,8 +84,6 @@ elif [ $NUM -eq 6 ]; then
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
    ./gradlew testDebug --tests com.example.test_suites.KernelAcvpTest.testKernelAcvp
    ./gradlew task xmlPatchAfterExecute
-   #./gradlew task singleTargetPatchExample -Poutdir=$NUM
-   #clone_output $NUM test-results
   fi
 elif [ $NUM -eq 9 ]; then
   ./gradlew clean

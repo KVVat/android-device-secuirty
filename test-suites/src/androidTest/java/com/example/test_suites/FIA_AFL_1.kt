@@ -12,12 +12,18 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.example.test_suites.utils.ADSRPTestWatcher
+import com.example.test_suites.utils.TestAssertLogger
 import com.example.test_suites.utils.UIAutomatorHelper
 import java.time.LocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
+import org.junit.rules.TestName
+import org.junit.rules.TestWatcher
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 
@@ -25,8 +31,19 @@ import org.junit.runners.MethodSorters
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)//Execute methods in order of appearance
 class FIA_AFL_1 {
 
-  private val LONG_TIMEOUT = 5000L
-  private val SHORT_TIMEOUT = 1000L
+
+  @Rule
+  @JvmField
+  var watcher: TestWatcher = ADSRPTestWatcher()
+  @Rule
+  @JvmField
+  var errs: ErrorCollector = ErrorCollector()
+  @Rule
+  @JvmField
+  var name: TestName = TestName();
+  //Asset Log
+  var a: TestAssertLogger = TestAssertLogger(name)
+
   private val PIN = "1234"
   private val PASSWORD = "aaaa"
 
@@ -38,7 +55,7 @@ class FIA_AFL_1 {
     Log.i(this.javaClass.canonicalName,line)
   }
   //Pattern Pixel 5e :
-  private var PATS:Map<String,Array<Point>> = mapOf(
+  /*private var PATS:Map<String,Array<Point>> = mapOf(
     Pair("sdk_gphone64_x86_64-33",
          arrayOf(Point(230, 1800), Point(230, 850),Point(512,1500),Point(880, 1800))
     ),
@@ -50,7 +67,7 @@ class FIA_AFL_1 {
 
   private var PAT:Array<Point> = arrayOf(Point(230, 1800),
     Point(230, 850),Point(512,1500),Point(880, 1800));
-
+  */
 
   @Before
   fun setUp() {
@@ -63,7 +80,7 @@ class FIA_AFL_1 {
 
     mDevice.freezeRotation();
     mUiHelper = UIAutomatorHelper(mContext,mDevice_)
-    println_("** A Junit test case for FIA_AFL_1 started on "+ LocalDateTime.now()+" **")
+    //rintln_("** A Junit test case for FIA_AFL_1 started on "+ LocalDateTime.now()+" **")
 
   }
 
@@ -130,13 +147,14 @@ class FIA_AFL_1 {
       //if it fails 5 times, 30 sec trial delay is applied
       println_("Wait 30 sec for retry.")
       mUiHelper.safeObjectClick("OK",1000);
-      Thread.sleep(30 * 1000)//wait 30 sec
+
     } finally {
+      Thread.sleep(30 * 1000)//wait 30 sec
       println_("Try to reset the screen lock.")
       mUiHelper.sleepAndWakeUpDevice()//LockScreen
-      Thread.sleep(1000);
+      //Thread.sleep(1000);
       mUiHelper.swipeUp()
-      Thread.sleep(1000);
+      //Thread.sleep(1000);
       //Need to unlock screen
       mDevice.executeShellCommand("input text ${PIN}")
       Thread.sleep(1000);
@@ -147,6 +165,7 @@ class FIA_AFL_1 {
     //if the operation above fails, there must be a problem.
     assert(!mUiHelper.isLockScreenEnbled())
   }
+
   @Test
   fun T11_testPassLockSuccess(){
     if(mUiHelper.isLockScreenEnbled()){
@@ -202,10 +221,10 @@ class FIA_AFL_1 {
       //if it fails 5 times, 30 sec trial delay is applied
       println_("Wait 30 sec for retry.")
       mUiHelper.safeObjectClick("OK",1000);
-      Thread.sleep(30 * 1000)//wait 30 sec
+
     } finally {
       println_("Try to reset the screen lock")
-
+      Thread.sleep(30 * 1000)//wait 30 sec
       mUiHelper.sleepAndWakeUpDevice()//LockScreen
       Thread.sleep(1000);
       mUiHelper.swipeUp()
@@ -221,6 +240,7 @@ class FIA_AFL_1 {
     assert(!mUiHelper.isLockScreenEnbled())
 
   }
+
   /*
   @Test
   fun testPatternSuccess(){

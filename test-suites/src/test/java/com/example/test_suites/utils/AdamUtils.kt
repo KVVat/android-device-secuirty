@@ -98,10 +98,18 @@ class AdamUtils {
         return null
       }
     }
-    fun pullfile(sourcePath:String,destDir:String,adb: AdbDeviceRule){
+
+
+    fun pullfile(sourcePath:String,dest:String,adb: AdbDeviceRule,copytoFile:Boolean=false){
       runBlocking {
         var p: Path = Paths.get(sourcePath);
-        val destPath: Path = Paths.get(destDir, p.fileName.toString());
+        var destPath: Path
+        if(copytoFile){
+          destPath = Paths.get(dest)
+        } else {
+          destPath = Paths.get(dest, p.fileName.toString());
+        }
+
         val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
         val channel = adb.adb.execute(
           PullFileRequest(sourcePath,destPath.toFile(),
@@ -109,7 +117,7 @@ class AdamUtils {
           this,
           adb.deviceSerial);
 
-        println("Process(Pull):"+sourcePath+"=>"+destDir)
+        println("Process(Pull):"+sourcePath+"=>"+destPath.toString())
 
         var percentage = 0
         for (percentageDouble in channel) {

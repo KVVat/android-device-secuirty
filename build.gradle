@@ -47,6 +47,10 @@ task exportPackage {
             exclude '**/build/**'
             exclude '**/.cxx/**'
             exclude '**/.gradle/**'
+            exclude '**/src/test/resources/vectors/**'
+            exclude '**/src/test/resources/expected/**'
+            exclude '**/src/test/resources/vectors-android/**'
+            exclude '**/src/test/resources/expected-android/**'
         }
         copy {
             includeEmptyDirs = false
