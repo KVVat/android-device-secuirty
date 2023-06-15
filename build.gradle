@@ -31,7 +31,7 @@ import org.apache.commons.text.StringEscapeUtils;
 
 apply plugin: 'java'
 
-task exportPackage {
+tasks.register("exportPackage") {
     println(delegate)
     println(delegate.class)
 
@@ -76,7 +76,7 @@ ext {
 }
 
 dependencies {
-    implementation project(path: ':test-suites')
+    //implementation project(path: ':test-suites')
 }
 
 
@@ -277,8 +277,9 @@ tasks.register("xmlPatchAfterExecute") {
             def source = "$rootDir/test-results/TEST-"+name+".xml"
             def output = "$rootDir/results/TEST-"+name+".xml"
             def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
-
-            CommandLineDriver.main(source, patch, output)
+            if(new File(source).exists() && new File(patch).exists()){
+                CommandLineDriver.main(source, patch, output)
+            }
         } catch (Exception ex){
             //ignore
             ex.printStackTrace()

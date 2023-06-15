@@ -1,20 +1,32 @@
 package com.example.openurl.utils
 
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import java.security.SecureRandom
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+
+
 class NetworkUtils {
   companion object {
     /**
      *
      */
     fun testHttpURLConnection(url_:String):Int {
-      //"https://tls-v1-2.badssl.com:1012/"
+
       val url = URL(url_)
-      val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+      //System.setProperty("jdk.tls.client.protocols","TLSv1.3")
+
+      val connection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
+
+      /*val sc = SSLContext.getInstance("TLSv1.3","AndroidOpenSSL")
+      sc.init(null, null, SecureRandom())
+      sc.createSSLEngine();
+      connection.setSSLSocketFactory(sc.getSocketFactory());*/
       connection.setRequestMethod("GET");
       connection.connect();
       val responseCode = connection.getResponseCode();
@@ -33,6 +45,7 @@ class NetworkUtils {
           if (line == null) break
           result.append(line)
         }
+        println(result)
         bufReader.close();
         inReader.close();
         ins.close();

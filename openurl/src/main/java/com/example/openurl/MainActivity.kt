@@ -8,7 +8,6 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.WorkRequest
 import com.example.openurl.databinding.ActivityMainBinding
 import com.example.openurl.utils.NetworkWorker
 
@@ -34,6 +33,13 @@ class MainActivity : AppCompatActivity() {
     if(!type_.isNullOrBlank()){
       type = type_
     }
+    /*
+    url = "https://expired.badssl.com/"
+    url = "https://wrong.host.badssl.com/"
+    url = "https://self-signed.badssl.com/"
+    url = "https://revoked.badssl.com/"
+    url = "https://tls-v1-0.badssl.com:1010/"
+    */
     if(url !== null){
       binding.mainText.text = url
       val data = Data.Builder().putString("url",url).putString("type",type).build();
