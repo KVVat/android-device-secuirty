@@ -38,6 +38,7 @@ import javax.xml.xpath.XPathFactory
 //import org.w3c.dom.NodeList
 import java.io.IOException
 import java.nio.file.Files
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 //import java.util.Date
@@ -64,6 +65,19 @@ class FTP_ITC_EXT_1 {
   var errs: ErrorCollector = ErrorCollector()
 
   var PKG_PCAPDROID ="com.emanuelef.remote_capture"
+
+  val REQUIRED_CIPHERS_IN_SFR = arrayOf(
+    "TLS_RSA_WITH_AES_256_GCM_SHA384",
+    "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+    "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+    "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+
   @Before
   fun setup() {
     runBlocking {
@@ -104,55 +118,82 @@ class FTP_ITC_EXT_1 {
     //if(this == null) return null;
     return this.selectNodes(".//descendant::field[@name='${key}']");
   }
+  fun Node.packetSerial():Int
+  {
+    return _value(this.selectSingleNode(
+      ".//proto[@name='geninfo']/field[@name='num']")).toInt(16)
+  }
+
   fun _showname(n:Node?):String{
     return n?.attrib() ?: "N/A"
+  }
+  fun _show(n:Node?):String{
+    return n?.attrib("show") ?: "N/A"
   }
   fun _value(n:Node?):String {
     return n?.attrib("value") ?: "0"
   }
-  companion object {
 
-  }
 
-  val REQUIRED_CIPHERS_IN_SFR = arrayOf(
-    "TLS_RSA_WITH_AES_256_GCM_SHA384",
-    "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
-    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
-    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-    "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
-    "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
-    "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
-    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
-    "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
   @Test
   fun anaylzeCertainPdml()
   {
-    var p:Path = Paths.get("../results/capture/20230614133107-normal.pcap.xml")
+    var p:Path = Paths.get("../results/capture/20230615140545-expired.pcap.xml")
+    var targetHost = "https://expired.badssl.com"
     val document:Document = SAXReader().read(File(p.toUri()))
+    //Start DNS record check
+    //determine entry point of the analyze with dnspackets
+    //we should verify the tlspackets after dns query to the target host...
+    val dnspkts = document.selectNodes("/pdml/packet/proto[@name='dns']")
+    if(dnspkts.size == 0) {
+      //there are no dns records...exit
+      //TODO: Assert
+      return
+    }
+    var readAfter = 0;
+    for(pkt in dnspkts){
+      val num = pkt.parent.packetSerial()
+      val queryname = _show(pkt.selectChild("dns.qry.name"))
+      if(targetHost.contains(queryname)){
+        println("Target : $targetHost contains $queryname. we'll examine after this($num) packet.")
+        readAfter = num
+        break;
+      }
+    }
 
-    //check dns.qry.name and find a connection to examine
-    //make sure to ignore the packets before querying the target host ....
-    //document.
+    //Start TLS record check
     val nodes = document.selectNodes("/pdml/packet/proto[@name='tls']")
-
     if(nodes.size == 0) {
       //there are no tls records...exit
+      //TODO: Assert
       return
     }
 
     var helloLookupDone = false;
     var certLookupDone = false;
+    var certExpire = false;
+    var certProblemFound = false;
+
     for(tlsp in nodes){
       val records = tlsp.selectChildren("tls.record")//multiple tls.records can be exist in a proto tag
+      val serial = tlsp.parent.packetSerial()
+      if(serial<readAfter){
+        //println("Packet Number:$serial < $readAfter.")
+        continue
+      } else {
+        println("Packet Number=$serial")
+      }
       if(records !== null) {
         var i=1;
         for (record in records) {
-          println(record!!.attrib()+"[$i]")
+          println(record!!.attrib()+"[$serial-$i]")
           println("\t" + _showname(record.selectChild("tls.record.version")))
           println("\t" + _showname(record.selectChild("tls.handshake.type")))
-          println("\t\t>" + _value(record.selectChild("tls.handshake.type")))
+          println("\t" + _showname(record.selectChild("tls.record.content_type")))
+          //tls.record.content_type
+          //println("\t\t>" + _value(record.selectChild("tls.handshake.type")))
           val hsType = _value(record.selectChild("tls.handshake.type")).toInt(16)
+          val cnType = _value(record.selectChild("tls.record.content_type")).toInt(16)
           if(hsType>0){
             //test for client hello
             if(hsType == 1 && !helloLookupDone){ //Client Hello
@@ -176,10 +217,12 @@ class FTP_ITC_EXT_1 {
                 } else {
                   //should assert
                   println("found no ciphers which is required to implement.")
+                  //TODO: Assert
                 }
               } else {
                 //should assert
                 println("found no ciphers block in this tls packet")
+                //TODO: Assert
               }
               //test 2
               val tlsversions = record.selectChildren("tls.handshake.extensions.supported_version")
@@ -189,7 +232,8 @@ class FTP_ITC_EXT_1 {
                 //var matches:MutableList<String> = mutableListOf()
                 var supported:Boolean = false
                 for(ver in tlsversions) {
-                  var found = _value(ver).toInt()
+                  var found = _value(ver).toInt(16)
+                  //println(found)
                   if(found == 0x0304 || found == 0x0303){
                     supported = true;
                     break;
@@ -199,34 +243,83 @@ class FTP_ITC_EXT_1 {
                   println("The client supports tls v1.2 or later")
                 } else {
                   //should assert
-                  println("The client does not support tls v1.2 or later")
+                  println("Failure : The client does not support tls v1.2 or later")
+                  //TODO: Assert
                 }
               } else {
                 //should assert
-                println("found no tlsversion block in this tls packet")
+                println("Failure : found no tlsversion block in this tls packet")
+                //TODO: Assert
               }
               helloLookupDone = true
             }
             else if(hsType == 11 && !certLookupDone){ //Certificate
-              //check : x509af.version
-
+              //check : x509af.version should be larger than 0x02
+              // val x50
+              val n_ = record.selectChild("x509af.version")
+              if(n_ !== null){
+                val x509afver = _value(n_).toInt(16)
+                println("test3 : x509 auth framework version is 0x$x509afver")
+                if(x509afver>=2){
+                  println("the value indicates version 3 or above ...  okay")
+                } else {
+                  //assert
+                  println("Failure : x509af version is insuffcient")
+                  //TODO: Assert
+                }
+              } else {
+                println("Failure : found no x509af version block in this tls packet")
+                //TODO: Assert
+              }
+              ///////////////////////////////////////////////////
               //Check validity of certificate : expiration date
-
+              //Packet Note:
+              //  The value was put in the packet like below.
+              //  It's the concatenated ascii codes which represents a date time value.
+              //  3135303431323233353935395a => 1504009000000Z => 2015-04-09-00:00:00Z
+              //  (The letters on hundreds/thousand place of the year are omitted.)
+              //x509af.notBefore > x509af.utcTime
+              //If the value is invalid we can catch an alert packet (content type=21)
+              val nb_ = record.selectChild("x509af.notBefore")
+              val na_ = record.selectChild("x509af.notAfter")
+              if(nb_ !== null && na_ !== null){
+                fun tls_utcdate(input:String):LocalDateTime{
+                  var sb:StringBuffer = StringBuffer()
+                  input.chunked(2).forEach {
+                    sb.append(Char( it.toInt(16)))
+                  }
+                  val dtf = DateTimeFormatter.ofPattern("yyMMddHHmmssX");
+                  return LocalDateTime.parse(sb.toString(),dtf)
+                }
+                val nb = tls_utcdate(_value(nb_.selectChild("x509af.utcTime")))
+                val na = tls_utcdate(_value(na_.selectChild("x509af.utcTime")))
+                val now = LocalDateTime.now();
+                println("test4: Cert Expiration check date should not before:$nb notafter:$na")
+                if(now.isAfter(na) || now.isBefore(nb)){
+                  certExpire = true;//
+                  certProblemFound = true;//The value should be set to false until the end of the test
+                  println("Failure : this cert is expired ")
+                }
+              } else {
+                //TODO: Assert
+                println("Failure : found no expiration date records")
+              }
               certLookupDone = true
             }
           }
+
+          if(cnType == 21 && certExpire == true){ //Alert
+            println("The cert is expired, but connection is gently canceled. okay")
+            certProblemFound = false
+          }
+
           i++;
         }
       }
-    //if("tls.handshake.type"==1) //client hello
-      //{
-      //list and eval supported tls versions
-      //list and eval support cipher suites
-      //}
-
-      //if(record.selectChild("tls.handshake.type"))
     }
-    println(nodes.size)
+    if(certProblemFound){
+      //TODO:Assert Found problem in the cert record
+    }
   }
 
   @Test
@@ -375,117 +468,3 @@ tshark -r ${pcap.toAbsolutePath()} -o tls.debug_file:ssldebug.log \
     return Pair(http_resp,pcap)
   }
 }
-
-
-/*
-fun selectNodesValues(target:Node,name:String):List<String>{
-  val nodes = target.selectNodes(".//field[@name='"+name+"']")
-  return selectNodesValues(nodes,name)
-}
-
-fun selectNodesValues(nodes:List<Node>,name:String="<internal>"):List<String>{
-  //val nodes = node.selectNodes(".//field[@name='"+name+"']")
-  var ret =  mutableListOf<String>()
-  for(ii in 0..nodes.size-1) {
-    val record = (nodes[ii] as Node) as Element
-    val showname = record.attributeValue("showname").toString()
-    println("$name[$ii]:" + showname)
-    ret.add(showname)
-  }
-  return ret
-}
-fun selectNodesValuePairs(target:Node,name:String):List<Pair<String,String>>{
-  val nodes = target.selectNodes(".//field[@name='"+name+"']")
-  return selectNodesValuePairs(nodes,name)
-}
-fun selectNodesValuePairs(nodes:List<Node>,name:String="<internal>"):List<Pair<String,String>>{
-  //val nodes = nodes.selectNodes(".//field[@name='"+name+"']")
-  var ret =  mutableListOf<Pair<String,String>>()
-  for(ii in 0..nodes.size-1) {
-    val record = (nodes[ii] as Node) as Element
-    val showname = record.attributeValue("showname").toString()
-    val show = record.attributeValue("show").toString()
-    println("$name[$ii]:" + showname+","+show)
-    ret.add(Pair<String,String>(showname,show))
-  }
-  return ret
-}
-
-fun testPcapReader() {
-  val file_pcap: File =
-    File(Paths.get("src", "test", "resources", "traffic.pcap").toUri());
-  val filePath = file_pcap.toString()
-  println(filePath)
-
-  var ret:Int = HostShellHelper.executeCommands("compgen -ac tshark")
-  if(!ret.equals(0)){
-    println("tshark is not found. please install the command to the environment")
-    Assert.assertTrue(false)
-    exitProcess(1)
-  }
-  //convert from pcap to pdml
-  val cmd:String="""\
-  tshark -r $filePath -o tls.debug_file:ssldebug.log \
--o tls.desegment_ssl_records:TRUE \
--o tls.desegment_ssl_application_data:TRUE -V -T pdml > pdml_analysis.xml
-"""
-  ret = HostShellHelper.executeCommands(cmd)
-  println(ret)
-  var listSupportedAlgorithm = listOf<String>()
-
-  if(ret.equals(0)){
-    val pdml = File(Paths.get("pdml_analysis.xml").toUri())
-    val document = SAXReader().read(pdml)
-    val nodes = document.selectNodes("/pdml/packet/proto[@name='tls']")
-    if(nodes.size == 0) return
-    println(nodes.size)
-    var i=1
-    for(tlspacket in nodes){
-      println(">"+i+"==============================")
-      val handshakes = selectNodesValuePairs(tlspacket,"tls.handshake.type")
-      val records = selectNodesValues(tlspacket,"tls.record");
-      //val handshakes = getNodeValuesPair(tlspacket,"tls.handshake.type")
-      println(handshakes.size)
-      if(handshakes.size>0){
-        //val handshakes:List<Pair<String,String>> = selectNodesValuePairs(handshakes_)
-        for(ii in 0..handshakes.size-1) {
-          var p:Pair<String,String> = handshakes[ii]
-          val showname = p.first
-          val step = Integer.valueOf(p.second)
-          //val step: Int = Integer.valueOf(handshake.attributeValue("value"), 16)
-          //val showname = handshake.attributeValue("showname").toString()
-          println("" + showname + " step:" + step);
-          if(step.equals(0)){
-            //Pick data for evaluation//
-            //<field name="tls.handshake.extensions_server_name" showname="Server Name: expired.badssl.com" size="18" pos="165" show="expired.badssl.com" value="657870697265642e62616473736c2e636f6d"/>
-            selectNodesValuePairs(tlspacket,"tls.handshake.ciphersuite")
-            selectNodesValuePairs(tlspacket,"tls.handshake.sig_hash_alg")
-            selectNodesValuePairs(tlspacket,"tls.handshake.extensions.supported_version")
-            selectNodesValuePairs(tlspacket,"tls.handshake.extensions_server_name")
-            //tlspacket.selectNodes(".//field[@name='tls.handshake.ciphersuite']")
-            //tlspacket.selectNodes(".//field[@name='tls.handshake.sig_hash_alg']")
-            //tlspacket.selectNodes(".//field[@name='tls.handshake.extensions.supported_version']")
-            //tlspacket.selectNodes(".//field[@name='tls.handshake.extensions_server_name']")//Connected Host
-          }
-        }
-      } else {
-        println("handshake element not found")
-        val alerts = tlspacket.selectNodes(".//field[@name='tls.alert_message']")
-        if(alerts.size>0){
-          for(ii in 0..alerts.size-1) {
-            val alert = alerts[ii] as Node
-            val alml = alert.selectNodes(".//field[@name='tls.alert_message.level']")
-            val almd = alert.selectNodes(".//field[@name='tls.alert_message.desc']")
-            if(alml.size>0 && almd.size>0){
-              val alml_ = (alml[0] as Node) as Element
-              val almd_ = (almd[0] as Node) as Element
-              println("TLS Alert:"+alml_.attributeValue("showname")+
-                      ","+almd_.attributeValue("showname"))
-            }
-          }
-        }
-      }
-      i++
-    }
-  }
-}*/
