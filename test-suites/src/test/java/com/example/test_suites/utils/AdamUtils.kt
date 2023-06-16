@@ -139,14 +139,17 @@ class AdamUtils {
         val channel = client.execute(PushFileRequest(apkFile, "/data/local/tmp/$fileName",features),
                                      GlobalScope,
                                      serial = adb.deviceSerial)
+        var done = false
         while (!channel.isClosedForReceive) {
           val progress: Double? =
             channel.tryReceive().onClosed {
-              Thread.sleep(1)
+              //Thread.sleep(1)
+              delay(0)
             }.getOrNull()
-          if(progress!==null && progress==1.0) {
+
+          if(progress!==null && progress==1.0 && done==false) {
+            done = true
             println("Install $fileName completed")
-            //break;
           }
         }
         //add -g option to permit all exisitng runtime option

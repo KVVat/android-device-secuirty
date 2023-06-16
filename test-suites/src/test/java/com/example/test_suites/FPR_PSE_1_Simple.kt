@@ -68,7 +68,7 @@ class FPR_PSE_1_Simple {
   @Before
   fun setup() {
     runBlocking {
-      client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
+      //client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
       client.execute(ShellCommandRequest("rm /data/local/tmp/$TEST_MODULE"),
                      adb.deviceSerial)
     }
@@ -91,13 +91,13 @@ class FPR_PSE_1_Simple {
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
 
       println("> The test verifies that the apis which generate unique ids return expected values.")
-      AdamUtils.InstallApk(file_apk, false,adb);
+      AdamUtils.InstallApk(file_apk, true,adb);
 
       Thread.sleep(SHORT_TIMEOUT*2);
+      //launch application (am start -n com.package.name/com.package.name.ActivityName)
+      var response
+       = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
 
-      var response: ShellCommandResult
-
-      //launch application (am start -n com.package.name/com.package.name.ActivityName) client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
       Thread.sleep(LONG_TIMEOUT);
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
@@ -117,6 +117,7 @@ class FPR_PSE_1_Simple {
       //Store preference into map B/check prefernce and compare included values against A
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
+      Thread.sleep(SHORT_TIMEOUT*5)
 
       val dictB:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
       println("Values of each api results (after reboot) : "+dictB.toString());
@@ -168,6 +169,7 @@ class FPR_PSE_1_Simple {
   }
 
   fun fromPrefMapListToDictionary(xml:String):Map<String,String>{
+    println(xml)
     val source = InputSource(StringReader(xml))
 
     val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
@@ -175,9 +177,9 @@ class FPR_PSE_1_Simple {
     val document: Document = db.parse(source)
 
     val nodes: NodeList = document.getElementsByTagName("string");
-    var  ret = mutableMapOf<String,String>();
+    val  ret = mutableMapOf<String,String>();
     for(i in 0 .. nodes.length-1){
-      var node: Node = nodes.item(i);
+      val node: Node = nodes.item(i);
       val key:String = node.attributes.getNamedItem("name").nodeValue;
       val value:String = node.textContent
       ret.put(key,value);
