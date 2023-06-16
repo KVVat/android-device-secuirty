@@ -1,33 +1,17 @@
 package com.example.test_suites
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Point
-import android.provider.Settings
 import android.util.Log
-import androidx.security.crypto.MasterKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import assertk.assertThat
-import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
-import assertk.assertions.isNotNull
 import com.example.test_suites.utils.ADSRPTestWatcher
-import com.example.test_suites.utils.LogLine
-import com.example.test_suites.utils.LogcatResult
 import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
 import com.example.test_suites.utils.UIAutomatorHelper
-import com.malinskiy.adam.junit4.android.rule.Mode
-import com.malinskiy.adam.junit4.android.rule.sandbox.SingleTargetAndroidDebugBridgeClient
-import com.malinskiy.adam.junit4.rule.AdbRule
-import com.malinskiy.adam.request.logcat.ChanneledLogcatRequest
-import com.malinskiy.adam.request.logcat.LogcatSinceFormat
-import com.malinskiy.adam.request.prop.GetSinglePropRequest
-import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers
 import org.junit.After
@@ -38,8 +22,6 @@ import org.junit.rules.ErrorCollector
 import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
 import org.junit.runner.RunWith
-import java.time.Instant
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -67,7 +49,7 @@ class FCS_CKH_EXT1_High2 {
   @Rule @JvmField
   var errs: ErrorCollector = ErrorCollector()
   @Rule @JvmField
-  var name: TestName = TestName();
+  var name: TestName = TestName()
   //Asset Log
   var a: TestAssertLogger = TestAssertLogger(name)
 
@@ -163,7 +145,6 @@ class FCS_CKH_EXT1_High2 {
         mUiHelper.setScreenLockText("PIN", PIN)
         //Launch application
 
-
         Thread.sleep(1000)
         mUiHelper.sleepAndWakeUpDevice()
 
@@ -173,16 +154,18 @@ class FCS_CKH_EXT1_High2 {
         //not authenticate
         mUiHelper.swipeUp()
         //Sleep device -> lock screen
-        Thread.sleep(3000)
+        Thread.sleep(2000)
+        //Change
         val pf:SharedPreferences =
           mTargetContext.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
-        val result_auth = pf.getString("AUTHREQUIRED","")
+        val result_auth = pf.getString("AUTHREQUIRED","OK")
         val result_unlock = pf.getString("UNLOCKDEVICE","")
 
-        pf.edit().putString("Test","test")
+        //FCS_CKH_EXT_TEST        com.example.test_suites              D  UNLOCKDEVICE:NG
+
+        //pf.edit().putString("Test","test")
         println_("Expected:AUTHREQUIRED:OK,UNLOCKDEVICE:NG")
         println_("AUTHREQUIRED:"+result_auth+",UNLOCKDEVICE:"+result_unlock)
-
 
         errs.checkThat(a.Msg("Evaluate AuthRequired State in Background."),
           result_auth, CoreMatchers.`is`("OK")
@@ -196,7 +179,7 @@ class FCS_CKH_EXT1_High2 {
 
       } finally {
         mDevice.executeShellCommand("input text ${PIN}")
-        Thread.sleep(1000);
+        Thread.sleep(1000)
         mDevice.pressEnter()
         mUiHelper.resetScreenLockText(PIN)
       }

@@ -1,14 +1,13 @@
 package com.example.test_suites.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
-import androidx.work.CoroutineWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.example.test_suites.EncryptionFileActivity
 import java.io.IOException
 import java.security.InvalidKeyException
 import java.security.KeyStore
@@ -23,7 +22,7 @@ import javax.crypto.SecretKey
 import javax.security.cert.CertificateException
 
 class CoroutineKeyCheckWorker(
-  context: Context,
+  private val context: Context,
   params: WorkerParameters
 ) : Worker(context, params) {
 
@@ -39,8 +38,14 @@ class CoroutineKeyCheckWorker(
       } catch (e:Exception){
         writePrefValue("UNLOCKDEVICE","NG")
         Thread.sleep(100)
-        return Result.failure();
+        return Result.failure()
       }
+      val pf: SharedPreferences =
+        context.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
+      val result_auth = pf.getString("AUTHREQUIRED","")
+      val result_unlock = pf.getString("UNLOCKDEVICE","")
+
+      Log.d(TAG,"AUTHREQUIRED:$result_auth,UNLOCKDEVICE:$result_unlock")
     }
     return Result.success()
   }
@@ -49,20 +54,18 @@ class CoroutineKeyCheckWorker(
       PREF_NAME, Context.MODE_PRIVATE)
     val ret = sharedPref.getString(label,"")
     sharedPref.edit().putString(label,value).apply()
-    Log.d(TAG,"${label}:${value}")
-    if(ret==""){
-      return value;
-    } else {
+
+    return if(ret=="") value else {
       Log.d(TAG, "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!)
-      return ret;
+      ret
     }
   }
 
-  private fun tryEncrypt(keyname:String): Boolean {
+  private fun tryEncrypt(key_name:String): Boolean {
     try {
       val keyStore = KeyStore.getInstance("AndroidKeyStore")
       keyStore.load(null)
-      val secretKey: SecretKey = keyStore.getKey(keyname, null) as SecretKey
+      val secretKey: SecretKey = keyStore.getKey(key_name, null) as SecretKey
       val cipher: Cipher = Cipher.getInstance(
         KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
           + KeyProperties.ENCRYPTION_PADDING_NONE
