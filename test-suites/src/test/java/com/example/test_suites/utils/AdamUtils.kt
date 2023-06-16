@@ -12,27 +12,18 @@ import com.malinskiy.adam.request.pkg.InstallRemotePackageRequest
 import com.malinskiy.adam.request.prop.GetSinglePropRequest
 import com.malinskiy.adam.request.shell.v2.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v2.ShellCommandResult
-import com.malinskiy.adam.request.shell.v2.ShellCommandInputChunk
-import com.malinskiy.adam.request.sync.v2.PushFileRequest
 import com.malinskiy.adam.request.sync.v2.PullFileRequest
+import com.malinskiy.adam.request.sync.v2.PushFileRequest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.onClosed
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import java.util.TimeZone
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.onClosed
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class AdamUtils {
   companion object{
@@ -45,7 +36,7 @@ class AdamUtils {
       }
 
       println("Restart adb=>$ret")
-      return ret;
+      return ret
     }
     fun shellRequest(shellCommand:String,adb:AdbDeviceRule):ShellCommandResult{
       var ret:ShellCommandResult
@@ -83,11 +74,11 @@ class AdamUtils {
             }
 
           if(!lines.isEmpty()){
-            println("matched logcat line found:"+lines.size);
+            println("matched logcat line found:"+lines.size)
             tag = lines.get(0).tag
             text = lines.get(0).text
             found = true
-            break;
+            break
           }
           delay(100)
         }
@@ -103,11 +94,11 @@ class AdamUtils {
 
     fun pullfile(sourcePath:String,dest:String,adb: AdbDeviceRule,copytoFile:Boolean=false){
       runBlocking {
-        val p: Path = Paths.get(sourcePath);
+        val p: Path = Paths.get(sourcePath)
         val destPath: Path = if(copytoFile){
           Paths.get(dest)
         } else {
-          Paths.get(dest, p.fileName.toString());
+          Paths.get(dest, p.fileName.toString())
         }
 
         val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
@@ -115,7 +106,7 @@ class AdamUtils {
           PullFileRequest(sourcePath,destPath.toFile(),
                           supportedFeatures = features,null,coroutineContext),
           this,
-          adb.deviceSerial);
+          adb.deviceSerial)
 
         println("Process(Pull):"+sourcePath+"=>"+destPath.toString())
 
@@ -131,7 +122,7 @@ class AdamUtils {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun InstallApk(apkFile: File, reinstall: Boolean = false, adb:AdbDeviceRule): String {
       var stdio: com.malinskiy.adam.request.shell.v1.ShellCommandResult
-      val client:AndroidDebugBridgeClient = adb.adb;
+      val client:AndroidDebugBridgeClient = adb.adb
 
       runBlocking {
         val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
@@ -156,7 +147,7 @@ class AdamUtils {
         stdio = client.execute(InstallRemotePackageRequest(
           "/data/local/tmp/$fileName", reinstall, listOf("-g")), serial = adb.deviceSerial)
       }
-      return stdio.output;
+      return stdio.output
     }
   }
 }

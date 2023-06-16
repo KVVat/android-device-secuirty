@@ -1,7 +1,5 @@
 package com.example.assets
 
-import android.content.ContentResolver
-import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -9,15 +7,10 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.nio.charset.Charset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 //The module simply record Unique Id to the configuration file
 class MainActivity : AppCompatActivity() {
@@ -27,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
     //Prepare Data
-    var res:Array<Boolean> = arrayOf(true,true,true,true);
+    val res:Array<Boolean> = arrayOf(true,true,true,true);
     //Access Check
 
     res[0] = "Success".equals(getPrefValueOrWrite("SampleValue",""));
@@ -54,6 +47,7 @@ class MainActivity : AppCompatActivity() {
                                          null);
       if (cursor != null && cursor.moveToFirst()) {
         Log.d("Info/"+TAG, "Media: Found")
+        cursor.close()
       } else {
         res[2] = false;
         Log.d("Info/"+TAG,"Media: Not Found");
@@ -77,17 +71,17 @@ class MainActivity : AppCompatActivity() {
   fun getPrefValueOrWrite(label:String,value:String):String{
     val sharedPref = getSharedPreferences(TAG, Context.MODE_PRIVATE)
     val ret = sharedPref.getString(label,"")
-    if(ret==""){
+    return if(ret==""){
       if(!ret.equals(value)){
         Log.d("Pref", "New API Value=>"+value+" assigned.")
       } else {
         Log.d("Pref", "It's a panic case. Both api value and existing value are blank.")
       }
       sharedPref.edit().putString(label,value).apply()
-      return value;
+      value;
     } else {
       Log.d("Pref", "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!+" Constancy:"+(ret.equals(value)))
-      return ret!!;
+      ret;
     }
   }
 

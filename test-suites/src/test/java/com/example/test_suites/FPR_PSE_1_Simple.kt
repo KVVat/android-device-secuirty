@@ -7,14 +7,6 @@ import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
-import com.malinskiy.adam.request.shell.v1.ShellCommandResult
-import java.io.File
-import java.io.StringReader
-import java.nio.file.Paths
-import java.text.DecimalFormat
-import java.time.LocalDateTime
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.core.IsEqual
@@ -25,11 +17,15 @@ import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
-import org.junit.runner.Description
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
+import java.io.File
+import java.io.StringReader
+import java.nio.file.Paths
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
 import org.hamcrest.CoreMatchers.`is` as Is
 
 //FPR_PSE.1
@@ -58,7 +54,7 @@ class FPR_PSE_1_Simple {
   @Rule @JvmField
   var watcher:TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
-  var name:TestName  = TestName();
+  var name:TestName  = TestName()
 
   //Asset Log
   var a:TestAssertLogger = TestAssertLogger(name)
@@ -88,17 +84,17 @@ class FPR_PSE_1_Simple {
     runBlocking {
 
       val file_apk =
-        File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
+        File(Paths.get("src", "test", "resources", TEST_MODULE).toUri())
 
       println("> The test verifies that the apis which generate unique ids return expected values.")
-      AdamUtils.InstallApk(file_apk, true,adb);
+      AdamUtils.InstallApk(file_apk, true,adb)
 
-      Thread.sleep(SHORT_TIMEOUT*2);
+      Thread.sleep(SHORT_TIMEOUT*2)
       //launch application (am start -n com.package.name/com.package.name.ActivityName)
       var response
-       = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
+       = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
 
-      Thread.sleep(LONG_TIMEOUT);
+      Thread.sleep(LONG_TIMEOUT)
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
       //store preference into map A
@@ -108,11 +104,11 @@ class FPR_PSE_1_Simple {
       println("Values of each api results : "+dictA.toString())
 
       //kill process (am force-stop com.package.name)
-      client.execute(ShellCommandRequest("am force-stop $TEST_PACKAGE"), adb.deviceSerial);
+      client.execute(ShellCommandRequest("am force-stop $TEST_PACKAGE"), adb.deviceSerial)
 
       //launch application
-      client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
-      Thread.sleep(SHORT_TIMEOUT*5);
+      client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
+      Thread.sleep(SHORT_TIMEOUT*5)
 
       //Store preference into map B/check prefernce and compare included values against A
       response =
@@ -120,8 +116,8 @@ class FPR_PSE_1_Simple {
       Thread.sleep(SHORT_TIMEOUT*5)
 
       val dictB:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
-      println("Values of each api results (after reboot) : "+dictB.toString());
-      println("Check all api values are maintained.");
+      println("Values of each api results (after reboot) : "+dictB.toString())
+      println("Check all api values are maintained.")
 
       //Expected : All unique id values should be maintained
       //Note : Each test should not interrupt execution of the test case
@@ -134,25 +130,25 @@ class FPR_PSE_1_Simple {
       errs.checkThat(a.Msg("Verify IMEI2 is blank"),dictA["IMEI2"],IsEqual(""))
       errs.checkThat(a.Msg("Verify DeviceSerial is blank"),dictA["DeviceSerial"],IsEqual(""))
 
-      println(">Uninstall/Install again the target apk.");
+      println(">Uninstall/Install again the target apk.")
       //uninstall application =>
       client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
-      Thread.sleep(SHORT_TIMEOUT*2);
+      Thread.sleep(SHORT_TIMEOUT*2)
       //println(response.output)
       //install application again
-      AdamUtils.InstallApk(file_apk, false,adb);
-      Thread.sleep(SHORT_TIMEOUT*2);
+      AdamUtils.InstallApk(file_apk, false,adb)
+      Thread.sleep(SHORT_TIMEOUT*2)
       //println(respstring)
       //launch application
-      client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
-      Thread.sleep(SHORT_TIMEOUT*5);
+      client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
+      Thread.sleep(SHORT_TIMEOUT*5)
       //check preference and compare included values against A and B
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
 
       val dictC:Map<String,String> = fromPrefMapListToDictionary(response.output.trimIndent())
 
-      println(">Check the api values except UUID should be maintained.");
+      println(">Check the api values except UUID should be maintained.")
       //Expected : UUID should be changed. Others should be maintained
       //You should set allowbackup option in module's androidmanifest.xml to false
       //for passing this test.(the option makes application a bit vulnerable to attack)
@@ -176,14 +172,14 @@ class FPR_PSE_1_Simple {
     val db: DocumentBuilder = dbf.newDocumentBuilder()
     val document: Document = db.parse(source)
 
-    val nodes: NodeList = document.getElementsByTagName("string");
-    val  ret = mutableMapOf<String,String>();
+    val nodes: NodeList = document.getElementsByTagName("string")
+    val  ret = mutableMapOf<String,String>()
     for(i in 0 .. nodes.length-1){
-      val node: Node = nodes.item(i);
-      val key:String = node.attributes.getNamedItem("name").nodeValue;
+      val node: Node = nodes.item(i)
+      val key:String = node.attributes.getNamedItem("name").nodeValue
       val value:String = node.textContent
-      ret.put(key,value);
+      ret.put(key,value)
     }
-    return ret;
+    return ret
   }
 }

@@ -62,7 +62,7 @@ class KernelAcvpTest {
   @Rule @JvmField
   var watcher:TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
-  var name: TestName = TestName();
+  var name: TestName = TestName()
 
   //Asset Log
   var a: TestAssertLogger = TestAssertLogger(name)
@@ -91,7 +91,7 @@ class KernelAcvpTest {
       val channel = client.execute(
         PushFileRequest(objFile, "$destdir$fileName"),
         GlobalScope,
-        serial = adb.deviceSerial);
+        serial = adb.deviceSerial)
 
       var done=false
       while (!channel.isClosedForReceive) {
@@ -107,10 +107,10 @@ class KernelAcvpTest {
 
       if(permission != ""){
         client.execute(request = ShellCommandRequest("chmod $permission $destdir$fileName"),
-                       serial = adb.deviceSerial);
+                       serial = adb.deviceSerial)
       }
     }
-    return;
+    return
   }
 
   //https://boringssl.googlesource.com/boringssl/+archive/refs/heads/master/util/fipstools/acvp/acvptool/test/expected.tar.gz
@@ -120,10 +120,10 @@ class KernelAcvpTest {
     runBlocking {
       files.forEach{
         //println(it)
-        var target:String = it;
+        var target:String = it
         var mode:String = "555"
         if(it.indexOf(":")>-1){
-          var targetarg = it.split(":");
+          var targetarg = it.split(":")
           target = targetarg[0]
           mode = targetarg[1]
         }
@@ -134,7 +134,7 @@ class KernelAcvpTest {
     return true
   }
 
-  private fun bz2reader(fileURI: URI): String? {
+  private fun bz2reader(fileURI: URI): String {
     try {
       FileInputStream(File(fileURI)).use {
         BufferedInputStream(it).use {
@@ -152,21 +152,21 @@ class KernelAcvpTest {
       FileInputStream(File(fileURI)).use { fin ->
         GzipCompressorInputStream(fin).use { gzin->
           TarArchiveInputStream(gzin).use {tar->
-            var break_ = false;
+            var break_ = false
             while(!break_){
               try {
                 val entry = tar.nextEntry
                 //println(entry.name)
-                if (entry.isDirectory) continue;
+                if (entry.isDirectory) continue
                 if (!tar.canReadEntryData(entry)){
                   break_=true
                 } else {
-                  val br = BufferedReader(InputStreamReader(tar));
+                  val br = BufferedReader(InputStreamReader(tar))
                   callback(entry.name,br.readText())
                 }
               } catch(ex:IOException){
                 ex.printStackTrace()
-                break;
+                break
               }
             }
           }
@@ -182,10 +182,10 @@ class KernelAcvpTest {
 
     targz_reader(Paths.get(OUT_PATH,"actual.tar.gz").toUri()) { name, tartext ->
       val fname: String = Paths.get(name).fileName.toString()
-      var result = true;
-      val uri:URI = Paths.get(RES_PATH+expectedDir,"$fname.bz2").toUri();
+      var result = true
+      val uri:URI = Paths.get(RES_PATH+expectedDir,"$fname.bz2").toUri()
       try {
-        val br2text = bz2reader(uri);//.readText()
+        val br2text = bz2reader(uri)//.readText()
         if (br2text !== null) {
           //Ignore case due to the variant of the output format ...
           val br2text_ = br2text.lowercase()
@@ -200,15 +200,15 @@ class KernelAcvpTest {
           val patch: JsonNode = JsonDiff.asJson(jsonT, jsonB,flags)
           //to suppress the differences of the format due to the revison of the files.
           val ignoreList = mutableListOf<String>("/1/revision","/1/issample")
-          if(patch.isArray()){
+          if(patch.isArray){
 
             patch.forEach {
               jsonNode ->
               val nodepath = jsonNode.get("path").textValue()
               if(!ignoreList.contains(nodepath)){
-                val resp = jsonNode.toString();
+                val resp = jsonNode.toString()
                 println("Found unmatches in $fname:$resp")
-                result = false;
+                result = false
               }
             }
           } else {
@@ -238,7 +238,7 @@ class KernelAcvpTest {
     //install test modules
     val ret = AdamUtils.root(adb)
     //If we can not to be root the device fail test
-    Thread.sleep(5000);//Wait system reponse for a while
+    Thread.sleep(5000)//Wait system reponse for a while
     println(ret)
     //
     batch_install(RES_PATH,"/data/local/tmp/", arrayOf(
@@ -284,9 +284,9 @@ class KernelAcvpTest {
     AdamUtils.shellRequest("bzip2 -dk /data/local/tmp/vectors/*.bz2",adb)
     AdamUtils.shellRequest("cd /data/local/tmp/;rm -rf actual;mkdir actual",adb)
 
-    vectors.forEach(){
+    vectors.forEach {
       val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
-      var line:String;
+      val line:String
       errs.checkThat(a.Msg("Execute acvptool $it"),sr.exitCode, IsEqual(0))
       if(sr.exitCode!=0) {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
@@ -317,7 +317,7 @@ class KernelAcvpTest {
     //install test modules
     val ret = AdamUtils.root(adb)
     //If we can not to be root the device fail test
-    Thread.sleep(5000);//Wait system reponse for a while
+    Thread.sleep(5000)//Wait system reponse for a while
     println(ret)
     //
     batch_install(RES_PATH,"/data/local/tmp/", arrayOf(
@@ -361,13 +361,13 @@ class KernelAcvpTest {
     AdamUtils.shellRequest("cd /data/local/tmp/;mkdir actual;mkdir diffs",adb)
 
     //var foundError = false;
-    vectors.forEach(){
+    vectors.forEach {
       val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
-      var line:String;
-      if(sr.exitCode!=0) {
-        line = "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
+
+      val line = if(sr.exitCode!=0) {
+        "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
       } else {
-        line = "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()
+        "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()
       }
       AdamUtils.shellRequest("cd /data/local/tmp/;echo $line >> acvptest.log",adb)
 
