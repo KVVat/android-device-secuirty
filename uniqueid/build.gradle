@@ -21,7 +21,7 @@ android {
          * Please update the keys according to your settings
          */
         platform{
-            storeFile file("../security/platform/platform.jks")
+            storeFile file("../security/release/release.jks")
             storePassword "android"
             keyPassword "android"
             keyAlias "platform"

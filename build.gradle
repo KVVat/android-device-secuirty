@@ -25,17 +25,17 @@ import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathFactory
 import org.w3c.dom.Document
 
-import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathConstants
 import java.util.regex.Pattern
-import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils
 
 apply plugin: 'java'
 
 tasks.register("exportPackage") {
-    println(delegate)
-    println(delegate.class)
 
-    doFirst {
+    doLast {
+        println(delegate)
+        println(delegate.class)
         mkdir "$buildDir/package"
         mkdir "$buildDir/package/gradle"
         mkdir "$buildDir/package/test-suites"
@@ -85,29 +85,6 @@ dependencies {
 // Use this single-target technique if you're only patching a few documents
 // and don't require multi-patch composition.
 //
-
-//try {
-//    File input = File.createTempFile("xml-patch-input-", ".xml");
-//    try {
-//        output = File.createTempFile("xml-patch-result-", ".xml");
-//
-//        try (FileOutputStream os = new FileOutputStream(input);
-//             Writer writer = new OutputStreamWriter(os, UTF_8);
-//             Reader reader = in) {
-//            IOUtils.copy(reader, writer);
-//        }
-//
-//        CommandLineDriver.main(input.getAbsolutePath(), patch, output.getAbsolutePath());
-//        in = new FileReader(output);
-//
-//    } finally {
-//        FileUtils.deleteQuietly(input);
-//    }
-//
-//} catch (Exception e) {
-//    throw new RuntimeException(e);
-//}
-
 tasks.register('xmlPatchForInst') {
     dependsOn("xmlPatchAfterExecuteI")
     doLast {
@@ -122,7 +99,7 @@ tasks.register('xmlPatchForInst') {
                 }
         //println(dirs)
         for (d in dirs) {
-            def xmlFile = new File("$rootDir/instrumentation-results/connected/TEST-$d-_test-suites-.xml");
+            def xmlFile = new File("$rootDir/instrumentation-results/connected/TEST-$d-_test-suites-.xml")
 //")
             //availability check
             if (xmlFile.exists()) {
@@ -133,19 +110,19 @@ tasks.register('xmlPatchForInst') {
                         Pattern.MULTILINE
                 )
                 //read testsuite name : <testsuite name="com.example.test_suites.FCS_CKH_EXT1_High2">
-                DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                Document doc = db.parse(xmlFile);
-                XPath xpath = XPathFactory.newInstance().newXPath();
-                def classname = (String) xpath.evaluate("//testsuite/@name", doc, XPathConstants.STRING);
+                DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                Document doc = db.parse(xmlFile)
+                XPath xpath = XPathFactory.newInstance().newXPath()
+                def classname = (String) xpath.evaluate("//testsuite/@name", doc, XPathConstants.STRING)
                 //println("attribuut"+name)
 
-                def specDone = false;
+                def specDone = false
                 //def specTest="{}";
                 fileTree("$rootDir/instrumentation-results/connected/$d")
                         .include("**/logcat-*.txt").visit { FileVisitDetails details ->
                     if (details.file.isFile()) {
                         //standard output file
-                        def tokens = details.file.name.split('-');
+                        def tokens = details.file.name.split('-')
                         if (tokens.length >= 2) {
                             def method = tokens[2]
                             method = method.substring(0, method.indexOf('.'))
@@ -241,7 +218,7 @@ tasks.register("xmlPatchAfterExecuteI") {
         def classname = properties.get("testname")
         def names = names_.split(",")
         // println(names)
-        def i=0;
+        def i=0
         for(name in names){
             try {
                 def source = "$rootDir/instrumentation-results/connected/TEST-"+name+".xml"
