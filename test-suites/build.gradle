@@ -42,12 +42,6 @@ android {
         resources.excludes.add("META-INF/*")
     }
 
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.18.1"
-        }
-    }
 
     defaultConfig {
         applicationId "com.example.test_suites"
@@ -56,12 +50,6 @@ android {
         versionCode 2
         versionName "2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
-        }
         testFunctionalTest true
     }
     buildFeatures{

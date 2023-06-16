@@ -69,10 +69,10 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
   //}
 
 
-  fun propertiesAddStringToArray(path:String, key:String, value:String)
+  fun propertiesAddStringToArray(path_:String, key:String, value:String)
   {
     val prop= Properties()
-    val path = Paths.get(path)
+    val path = Paths.get(path_)
     var mValue:String = value;
     if(path.exists()){
       FileInputStream(path.toFile()).use { stream->
@@ -134,14 +134,14 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
     this.deviceSerial=adbDeviceRule.deviceSerial.trim()
     this.osversion=adbDeviceRule.osversion.trim()
     this.system=adbDeviceRule.system.trim()
-    val title = sfr!!.title.trim()
-    val desc = sfr!!.description.trim()
+    val title_ = sfr.title.trim()
+    val desc_ = sfr.description.trim()
 
     val diffText:String = """
 <diff>
    <add sel="/testsuite/properties">
-       <property name="SFR.name" value="${title}" />
-       <property name="SFR.description" value="${desc}" />
+       <property name="SFR.name" value="${title_}" />
+       <property name="SFR.description" value="${desc_}" />
        <property name="device" value="${deviceType}" />
        <property name="osversion" value="${osversion}" />
        <property name="system" value="${system}" />

@@ -47,11 +47,11 @@ class UIAutomatorSession
             }
         }
     }
-    fun labelToId(label:String){
+    /*fun labelToId(label:String){
         if(document != null){
 
         }
-    }
+    }*/
 
     fun exists(id:String):Boolean{
         if(document != null) {
@@ -95,7 +95,7 @@ class UIAutomatorSession
                                 ShellCommandRequest("input touchscreen tap $cx $cy"), adb.deviceSerial
                             )
 
-                        if (response.exitCode !== 0) {
+                        if (response.exitCode != 0) {
                             println("touch action failure:" + response.output)
                         }
                     }

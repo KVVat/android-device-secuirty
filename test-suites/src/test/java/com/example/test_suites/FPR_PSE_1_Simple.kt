@@ -87,7 +87,7 @@ class FPR_PSE_1_Simple {
   {
     runBlocking {
 
-      val file_apk: File =
+      val file_apk =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
 
       println("> The test verifies that the apis which generate unique ids return expected values.")
@@ -97,8 +97,7 @@ class FPR_PSE_1_Simple {
 
       var response: ShellCommandResult
 
-      //launch application (am start -n com.package.name/com.package.name.ActivityName)
-      response =   client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
+      //launch application (am start -n com.package.name/com.package.name.ActivityName) client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
       Thread.sleep(LONG_TIMEOUT);
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)
@@ -136,7 +135,7 @@ class FPR_PSE_1_Simple {
 
       println(">Uninstall/Install again the target apk.");
       //uninstall application =>
-      response = client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
+      client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
       Thread.sleep(SHORT_TIMEOUT*2);
       //println(response.output)
       //install application again

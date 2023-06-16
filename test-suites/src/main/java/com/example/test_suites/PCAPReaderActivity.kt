@@ -44,7 +44,7 @@ class PCAPReaderActivity : AppCompatActivity() {
     val startForResult =
       registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
         if (result?.resultCode == Activity.RESULT_OK) {
-          result.data?.let { data: Intent ->
+          result.data?.let { _ ->
             //val value = data.toString();//data.getIntExtra(SubActivity.KEY_VALUE, 0)
             //Toast.makeText(this, "$value", Toast.LENGTH_LONG).show()
             //data.dataString

@@ -204,9 +204,7 @@ class EncryptionFileActivity : AppCompatActivity() {
     // Create the Confirm Credentials screen. You can customize the title and description. Or
     // we will provide a generic one for you if you leave it null
     val intent: Intent = mKeyGuardservice.createConfirmDeviceCredentialIntent(null, null)
-    if (intent != null) {
-      startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS)
-    }
+    startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS)
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

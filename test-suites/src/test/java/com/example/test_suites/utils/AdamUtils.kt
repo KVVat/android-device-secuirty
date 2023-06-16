@@ -26,6 +26,7 @@ import java.util.TimeZone
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onClosed
@@ -92,22 +93,21 @@ class AdamUtils {
         }
         channel.cancel()
       }
-      if(found) {
-        return LogcatResult(tag, text)
+      return if(found) {
+        LogcatResult(tag, text)
       } else {
-        return null
+        null
       }
     }
 
 
     fun pullfile(sourcePath:String,dest:String,adb: AdbDeviceRule,copytoFile:Boolean=false){
       runBlocking {
-        var p: Path = Paths.get(sourcePath);
-        var destPath: Path
-        if(copytoFile){
-          destPath = Paths.get(dest)
+        val p: Path = Paths.get(sourcePath);
+        val destPath: Path = if(copytoFile){
+          Paths.get(dest)
         } else {
-          destPath = Paths.get(dest, p.fileName.toString());
+          Paths.get(dest, p.fileName.toString());
         }
 
         val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
@@ -119,7 +119,7 @@ class AdamUtils {
 
         println("Process(Pull):"+sourcePath+"=>"+destPath.toString())
 
-        var percentage = 0
+        var percentage:Int
         for (percentageDouble in channel) {
           percentage = (percentageDouble * 100).toInt()
           if(percentage%10==0) {
@@ -128,9 +128,10 @@ class AdamUtils {
         }
       }
     }
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun InstallApk(apkFile: File, reinstall: Boolean = false, adb:AdbDeviceRule): String {
       var stdio: com.malinskiy.adam.request.shell.v1.ShellCommandResult
-      var client:AndroidDebugBridgeClient = adb.adb;
+      val client:AndroidDebugBridgeClient = adb.adb;
 
       runBlocking {
         val features: List<Feature> = adb.adb.execute(request = FetchHostFeaturesRequest())
@@ -141,7 +142,12 @@ class AdamUtils {
         while (!channel.isClosedForReceive) {
           val progress: Double? =
             channel.tryReceive().onClosed {
+              Thread.sleep(1)
             }.getOrNull()
+          if(progress!==null && progress==1.0) {
+            println("Install $fileName completed")
+            //break;
+          }
         }
         //add -g option to permit all exisitng runtime option
         stdio = client.execute(InstallRemotePackageRequest(

@@ -65,7 +65,7 @@ sealed class LogLine(val matcher: Matcher) {
         }
 
         override fun hashCode(): Int {
-            var result = date?.hashCode() ?: 0
+            var result = date.hashCode()
             result = 31 * result + (pid?.hashCode() ?: 0)
             result = 31 * result + (tid?.hashCode() ?: 0)
             result = 31 * result + level.hashCode()

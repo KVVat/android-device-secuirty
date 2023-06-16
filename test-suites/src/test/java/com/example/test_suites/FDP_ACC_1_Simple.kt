@@ -86,15 +86,15 @@ class FDP_ACC_1_Simple {
   fun testUserAssets()
   {
     runBlocking {
-      val file_apk: File =
+      val file_apk =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
-
+      println("Found file to install:"+file_apk.exists())
       var response: ShellCommandResult
       var result: LogcatResult?
       var ret = AdamUtils.InstallApk(file_apk,false,adb)
       assertThat(a.Msg("Install Package"),
                  ret,StringStartsWith("Success"))
-
+      println("Install done")
 
       Thread.sleep(SHORT_TIMEOUT*2);
 

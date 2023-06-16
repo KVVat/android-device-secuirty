@@ -96,15 +96,7 @@ class FTP_ITC_EXT_1 {
     }
   }
 
-
-
-
-  /*Node.selectChildNodes(){
-
-  }*/
   fun Node.attrib(attrib:String="showname"):String{
-    //if(this == null) return ""
-    //val node = this.selectSingleNode(".//field[@name='$key']")
     val elem = this as Element
     return elem.attributeValue(attrib).toString()
   }
@@ -133,7 +125,6 @@ class FTP_ITC_EXT_1 {
   fun _value(n:Node?):String {
     return n?.attrib("value") ?: "0"
   }
-
 
   @Test
   fun anaylzeCertainPdml()
@@ -186,7 +177,7 @@ class FTP_ITC_EXT_1 {
       if(records !== null) {
         var i=1;
         for (record in records) {
-          println(record!!.attrib()+"[$serial-$i]")
+          println(record.attrib()+"[$serial-$i]")
           println("\t" + _showname(record.selectChild("tls.record.version")))
           println("\t" + _showname(record.selectChild("tls.handshake.type")))
           println("\t" + _showname(record.selectChild("tls.record.content_type")))

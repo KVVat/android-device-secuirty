@@ -11,6 +11,7 @@ import com.flipkart.zjsonpatch.DiffFlags
 import com.flipkart.zjsonpatch.JsonDiff
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.sync.v1.PushFileRequest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.onClosed
 import kotlinx.coroutines.runBlocking
@@ -80,7 +81,8 @@ class KernelAcvpTest {
 
   val RES_PATH  = "src/test/resources"
   val OUT_PATH  = "../results/kernelacvp/"
-  fun pushFileToTmp(objFile: File, permission:String="",destdir:String="/data/local/tmp/") {
+  @OptIn(ExperimentalCoroutinesApi::class)
+  fun pushFileToTmp(objFile: File, permission:String="", destdir:String="/data/local/tmp/") {
     runBlocking {
 
       //if(client.execute())
@@ -91,10 +93,16 @@ class KernelAcvpTest {
         GlobalScope,
         serial = adb.deviceSerial);
 
+      var done=false
       while (!channel.isClosedForReceive) {
         val progress: Double? =
           channel.tryReceive().onClosed {
+            Thread.sleep(1)
           }.getOrNull()
+        if(progress!==null && progress==1.0 && !done) {
+          println("Push file $fileName completed")
+          done=true
+        }
       }
 
       if(permission != ""){
@@ -147,7 +155,7 @@ class KernelAcvpTest {
             var break_ = false;
             while(!break_){
               try {
-                val entry = tar!!.nextEntry
+                val entry = tar.nextEntry
                 //println(entry.name)
                 if (entry.isDirectory) continue;
                 if (!tar.canReadEntryData(entry)){
@@ -278,9 +286,9 @@ class KernelAcvpTest {
 
     vectors.forEach(){
       val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
-      var line="";
+      var line:String;
       errs.checkThat(a.Msg("Execute acvptool $it"),sr.exitCode, IsEqual(0))
-      if(sr.exitCode!==0) {
+      if(sr.exitCode!=0) {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
       } else {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()
@@ -352,11 +360,11 @@ class KernelAcvpTest {
     //AdamUtils.shellRequest("bzip2 -dk /data/local/tmp/expected/*.bz2",adb)
     AdamUtils.shellRequest("cd /data/local/tmp/;mkdir actual;mkdir diffs",adb)
 
-    var foundError = false;
+    //var foundError = false;
     vectors.forEach(){
       val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
-      var line="";
-      if(sr.exitCode!==0) {
+      var line:String;
+      if(sr.exitCode!=0) {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
       } else {
         line = "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()

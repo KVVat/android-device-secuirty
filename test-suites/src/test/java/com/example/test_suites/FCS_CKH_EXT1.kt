@@ -123,7 +123,7 @@ class FCS_CKH_EXT1 {
       //2. Users need to relaunch the device quickly
       client.execute(request = RebootRequest(), serial = adb.deviceSerial)
       println("> ** Rebooting : Please Reboot Device **")
-      Thread.sleep(LONG_TIMEOUT*5);//20sec.
+      Thread.sleep(1000*30);//20sec.
       //Note:  the connection to the adb server will be dismissed during the rebooting
       println("> ** Maybe it requires manual operation : Please Reboot the target device as fast as possible **")
 
@@ -133,7 +133,7 @@ class FCS_CKH_EXT1 {
       // 1. Check if we can access to the DES(Device Encrypted Storage)
       // 2. Check we can not access to the CES
 
-      errs.checkThat(a.Msg("Check if we can access to the DES/We can not acces to CES."),
+      errs.checkThat(a.Msg("Check if we can access to the DES/We can not accees to CES."),
                      result!!.text,
                      StringStartsWith("des=Success,ces=Failed") )
 

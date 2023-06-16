@@ -110,54 +110,56 @@ dependencies {
 
 tasks.register('xmlPatchForInst') {
     dependsOn("xmlPatchAfterExecuteI")
-    //def className =("com.example.test_suites.FCS_CKH_EXT1_High")
-    //Directory name indicates target device
-    def dirs = []
-    fileTree("$rootDir/instrumentation-results/connected").
-            visit { FileVisitDetails details ->
-        if(details.file.isDirectory())
-            dirs << details.file.name
-        //println(details.file.name)
-    }
-    //println(dirs)
-    for(d in dirs){
-        def xmlFile = new File("$rootDir/instrumentation-results/connected/TEST-$d-_test-suites-.xml");//")
-        //availability check
-        if(xmlFile.exists()){
-            //println(path.name+" exists")
-            def list = new ArrayList<String>()
-            def LOG_LINE_RE = Pattern.compile(
-                    "((?:(\\d\\d\\d\\d)-)?(\\d\\d)-(\\d\\d)\\s+(\\d\\d):(\\d\\d):(\\d\\d)\\.(\\d\\d\\d)\\s+(\\d+)\\s+(\\d+)\\s+(.)\\s+)(.*?):\\s(.*)",
-                    Pattern.MULTILINE
-            )
-            //read testsuite name : <testsuite name="com.example.test_suites.FCS_CKH_EXT1_High2">
-            DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = db.parse(xmlFile);
-            XPath xpath = XPathFactory.newInstance().newXPath();
-            def classname = (String)xpath.evaluate("//testsuite/@name", doc, XPathConstants.STRING);
-            //println("attribuut"+name)
+    doLast {
+        //def className =("com.example.test_suites.FCS_CKH_EXT1_High")
+        //Directory name indicates target device
+        def dirs = []
+        fileTree("$rootDir/instrumentation-results/connected").
+                visit { FileVisitDetails details ->
+                    if (details.file.isDirectory())
+                        dirs << details.file.name
+                    //println(details.file.name)
+                }
+        //println(dirs)
+        for (d in dirs) {
+            def xmlFile = new File("$rootDir/instrumentation-results/connected/TEST-$d-_test-suites-.xml");
+//")
+            //availability check
+            if (xmlFile.exists()) {
+                //println(path.name+" exists")
+                def list = new ArrayList<String>()
+                def LOG_LINE_RE = Pattern.compile(
+                        "((?:(\\d\\d\\d\\d)-)?(\\d\\d)-(\\d\\d)\\s+(\\d\\d):(\\d\\d):(\\d\\d)\\.(\\d\\d\\d)\\s+(\\d+)\\s+(\\d+)\\s+(.)\\s+)(.*?):\\s(.*)",
+                        Pattern.MULTILINE
+                )
+                //read testsuite name : <testsuite name="com.example.test_suites.FCS_CKH_EXT1_High2">
+                DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                Document doc = db.parse(xmlFile);
+                XPath xpath = XPathFactory.newInstance().newXPath();
+                def classname = (String) xpath.evaluate("//testsuite/@name", doc, XPathConstants.STRING);
+                //println("attribuut"+name)
 
-            def specDone = false;
-            //def specTest="{}";
-            fileTree("$rootDir/instrumentation-results/connected/$d")
-                .include("**/logcat-*.txt").visit { FileVisitDetails details ->
-                    if(details.file.isFile()){
+                def specDone = false;
+                //def specTest="{}";
+                fileTree("$rootDir/instrumentation-results/connected/$d")
+                        .include("**/logcat-*.txt").visit { FileVisitDetails details ->
+                    if (details.file.isFile()) {
                         //standard output file
                         def tokens = details.file.name.split('-');
-                        if(tokens.length >= 2){
+                        if (tokens.length >= 2) {
                             def method = tokens[2]
-                            method=method.substring(0,method.indexOf('.'))
+                            method = method.substring(0, method.indexOf('.'))
                             //println(pkg+","+method)
                             StringWriter writer = new StringWriter()
-                            def pid =""
+                            def pid = ""
                             details.file.eachLine {
-                                def ma= LOG_LINE_RE.matcher(it).find() { ArrayList m->
-                                     return m
+                                def ma = LOG_LINE_RE.matcher(it).find() { ArrayList m ->
+                                    return m
                                 }
-                                if(ma == null){
-                                    println("File error:"+details.file.name)
+                                if (ma == null) {
+                                    println("File error:" + details.file.name)
                                 }
-                                if(ma!=null && ma.size()>=14) {
+                                if (ma != null && ma.size() >= 14) {
                                     if (pid == "") pid = ma[10]
                                     if (pid == ma[10]) {
                                         //def label = ""+ma[12]
@@ -166,17 +168,17 @@ tasks.register('xmlPatchForInst') {
                                         //def level = ""+ma[11]
                                         def token = text.split(":")
                                         def label = ""
-                                        def json="{}"
-                                        if(token.size()>=2){
+                                        def json = "{}"
+                                        if (token.size() >= 2) {
                                             label = token[0].trim()
-                                            json = text.substring(text.indexOf(':')+1).trim()
-                                            json = json.replaceAll("^\"|\"\$" , "")
+                                            json = text.substring(text.indexOf(':') + 1).trim()
+                                            json = json.replaceAll("^\"|\"\$", "")
                                         }
 
-                                        if(label.equals("[TestSpec]") && !specDone){
+                                        if (label.equals("[TestSpec]") && !specDone) {
                                             specDone = true
                                             JSONObject j = new JSONObject(json)
-list.add("""<add sel="/testsuite/properties"><property name="SFR.name" value="${j['SFR.name']}" />
+                                            list.add("""<add sel="/testsuite/properties"><property name="SFR.name" value="${j['SFR.name']}" />
 <property name="SFR.description" value="${j['SFR.desc']}" />
 <property name="device" value="${j['device']}" />
 <property name="osversion" value="${j['osversion']}" />
@@ -184,7 +186,7 @@ list.add("""<add sel="/testsuite/properties"><property name="SFR.name" value="${
 <property name="signature" value="${j['deviceserial']}" />
 </add>""".trim())
                                         }
-                                        writer <<  text +"\n"
+                                        writer << text + "\n"
                                         return true
                                     }
                                 }
@@ -199,90 +201,93 @@ list.add("""<add sel="/testsuite/properties"><property name="SFR.name" value="${
 <system-out><![CDATA[${stdout}]]></system-out></add>""")
                         }
                     }
-            }
-            //StringWriter writer = new StringWriter()
-            def f = new File("$rootDir/xml-patches/PATCH-$d-_test-suites-.xml")
-            f.createNewFile()
-            FileWriter fwriter = new FileWriter(f)
-            fwriter << "<diff>\n"
-            for(item in list){
-                fwriter << item +"\n"
-            }
-            fwriter << "</diff>"
-            fwriter.flush()
-            fwriter.close()
+                }
+                //StringWriter writer = new StringWriter()
+                def f = new File("$rootDir/xml-patches/PATCH-$d-_test-suites-.xml")
+                f.createNewFile()
+                FileWriter fwriter = new FileWriter(f)
+                fwriter << "<diff>\n"
+                for (item in list) {
+                    fwriter << item + "\n"
+                }
+                fwriter << "</diff>"
+                fwriter.flush()
+                fwriter.close()
 
-            def f2 = new File("$rootDir/xml-patches/patch.prop")
-            f2.createNewFile()
-            fwriter = new FileWriter(f2)
-            fwriter << "classname=$d-_test-suites-\n"
-            fwriter << "testname=$classname\n"
-            fwriter.flush()
-            fwriter.close()
-            //println(writer.toString())
-            println("Done generate patch :"+f.getAbsolutePath())
+                def f2 = new File("$rootDir/xml-patches/patch.prop")
+                f2.createNewFile()
+                fwriter = new FileWriter(f2)
+                fwriter << "classname=$d-_test-suites-\n"
+                fwriter << "testname=$classname\n"
+                fwriter.flush()
+                fwriter.close()
+                //println(writer.toString())
+                println("Done generate patch :" + f.getAbsolutePath())
+            }
         }
     }
 }
 
 tasks.register("xmlPatchAfterExecuteI") {
+    doLast{
+        def patchDir = "$rootDir/xml-patches"
 
-    def patchDir = "$rootDir/xml-patches"
-
-    Properties properties = new Properties()
-    File propertiesFile = new File(patchDir+"/patch.prop")
-    propertiesFile.withInputStream {
-        properties.load(it)
-    }
-    def names_ = properties.get("classname")
-    def classname = properties.get("testname")
-    def names = names_.split(",")
-    // println(names)
-    def i=0;
-    for(name in names){
-        try {
-            def source = "$rootDir/instrumentation-results/connected/TEST-"+name+".xml"
-            def classname_=classname
-            if(i>0){
-                classname_ = classname+i
-            }
-            def output = "$rootDir/results/TEST-"+classname_+".xml"
-            def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
-            println("output path=>"+output)
-            CommandLineDriver.main(source, patch, output)
-        } catch (Exception ex){
-            //ignore
-            ex.printStackTrace()
+        Properties properties = new Properties()
+        File propertiesFile = new File(patchDir+"/patch.prop")
+        propertiesFile.withInputStream {
+            properties.load(it)
         }
-        i=i+1
+        def names_ = properties.get("classname")
+        def classname = properties.get("testname")
+        def names = names_.split(",")
+        // println(names)
+        def i=0;
+        for(name in names){
+            try {
+                def source = "$rootDir/instrumentation-results/connected/TEST-"+name+".xml"
+                def classname_=classname
+                if(i>0){
+                    classname_ = classname+i
+                }
+                def output = "$rootDir/results/TEST-"+classname_+".xml"
+                def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
+                println("output path=>"+output)
+                CommandLineDriver.main(source, patch, output)
+            } catch (Exception ex){
+                //ignore
+                ex.printStackTrace()
+            }
+            i=i+1
+        }
+        println("Done merege")
     }
-    println("Done merege")
-
 }
 
 tasks.register("xmlPatchAfterExecute") {
-    def patchDir = "$rootDir/xml-patches"
+    doLast {
+        def patchDir = "$rootDir/xml-patches"
 
-    Properties properties = new Properties()
-    File propertiesFile = new File(patchDir+"/patch.prop")
-    propertiesFile.withInputStream {
-        properties.load(it)
-    }
-    def names_ = properties.get("classname")
-    def names = names_.split(",")
-   // println(names)
-    for(name in names){
-        //println(name)
-        try {
-            def source = "$rootDir/test-results/TEST-"+name+".xml"
-            def output = "$rootDir/results/TEST-"+name+".xml"
-            def patch = "$rootDir/xml-patches/PATCH-"+name+".xml"
-            if(new File(source).exists() && new File(patch).exists()){
-                CommandLineDriver.main(source, patch, output)
+        Properties properties = new Properties()
+        File propertiesFile = new File(patchDir + "/patch.prop")
+        propertiesFile.withInputStream {
+            properties.load(it)
+        }
+        def names_ = properties.get("classname")
+        def names = names_.split(",")
+        // println(names)
+        for (name in names) {
+            //println(name)
+            try {
+                def source = "$rootDir/test-results/TEST-" + name + ".xml"
+                def output = "$rootDir/results/TEST-" + name + ".xml"
+                def patch = "$rootDir/xml-patches/PATCH-" + name + ".xml"
+                if (new File(source).exists() && new File(patch).exists()) {
+                    CommandLineDriver.main(source, patch, output)
+                }
+            } catch (Exception ex) {
+                //ignore
+                ex.printStackTrace()
             }
-        } catch (Exception ex){
-            //ignore
-            ex.printStackTrace()
         }
     }
 }
