@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    binding = ActivityMainBinding.inflate(layoutInflater);
+    binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
 
     url = intent.getStringExtra("openurl")
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     */
     if(url !== null){
       binding.mainText.text = url
-      val data = Data.Builder().putString("url",url).putString("type",type).build();
+      val data = Data.Builder().putString("url",url).putString("type",type).build()
 
       workRequest = OneTimeWorkRequest.Builder(NetworkWorker::class.java).setInputData(data).build()
       WorkManager.getInstance(applicationContext)
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
               binding.resultText.text =
                 binding.resultText.text.toString() + "\n" + value
 
-              var returnValue = workInfo.outputData.getString("return")
+              val returnValue = workInfo.outputData.getString("return")
               if(!returnValue.isNullOrBlank()) {
                 Log.d(TAG + "return", "" + returnValue.toString())
               }
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
           }
         })
       binding.resultText.text = "... Launch Work Manager"
-      workManager?.enqueue(workRequest)
+      workManager.enqueue(workRequest)
     } else {
       binding.resultText.text = "... Url is not specified"
     }

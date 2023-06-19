@@ -12,24 +12,20 @@ import com.malinskiy.adam.AndroidDebugBridgeClient
 import com.malinskiy.adam.request.misc.RebootRequest
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
-import java.io.File
-import java.nio.file.Paths
-import java.time.LocalDateTime
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.MatcherAssert
-import org.hamcrest.core.IsEqual
-import org.hamcrest.core.IsNot
 import org.hamcrest.core.StringStartsWith
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.Assert.*
 import org.junit.rules.ErrorCollector
 import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
-import org.hamcrest.CoreMatchers.`is` as Is
+import java.io.File
+import java.nio.file.Paths
 
 @SFR("FCS_CKH_EXT.1/Low", """
   FCS_CKH_EXT.1/Low
@@ -47,7 +43,6 @@ class FCS_CKH_EXT1 {
 
   private val TEST_PACKAGE = "com.example.directboot"
   private val TEST_MODULE = "directboot-debug.apk"
-  private val LONG_TIMEOUT = 5000L
 
   @Rule
   @JvmField
@@ -55,11 +50,11 @@ class FCS_CKH_EXT1 {
   private val client:AndroidDebugBridgeClient = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
+  var watcher: TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
   var errs: ErrorCollector = ErrorCollector()
   @Rule @JvmField
-  var name: TestName = TestName();
+  var name: TestName = TestName()
   //Asset Log
   var a: TestAssertLogger = TestAssertLogger(name)
 
@@ -91,10 +86,10 @@ class FCS_CKH_EXT1 {
   fun testDeviceEncryptedStorage() {
     runBlocking {
       //install file
-      val file_apk: File =
+      val file_apk =
         File(Paths.get("src", "test", "resources", TEST_MODULE).toUri())
 
-      var ret = AdamUtils.InstallApk(file_apk, false,adb)
+      val ret = AdamUtils.InstallApk(file_apk, false,adb)
       assertTrue(ret.startsWith("Success"))
       MatcherAssert.assertThat(
         a.Msg("Verify Install apk v1 (expect=Success)"),
@@ -115,26 +110,29 @@ class FCS_CKH_EXT1 {
                      StringStartsWith("Booted") )
 
 
-      Thread.sleep(1000*10);
+      Thread.sleep(1000*5)
 
-      //return;
       //(Require)Reboot Device
       //1. We expect the bootloader of the device is unlocked.
       //2. Users need to relaunch the device quickly
       client.execute(request = RebootRequest(), serial = adb.deviceSerial)
       println("> ** Rebooting : Please Reboot Device **")
-      Thread.sleep(1000*30);//20sec.
+      Thread.sleep(1000*10)
       //Note:  the connection to the adb server will be dismissed during the rebooting
       println("> ** Maybe it requires manual operation : Please Reboot the target device as fast as possible **")
-
+      adb.waitBoot()
+      Thread.sleep(1000*5)
+      println("> ** Reconnected")
       result = AdamUtils.waitLogcatLine(200,"FCS_CKH_EXT_TEST",adb)
+      if(result == null){
+        result = LogcatResult("","<null>")
+      }
 
       // Evaluates below behaviours. Application will be triggered by LOCKED_BOOT_COMPLETED action.
       // 1. Check if we can access to the DES(Device Encrypted Storage)
       // 2. Check we can not access to the CES
-
       errs.checkThat(a.Msg("Check if we can access to the DES/We can not accees to CES."),
-                     result!!.text,
+                     result.text,
                      StringStartsWith("des=Success,ces=Failed") )
 
 

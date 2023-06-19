@@ -9,11 +9,7 @@ import com.example.test_suites.utils.TestAssertLogger
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandResult
-import java.io.File
-import java.nio.file.Paths
-import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.IsEqual
 import org.hamcrest.core.StringStartsWith
@@ -24,7 +20,8 @@ import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
-import org.hamcrest.CoreMatchers.`is` as Is
+import java.io.File
+import java.nio.file.Paths
 
 //FPR_PSE.1
 
@@ -53,13 +50,14 @@ class FDP_ACC_1_Simple {
   val client = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
+  var watcher: TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
-  public var name: TestName = TestName();
+  var name: TestName = TestName()
+
   //Asset Log
-  public var a: TestAssertLogger = TestAssertLogger(name)
+  var a: TestAssertLogger = TestAssertLogger(name)
   @Rule @JvmField
-  public var errs: ErrorCollector = ErrorCollector()
+  var errs: ErrorCollector = ErrorCollector()
   @Before
   fun setup() {
     runBlocking {
@@ -87,24 +85,25 @@ class FDP_ACC_1_Simple {
   {
     runBlocking {
       val file_apk =
-        File(Paths.get("src", "test", "resources", TEST_MODULE).toUri());
+        File(Paths.get("src", "test", "resources", TEST_MODULE).toUri())
       println("Found file to install:"+file_apk.exists())
       var response: ShellCommandResult
       var result: LogcatResult?
       var ret = AdamUtils.InstallApk(file_apk,false,adb)
       assertThat(a.Msg("Install Package"),
                  ret,StringStartsWith("Success"))
+
       println("Install done")
 
-      Thread.sleep(SHORT_TIMEOUT*2);
+      Thread.sleep(SHORT_TIMEOUT*2)
 
       //launch application and prepare
-      response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.PrepareActivity"), adb.deviceSerial);
+      response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.PrepareActivity"), adb.deviceSerial)
       assertThat(a.Msg("Preparing Test Files with opening PrepareActivity"),
                  response.output,StringStartsWith("Starting"))
 
-      Thread.sleep(LONG_TIMEOUT);
-      response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
+      Thread.sleep(LONG_TIMEOUT)
+      response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
       assertThat(a.Msg("Check file acccess via MainActivity"),
                  response.output,StringStartsWith("Starting"))
 
@@ -123,10 +122,10 @@ class FDP_ACC_1_Simple {
       ret = AdamUtils.InstallApk(file_apk,false,adb)
       assertThat(a.Msg("Install Package"),
                  ret,StringStartsWith("Success"))
-      Thread.sleep(SHORT_TIMEOUT*2);
+      Thread.sleep(SHORT_TIMEOUT*2)
 
-      response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial);
-      assertThat(a.Msg("Check file acccess via MainActivity"),
+      response = client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
+      assertThat(a.Msg("Check file access via MainActivity"),
                  response.output,StringStartsWith("Starting"))
 
       result = AdamUtils.waitLogcatLine(100,"FDP_ACC_1_TEST",adb)

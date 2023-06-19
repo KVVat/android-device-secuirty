@@ -24,7 +24,7 @@ android {
             storeFile file("../security/release/release.jks")
             storePassword "android"
             keyPassword "android"
-            keyAlias "platform"
+            keyAlias "release"
         }
         debugkeystore {
             storeFile file(homePath+'/.android/debug.keystore')

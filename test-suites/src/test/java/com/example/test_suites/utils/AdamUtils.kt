@@ -53,9 +53,10 @@ class AdamUtils {
     }
     fun waitLogcatLine(waitTime:Int,tagWait:String,adb:AdbDeviceRule):LogcatResult? {
       var found = false
-      var text:String = ""
-      var tag:String = ""
+      var text = ""
+      var tag = ""
       runBlocking {
+
         val deviceTimezoneString = adb.adb.execute(GetSinglePropRequest("persist.sys.timezone"), adb.deviceSerial).trim()
         val deviceTimezone = TimeZone.getTimeZone(deviceTimezoneString)
         val nowInstant = Instant.now()
@@ -64,13 +65,13 @@ class AdamUtils {
 
         // Receive logcat for max several seconds, wait and find certain tag text
         for (i in 1..waitTime) {
-          var lines:List<LogLine> = channel.receive()
+          val lines:List<LogLine> = channel.receive()
             .split("\n")
             .mapNotNull { LogLine.of(it, deviceTimezone) }
             .filterIsInstance<LogLine.Log>()
             .filter { it.level == 'D'}
             .filter {
-              it.tag.equals(tagWait)
+              it.tag?.equals(tagWait) ?:
             }
 
           if(!lines.isEmpty()){

@@ -54,7 +54,15 @@ class AdbDeviceRule(val deviceType: DeviceType = DeviceType.ANY, vararg val requ
       }
     }
   }
-
+  suspend fun waitBoot(){
+    runBlocking {
+      loop@ for (device in adb.execute(ListDevicesRequest())) {
+        val booted =
+          adb.execute(GetSinglePropRequest("sys.boot_completed"), device.serial).isNotBlank()
+        if (!booted) continue
+      }
+    }
+  }
   private suspend fun CoroutineScope.waitForDevice(): Device {
     while (isActive) {
       try {
@@ -74,10 +82,9 @@ class AdbDeviceRule(val deviceType: DeviceType = DeviceType.ANY, vararg val requ
           }
 
           supportedFeatures = adb.execute(FetchDeviceFeaturesRequest(device.serial))
-          if (!requiredFeatures.isEmpty()) {
+          if (requiredFeatures.isNotEmpty()) {
             Assume.assumeTrue(
               "No compatible device found for features $requiredFeatures",
-              requiredFeatures.isEmpty() ||
                 supportedFeatures.containsAll(requiredFeatures.asList())
             )
           }
