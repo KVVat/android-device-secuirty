@@ -71,7 +71,7 @@ class AdamUtils {
             .filterIsInstance<LogLine.Log>()
             .filter { it.level == 'D'}
             .filter {
-              it.tag?.equals(tagWait) ?:
+              it.tag.equals(tagWait)
             }
 
           if(!lines.isEmpty()){
