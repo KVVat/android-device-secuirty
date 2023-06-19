@@ -2,9 +2,6 @@ package com.example.test_suites.utils
 
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.TimeZone
-import java.util.regex.Pattern
 
 class LogcatUtils {
     //private val BUFFER_BEGIN_RE = Pattern.compile("--------- beginning of (.*)")

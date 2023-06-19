@@ -13,16 +13,17 @@ import kotlin.io.path.absolutePathString
 
 class UIAutomatorSession
     (var adb: AdbDeviceRule, var packageName: String) {
-    var document: org.dom4j.Document?;
+    var document: org.dom4j.Document?
+
     init {
         runBlocking {
-            var response: ShellCommandResult =
+            val response: ShellCommandResult =
                 adb.adb.execute(ShellCommandRequest("uiautomator dump"), adb.deviceSerial)
             val found = Regex("^.*([ ].*.xml)\$").find(response.output)
             if (found?.groups != null) {
-                val srcpath: String? = found.groups[1]?.value?.trim();
+                val srcpath: String? = found.groups[1]?.value?.trim()
                 //println("***$srcpath***")
-                var temppath: Path = kotlin.io.path.createTempFile("ui", ".xml")
+                val temppath: Path = kotlin.io.path.createTempFile("ui", ".xml")
                 AdamUtils.pullfile(srcpath!!.trim(), temppath.absolutePathString(), adb, true)
                 val xmlFile = File(temppath.toUri())
                 document = SAXReader().read(xmlFile)
@@ -75,22 +76,22 @@ class UIAutomatorSession
                     val bounds = target.attributeValue("bounds")
                     val pp = bounds.split("][")
                     val pos = arrayOf(0, 0, 0, 0)
-                    var i = 0;
+                    var i = 0
                     if (pp.size == 2) {
                         for (ppp: String in pp) {
-                            var nums = ppp.replace("[", "")
+                            val nums = ppp.replace("[", "")
                                 .replace("]", "").split(",")
                             if (nums.size == 2) {
                                 pos[i] = nums[0].toInt()
                                 pos[i + 1] = nums[1].toInt()
                             }
-                            i += 2;
+                            i += 2
                         }
                         val cx = ((pos[2] - pos[0]) / 2) + pos[0]
                         val cy = ((pos[3] - pos[1]) / 2) + pos[1]
                         //tap
                         println("tap $cx, $cy")
-                        var response: ShellCommandResult =
+                        val response: ShellCommandResult =
                             adb.adb.execute(
                                 ShellCommandRequest("input touchscreen tap $cx $cy"), adb.deviceSerial
                             )

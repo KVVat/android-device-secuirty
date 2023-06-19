@@ -1,7 +1,5 @@
 package com.example.test_suites.utils
 
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -12,8 +10,8 @@ private val LOG_LINE_RE = Pattern.compile(
     "((?:(\\d\\d\\d\\d)-)?(\\d\\d)-(\\d\\d)\\s+(\\d\\d):(\\d\\d):(\\d\\d)\\.(\\d\\d\\d)\\s+(\\d+)\\s+(\\d+)\\s+(.)\\s+)(.*?):\\s(.*)",
     Pattern.MULTILINE
 )
-private val sinceFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS")
-    .withZone(ZoneId.systemDefault())
+//private val sinceFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS")
+//    .withZone(ZoneId.systemDefault())
 
 data class LogcatResult(var tag:String,var text:String)
 

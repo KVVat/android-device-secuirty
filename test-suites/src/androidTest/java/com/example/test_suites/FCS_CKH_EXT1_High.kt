@@ -32,7 +32,6 @@ import javax.security.cert.CertificateException
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is` as Is
 import org.hamcrest.CoreMatchers.`not` as Not
-import org.hamcrest.core.StringStartsWith
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -69,16 +68,17 @@ class FCS_CKH_EXT1_High {
   @Rule @JvmField
   var errs: ErrorCollector = ErrorCollector()
   @Rule @JvmField
-  var name: TestName = TestName();
+  var name: TestName = TestName()
+
   //Asset Log
   var a: TestAssertLogger = TestAssertLogger(name)
 
   private lateinit var norm_enc_data: SharedPreferences
   val PREF_NAME:String = "EncryptedSharedPref"
 
-  lateinit var appContext:Context;
-  lateinit var keyNormal:MasterKey;
-  lateinit var keyUnlockDeviceTest:MasterKey;
+  lateinit var appContext:Context
+  lateinit var keyNormal:MasterKey
+  lateinit var keyUnlockDeviceTest:MasterKey
   fun println_(line:String){
     Log.d(this.javaClass.canonicalName,line)
   }
@@ -93,7 +93,7 @@ class FCS_CKH_EXT1_High {
 
     keyUnlockDeviceTest = MasterKey.Builder(appContext).setKeyGenParameterSpec(
       keyGenParameterSpec("_androidx_security_master_key_",false,true)
-    ).build();
+    ).build()
 
     norm_enc_data = EncryptedSharedPreferences
       .create(appContext,
@@ -103,7 +103,7 @@ class FCS_CKH_EXT1_High {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
       )
 
-    val fdelete: File = File(appContext.getFilesDir(), "my_sensitive_loremipsum.txt")
+    val fdelete: File = File(appContext.filesDir, "my_sensitive_loremipsum.txt")
     if (fdelete.exists()) {fdelete.delete()}
 
     println_("** A Junit test case for FCS_CKH_EXT1_High started on "+ LocalDateTime.now()+" **")
@@ -143,15 +143,15 @@ class FCS_CKH_EXT1_High {
 
   fun checkEncryptedSharedPreference(data:SharedPreferences,prefName:String)
   {
-    val sampleString = "The quick brown fox jumps over the lazy dog";
+    val sampleString = "The quick brown fox jumps over the lazy dog"
 
     println_("> Generate encrypted Shared Preferences")
 
-    var editor: SharedPreferences.Editor = data.edit();
+    val editor: SharedPreferences.Editor = data.edit()
 
-    editor.putInt("IntTest", 65535);
-    editor.putBoolean("BooleanTest", true);
-    editor.putString("StringTest", sampleString);
+    editor.putInt("IntTest", 65535)
+    editor.putBoolean("BooleanTest", true)
+    editor.putString("StringTest", sampleString)
     editor.apply()
     //check availability
     println_("Check availavility of values")
@@ -173,7 +173,7 @@ class FCS_CKH_EXT1_High {
 
     //
     println_("Check all values in the shared preference are encrypted.")
-    loadSharedPrefs(prefName);
+    loadSharedPrefs(prefName)
   }
 
   @Test
@@ -182,10 +182,10 @@ class FCS_CKH_EXT1_High {
 
     val isLoremIpsum: InputStream = appContext.resources.openRawResource(
       appContext.resources.getIdentifier("loremipsum",
-                                         "raw", appContext.packageName));
+                                         "raw", appContext.packageName))
     val content = isLoremIpsum.bufferedReader().use(BufferedReader::readText)
 
-    val fTarget: File = File(appContext.getFilesDir(), fileToWrite)
+    val fTarget: File = File(appContext.filesDir, fileToWrite)
 
     println_("Generate a encrypted file with EncryptedFile Class")
     val encryptedFile = EncryptedFile.Builder(
@@ -197,7 +197,7 @@ class FCS_CKH_EXT1_High {
 
     //Write loaded file with EncryptedFile class
     try {
-      val outputStream: FileOutputStream? = encryptedFile.openFileOutput()
+      val outputStream: FileOutputStream = encryptedFile.openFileOutput()
       outputStream?.apply {
         write(content.toByteArray(Charset.forName("UTF-8")))
         flush()
@@ -211,7 +211,7 @@ class FCS_CKH_EXT1_High {
     errs.checkThat(a.Msg("Check availability of the encrypted file"),
                    fTarget.exists(),Is(true))
 
-    val original:String;
+    val original:String
     encryptedFile.openFileInput().use { fileInputStream ->
       try {
         val sb = StringBuilder()
@@ -230,7 +230,7 @@ class FCS_CKH_EXT1_High {
       }
     }
     //Check the file is encrypted (Read the file with BufferedReader)
-    val fTargetStream = FileInputStream(fTarget);
+    val fTargetStream = FileInputStream(fTarget)
     try {
       val sb = StringBuilder()
       val br = BufferedReader(InputStreamReader(fTargetStream) as Reader?)
@@ -239,7 +239,7 @@ class FCS_CKH_EXT1_High {
           sb.append(it)
         }
       br.close()
-      val encrypted = sb.toString();
+      val encrypted = sb.toString()
       println_("Check the file is encrypted.(means they are not identical)")
 
       println_("===original content===")
@@ -254,7 +254,7 @@ class FCS_CKH_EXT1_High {
       // Error occurred opening raw file for reading.
       throw RuntimeException("IOException")
     } finally {
-      fTargetStream.close();
+      fTargetStream.close()
     }
   }
 
@@ -265,7 +265,7 @@ class FCS_CKH_EXT1_High {
       for (key in preference.all.keys) {
         val res = String.format("Shared Preference : %s - %s", pref_name, key)+
               preference.getString(key, "error")!!
-        println_(res);
+        println_(res)
       }
     }
   }

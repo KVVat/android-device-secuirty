@@ -2,17 +2,15 @@ package com.example.uniqueid.utils
 
 import android.content.Context
 import android.media.MediaDrm
-import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
-import androidx.annotation.RequiresPermission
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.UUID
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 
 class UniqueId {

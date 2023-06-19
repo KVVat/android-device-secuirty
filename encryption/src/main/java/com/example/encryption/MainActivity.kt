@@ -5,7 +5,6 @@ import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
@@ -15,37 +14,43 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.security.crypto.MasterKey
-import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ListenableWorker
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_CLASS_NAME
 import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_PACKAGE_NAME
-import androidx.work.multiprocess.RemoteWorkerService
 import com.example.encryption.utils.CoroutineKeyCheckWorker
 import java.io.IOException
-import java.security.*
-import javax.crypto.*
+import java.security.InvalidAlgorithmParameterException
+import java.security.InvalidKeyException
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
+import java.security.NoSuchProviderException
+import java.security.UnrecoverableKeyException
+import javax.crypto.BadPaddingException
+import javax.crypto.Cipher
+import javax.crypto.IllegalBlockSizeException
+import javax.crypto.KeyGenerator
+import javax.crypto.NoSuchPaddingException
+import javax.crypto.SecretKey
 import javax.security.cert.CertificateException
 
 
 //The module simply record Unique Id to the configuration file
 class MainActivity : AppCompatActivity() {
   lateinit var mKeyGuardservice:KeyguardManager
-  var keyLockEnabled = true;
+  var keyLockEnabled = true
   var TAG = "ADSRP_ENCRYPTION"
   var TAG_TEST = "FCS_CKH_EXT1_HIGH"
 
-  lateinit var keyGenParameterSpec1: KeyGenParameterSpec;
-  lateinit var keyGenParameterSpec2: KeyGenParameterSpec;
+  lateinit var keyGenParameterSpec1: KeyGenParameterSpec
+  lateinit var keyGenParameterSpec2: KeyGenParameterSpec
   private val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
 
 
-  private var workManager: WorkManager? =null;
-  private val PACKAGE_NAME = "com.example.encryption"
+  private var workManager: WorkManager? =null
 
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,16 +60,16 @@ class MainActivity : AppCompatActivity() {
     val btn:Button = findViewById<Button>(R.id.test_button)
 
     mKeyGuardservice =
-      getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager;
+      getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
-    var notSecure = false;
-    if (!mKeyGuardservice.isKeyguardSecure()) {
-      keyLockEnabled = false;
+    var notSecure = false
+    if (!mKeyGuardservice.isKeyguardSecure) {
+      keyLockEnabled = false
       btn.isEnabled = false
       Log.w(TAG,"KeyGuard Secure is disabled. we can not try testing keys relate to it.")
       Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => disabled")
       //return; //画面のロックが設定されていない
-      notSecure = true;
+      notSecure = true
     }
     if(!notSecure) {
       keyGenParameterSpec1 =
@@ -89,7 +94,7 @@ class MainActivity : AppCompatActivity() {
       componentName,
       CoroutineKeyCheckWorker::class.java
     )*/
-    workManager = WorkManager.getInstance(applicationContext);
+    workManager = WorkManager.getInstance(applicationContext)
     val request = OneTimeWorkRequest.from(CoroutineKeyCheckWorker::class.java)
     //manager.enqueue(request)
     workManager?.enqueue(request)
@@ -133,9 +138,6 @@ class MainActivity : AppCompatActivity() {
     return OneTimeWorkRequest.Builder(listenableWorkerClass)
       .setInputData(data)
       .build()
-  }
-  override fun onStart() {
-    super.onStart()
   }
 
   private fun createKey(keyGenParameterSpec: KeyGenParameterSpec) {

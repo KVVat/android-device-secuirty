@@ -2,38 +2,18 @@ package com.example.test_suites.utils
 
 
 import com.example.test_suites.rule.AdbDeviceRule
-import com.example.test_suites.rule.DeviceType
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
-import org.w3c.dom.Document
-import org.w3c.dom.Node
-import org.xml.sax.SAXException
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
-import java.io.NotSerializableException
-import java.io.StringWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.MessageFormat
 import java.time.LocalDateTime
 import java.util.Properties
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
-import javax.xml.transform.OutputKeys
-import javax.xml.transform.Transformer
-import javax.xml.transform.TransformerConfigurationException
-import javax.xml.transform.TransformerException
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
-import javax.xml.xpath.XPath
-import javax.xml.xpath.XPathConstants
-import javax.xml.xpath.XPathExpressionException
-import javax.xml.xpath.XPathFactory
 import kotlin.io.path.exists
 
 

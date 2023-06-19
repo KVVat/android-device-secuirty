@@ -2,13 +2,11 @@ package com.example.test_suites.utils
 
 import android.os.Build
 import android.provider.Settings
-import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
 import org.json.JSONObject
-import java.io.File
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 import java.text.MessageFormat
 import java.time.LocalDateTime
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description
 
 class ADSRPTestWatcher():TestWatcher() {
   private lateinit var deviceType:String
@@ -19,8 +17,8 @@ class ADSRPTestWatcher():TestWatcher() {
     println(MessageFormat.format("==========================================\n[Test Start] : {0} on {1}", desc, LocalDateTime.now()))
     //reffer android api
 
-    this.osversion = Build.VERSION.RELEASE;
-    this.system = Build.DISPLAY;
+    this.osversion = Build.VERSION.RELEASE
+    this.system = Build.DISPLAY
     this.deviceType = Build.TYPE
     this.deviceSerial =  Settings.Secure.ANDROID_ID//ro.boot.serialno
 

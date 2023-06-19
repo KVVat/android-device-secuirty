@@ -18,14 +18,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
-import org.apache.commons.compress.utils.FileNameUtils
-import org.hamcrest.MatcherAssert
 import org.hamcrest.core.IsEqual
-import org.hamcrest.core.StringStartsWith
-import org.jsfr.json.JsonPathListener
-import org.jsfr.json.JsonSurfer
-import org.jsfr.json.JsonSurferJackson
-import org.jsfr.json.SurfingConfiguration
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -35,7 +28,6 @@ import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
 import java.io.BufferedInputStream
 import java.io.BufferedReader
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -306,89 +298,5 @@ class KernelAcvpTest {
   }
 
   //@Test
-  fun testKernelAcvp_() {
 
-    val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm XXX")
-
-    //Check kernel settings
-
-    //If the system does not require  the test should be fail.
-
-    //install test modules
-    val ret = AdamUtils.root(adb)
-    //If we can not to be root the device fail test
-    Thread.sleep(5000)//Wait system reponse for a while
-    println(ret)
-    //
-    batch_install(RES_PATH,"/data/local/tmp/", arrayOf(
-      "acvptool:775","acvp_kernel_harness_arm64:775","af_alg_config.txt",
-      "config.json"
-    ))
-    //based on a recent test cases.
-
-    // val vectors:List<String> = listOf(
-    //   "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
-    //   "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC","ACVP-AES-CBC-CS3",
-    //   "ACVP-AES-CTR","ACVP-AES-XTS","ACVP-AES-GCM"
-    // )
-
-    // val vectors:List<String> = listOf(
-    // "1044265_SHA2-224",            "1044271_HMAC-SHA2-256",       "1044266_SHA2-256",            "1044263_CMAC-AES",
-    // "1044258_ACVP-AES-ECB",        "1044272_HMAC-SHA2-384",       "1044270_HMAC-SHA2-224",       "1044267_SHA2-384",
-    // "1044259_ACVP-AES-CBC",        "1044261_ACVP-AES-CTR",        "1044269_HMAC-SHA-1",          "1044268_SHA2-512",
-    // "1044274_hmacDRBG",
-    // "1044273_HMAC-SHA2-512",       "1044264_SHA-1",               "1044262_ACVP-AES-XTS"       /*,"1044275_hmacDRBG"*/
-    // )
-
-    val vectors:List<String> = 
-    listOf("1633593-ACVP-AES-ECB",	"1633602-SHA2-384", "1633594-ACVP-AES-CBC",	"1633603-SHA2-512",
-    "1633595-ACVP-AES-CBC-CS3",	"1633604-HMAC-SHA-1", "1633596-ACVP-AES-CTR",	"1633605-HMAC-SHA2-224",
-    "1633597-ACVP-AES-XTS",	"1633606-HMAC-SHA2-256", "1633598-CMAC-AES","1633607-HMAC-SHA2-384",
-    "1633599-SHA-1","1633608-HMAC-SHA2-512", "1633600-SHA2-224","1633609-hmacDRBG", "1633601-SHA2-256")
-
-    //
-    val fnames:Array<String> = vectors.map{ "$it.bz2" }.toTypedArray()
-    //
-    batch_install(RES_PATH+"/vectors-20230509/","/data/local/tmp/vectors/",fnames)
-    batch_install(RES_PATH+"/expected-20230509/","/data/local/tmp/expected/",fnames)
-    // For in case not be configured :
-    // Because the key and DRBG entropy are set with setsockopt,
-    // tests can fail on certain inputs if sysctl_optmem_max is too low.
-    AdamUtils.shellRequest("sysctl -w net.core.optmem_max=204800",adb)
-    //extract datas
-    AdamUtils.shellRequest("bzip2 -dk /data/local/tmp/vectors/*.bz2",adb)
-    //AdamUtils.shellRequest("bzip2 -dk /data/local/tmp/expected/*.bz2",adb)
-    AdamUtils.shellRequest("cd /data/local/tmp/;mkdir actual;mkdir diffs",adb)
-
-    //var foundError = false;
-    vectors.forEach {
-      val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
-
-      val line = if(sr.exitCode!=0) {
-        "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
-      } else {
-        "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()
-      }
-      AdamUtils.shellRequest("cd /data/local/tmp/;echo $line >> acvptest.log",adb)
-
-      //var diffResult = AdamUtils.shellRequest("cd /data/local/tmp/;diff actual/$it expected/$it > diffs/$it.diff",adb)
-      /*if(sr.exitCode !== 0){
-        foundError = true
-        val line = "\""+dateFormat.format(Date())+" *** result for $it does not match expected ***\""
-        AdamUtils.shellRequest("cd /data/local/tmp/;echo $line >> acvptest.log",adb)
-        println(line)
-      }*/
-    }
-    //File("results","kernelacvp").mkdirs()
-    //Archive diff,actual dirs
-    AdamUtils.shellRequest("cd /data/local/tmp/;tar -zcvf actual.tar.gz actual",adb)
-    //AdamUtils.shellRequest("cd /data/local/tmp/;tar -zcvf diffs.tar.gz diffs",adb)
-    //Pull worklog, actual, diff file into results dir from device
-
-    AdamUtils.pullfile("/data/local/tmp/acvptest.log","../results/kernelacvp/",adb)
-    //AdamUtils.pullfile("/data/local/tmp/diffs.tar.gz","../results/kernelacvp/",adb)
-    AdamUtils.pullfile("/data/local/tmp/actual.tar.gz","../results/kernelacvp/",adb)
-
-    //Clean the system
-  }
 }

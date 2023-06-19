@@ -7,22 +7,18 @@ import com.example.test_suites.utils.SFR
 import com.example.test_suites.utils.TestAssertLogger
 import com.malinskiy.adam.request.pkg.UninstallRemotePackageRequest
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
-import java.io.File
-import java.nio.file.Paths
-import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.core.StringStartsWith
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.junit.rules.TestName
 import org.junit.rules.TestWatcher
-import org.hamcrest.Matcher
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.IsEqual
-import org.hamcrest.core.StringStartsWith
+import java.io.File
+import java.nio.file.Paths
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -45,13 +41,14 @@ class FDP_ACF_EXT_Simple {
   val client = adb.adb
 
   @Rule @JvmField
-  public var watcher: TestWatcher = ADSRPTestWatcher(adb)
+  var watcher: TestWatcher = ADSRPTestWatcher(adb)
   @Rule @JvmField
-  public var name: TestName = TestName();
+  var name: TestName = TestName()
+
   //Asset Log
-  public var a: TestAssertLogger = TestAssertLogger(name)
+  var a: TestAssertLogger = TestAssertLogger(name)
   @Rule @JvmField
-  public var errs: ErrorCollector = ErrorCollector()
+  var errs: ErrorCollector = ErrorCollector()
 
   @Before
   fun setup() {
@@ -84,20 +81,20 @@ class FDP_ACF_EXT_Simple {
     runBlocking {
       //
       val file_apk_v1_debug: File =
-        File(Paths.get("src", "test", "resources", "appupdate-v1-debug.apk").toUri());
+        File(Paths.get("src", "test", "resources", "appupdate-v1-debug.apk").toUri())
       val file_apk_v2_debug: File =
-        File(Paths.get("src", "test", "resources", "appupdate-v2-debug.apk").toUri());
+        File(Paths.get("src", "test", "resources", "appupdate-v2-debug.apk").toUri())
 
-      var ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
+      var ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb)
       assertThat(a.Msg("Verify Install apk v1 (expect=Success)"),
                  ret,StringStartsWith("Success"))
 
-      ret =  AdamUtils.InstallApk(file_apk_v2_debug,false,adb);
+      ret =  AdamUtils.InstallApk(file_apk_v2_debug,false,adb)
       assertThat(a.Msg("Verify Install upgraded apk v2 (expect=Success)"),
                  ret,StringStartsWith("Success"))
 
       //degrade
-      ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
+      ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb)
       assertThat(a.Msg("Verify Install degraded apk v1 (expect=Failure)"),
                  ret,StringStartsWith("Failure"))
 
@@ -115,18 +112,18 @@ class FDP_ACF_EXT_Simple {
     runBlocking {
       //
       val file_apk_v1_debug: File =
-        File(Paths.get("src", "test", "resources", "appupdate-v1-debug.apk").toUri());
+        File(Paths.get("src", "test", "resources", "appupdate-v1-debug.apk").toUri())
       val file_apk_v2_signed: File =
-        File(Paths.get("src", "test", "resources", "appupdate-v2-signed.apk").toUri());
+        File(Paths.get("src", "test", "resources", "appupdate-v2-signed.apk").toUri())
 
       println("Verify Install apk v1 (expect=Success)")
-      var ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb);
+      var ret = AdamUtils.InstallApk(file_apk_v1_debug,false,adb)
       assertThat(a.Msg("Verify Install apk v1 (expect=Success)"),
                  ret,StringStartsWith("Success"))
 
       //Signature mismatch case
       println("Verify Install apk v2 with different signing key (expect=Failure)a")
-      ret = AdamUtils.InstallApk(file_apk_v2_signed,false,adb);
+      ret = AdamUtils.InstallApk(file_apk_v2_signed,false,adb)
       assertThat(a.Msg("Verify Install apk v2 with different signing key (expect=Failure)"),
                  ret,StringStartsWith("Failure"))
       //unistall the test file before next test
