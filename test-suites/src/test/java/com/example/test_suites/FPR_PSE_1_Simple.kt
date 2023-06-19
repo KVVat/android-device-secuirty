@@ -108,7 +108,7 @@ class FPR_PSE_1_Simple {
 
       //launch application
       client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
-      Thread.sleep(SHORT_TIMEOUT*5)
+      //Thread.sleep(SHORT_TIMEOUT*15)
 
       //Store preference into map B/check prefernce and compare included values against A
       response =
@@ -121,7 +121,7 @@ class FPR_PSE_1_Simple {
 
       //Expected : All unique id values should be maintained
       //Note : Each test should not interrupt execution of the test case
-
+      println(dictB)
       errs.checkThat(a.Msg("Verify UUID same"),dictA["UUID"],IsEqual(dictB["UUID"]))
       errs.checkThat(a.Msg("Verify ADID same"),dictA["ADID"],IsEqual(dictB["ADID"]))
       errs.checkThat(a.Msg("Verify AID same"),dictA["AID"],IsEqual(dictB["AID"]))
@@ -133,15 +133,15 @@ class FPR_PSE_1_Simple {
       println(">Uninstall/Install again the target apk.")
       //uninstall application =>
       client.execute(UninstallRemotePackageRequest(TEST_PACKAGE), adb.deviceSerial)
-      Thread.sleep(SHORT_TIMEOUT*2)
+      Thread.sleep(SHORT_TIMEOUT*5)
       //println(response.output)
       //install application again
       AdamUtils.InstallApk(file_apk, false,adb)
-      Thread.sleep(SHORT_TIMEOUT*2)
+      Thread.sleep(SHORT_TIMEOUT*5)
       //println(respstring)
       //launch application
       client.execute(ShellCommandRequest("am start -n $TEST_PACKAGE/$TEST_PACKAGE.MainActivity"), adb.deviceSerial)
-      Thread.sleep(SHORT_TIMEOUT*5)
+      Thread.sleep(SHORT_TIMEOUT*10)
       //check preference and compare included values against A and B
       response =
         client.execute(ShellCommandRequest("run-as ${TEST_PACKAGE} cat /data/data/$TEST_PACKAGE/shared_prefs/UniqueID.xml"), adb.deviceSerial)

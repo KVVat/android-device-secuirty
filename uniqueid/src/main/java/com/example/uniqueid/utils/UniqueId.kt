@@ -81,7 +81,13 @@ class UniqueId {
     }
 
     fun getIMEI3():String{
-      return  Build.getSerial()
+      return ""
+      /*return try {
+          val r = Build.getSerial();
+        r;
+      } catch (ex:Exception){
+        ""
+      }*/
     }
     fun getIMEI1():String{
       try {
@@ -90,7 +96,7 @@ class UniqueId {
         if(r.ret == 0) {
           if (r.output.startsWith("Result: Parcel(")) {
             val lines:List<String> = r.output.split("\n");
-            var result = StringBuffer();
+            val result = StringBuffer();
             for(line:String in lines){
               val fi = line.indexOf("'");
               if(fi != -1) {

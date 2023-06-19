@@ -31,6 +31,7 @@ echo "3: FCS_CKH_EXT1_Low (DirectBoot)"
 echo "4: FCS_CKH_EXT1_High 2(File Encryption)"
 echo "5: FIA_AFL_1 (ScreenLock Password)"
 echo "6: FCS_COP_1 (Kernel Acvp Test)"
+echo "7: FTP_ITC_EXT_1 (TLS Packet Analyze)"
 echo "9: Clean test"
 echo "Results will be stored in $rdir"
 echo -n ">"
@@ -38,7 +39,7 @@ read -r NUM
 
 if [ $NUM -eq 1 ]; then
   ./gradlew testDebug --tests com.example.test_suites.\*_Simple
-  ./gradlew task xmlPatchAfterExecute
+  ./gradlew xmlPatchAfterExecute
   # copy test results to the result directory
   #clone_output $NUM test-results
 elif [ $NUM -eq 2 ]; then
@@ -53,7 +54,7 @@ elif [ $NUM -eq 3 ]; then
   echo "*** any key to start ***"
   read -r WARN
   ./gradlew testDebug --tests com.example.test_suites.FCS_CKH_EXT1
-  ./gradlew task xmlPatchAfterExecute
+  ./gradlew xmlPatchAfterExecute
 elif [ $NUM -eq 4 ]; then
   echo " - The test automatically operate the target device with UIAutomator"
   echo " - For running this test you need to set the ScreenLock setting to 'None'. "
@@ -83,7 +84,16 @@ elif [ $NUM -eq 6 ]; then
   read -r WARN
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
    ./gradlew testDebug --tests com.example.test_suites.KernelAcvpTest.testKernelAcvp
-   ./gradlew task xmlPatchAfterExecute
+   ./gradlew xmlPatchAfterExecute
+  fi
+elif [ $NUM -eq 7 ]; then
+  echo "- This test runs packet capture software on the device."
+  echo "- For running this test you need to set the ScreenLock setting to 'None'"
+  echo "Start This Test Case? (y/n)"
+  read -r WARN
+  if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
+   ./gradlew testDebug --tests com.example.test_suites.FTP_ITC_EXT_1
+   ./gradlew xmlPatchAfterExecute
   fi
 elif [ $NUM -eq 9 ]; then
   ./gradlew clean
@@ -93,13 +103,3 @@ else
 fi
 
 exit 0
-
-# For acvpkernel test you should compile kernel with the settings below...
-  # CONFIG_CRYPTO_FIPS140_MOD=y
-  # CONFIG_CRYPTO_DRBG_HASH=y
-  # CONFIG_CRYPTO_DRBG_CTR=y
-  # CONFIG_CRYPTO_USER_API_HASH=y
-  # CONFIG_CRYPTO_USER_API_SKCIPHER=y
-  # CONFIG_CRYPTO_USER_API_RNG=y
-  # CONFIG_CRYPTO_USER_API_RNG_CAVP=y
-  # CONFIG_CRYPTO_USER_API_AEAD=y
