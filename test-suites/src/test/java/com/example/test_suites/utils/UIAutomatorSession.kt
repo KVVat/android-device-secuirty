@@ -1,6 +1,5 @@
 package com.example.test_suites.utils
 
-import android.provider.Settings.ACTION_SECURITY_SETTINGS
 import com.example.test_suites.rule.AdbDeviceRule
 import com.malinskiy.adam.AndroidDebugBridgeClient
 import com.malinskiy.adam.request.shell.v1.ShellCommandRequest
@@ -11,8 +10,6 @@ import org.dom4j.Element
 import org.dom4j.Node
 import org.dom4j.io.SAXReader
 import java.io.File
-import java.net.URI
-import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -151,8 +148,7 @@ class UIAutomatorSession
             return false
         }
     }
-    class UIClickable(x:Int,y:Int,h:Int,w:Int){
-    }
+
     fun listAllClickables(){
         if(document != null){
             val nodes = document!!.selectNodes(
@@ -160,9 +156,9 @@ class UIAutomatorSession
             for(n in nodes){
                 val elem = n as Element
                 val cls = elem.attributeValue("class")
-                val res = elem.attributeValue("resource-id")
-                val pkg = elem.attributeValue("package")
-                var bounds = boundsToArray(elem.attributeValue("bounds"))
+                //val res = elem.attributeValue("resource-id")
+                //val pkg = elem.attributeValue("package")
+                //var bounds = boundsToArray(elem.attributeValue("bounds"))
 
                 if(cls.endsWith("Layout")){
                     //check if clickable layout contains text node

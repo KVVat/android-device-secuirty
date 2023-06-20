@@ -77,7 +77,7 @@ class AdbDeviceRule(val deviceType: DeviceType = DeviceType.ANY, vararg val requ
                 device.serial.startsWith("emulator-")
               )
             }
-            DeviceType.ANY->{
+            DeviceType.ANY ->{
             }
           }
 

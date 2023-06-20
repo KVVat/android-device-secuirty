@@ -14,6 +14,7 @@ import org.dom4j.Document
 import org.dom4j.Element
 import org.dom4j.Node
 import org.dom4j.io.SAXReader
+import org.hamcrest.core.Is
 import org.hamcrest.core.IsEqual
 import org.junit.After
 import org.junit.Assert
@@ -146,7 +147,8 @@ class FTP_ITC_EXT_1 {
     val hostName = "https://tls-v1-2.badssl.com:1012/"
     val resp:Pair<String,Path> =
       tlsCapturePacket("normal",hostName)
-
+    val httpret:String = resp.first
+    errs.checkThat(httpret, IsEqual( "200"))
     println(resp)
 
     val pdml_path  = resp.second.absolutePathString()
@@ -163,8 +165,9 @@ class FTP_ITC_EXT_1 {
     val hostName = "https://expired.badssl.com/"
     val resp:Pair<String,Path> =
       tlsCapturePacket("expired",hostName)
-
-    println(resp)
+    val httpret:String = resp.first
+    errs.checkThat(httpret, IsEqual( "525"))
+    //println(resp)
 
     val pdml_path  = resp.second.absolutePathString()
     anaylzeCertainPdml(Paths.get(pdml_path+".xml"),hostName)
@@ -180,8 +183,9 @@ class FTP_ITC_EXT_1 {
     val hostName = "https://wrong.host.badssl.com/"
     val resp:Pair<String,Path> =
       tlsCapturePacket("expired",hostName)
-
-    println(resp)
+    val httpret:String = resp.first
+    errs.checkThat(httpret, IsEqual( "526"))
+    //println(resp)
 
     val pdml_path  = resp.second.absolutePathString()
     anaylzeCertainPdml(Paths.get(pdml_path+".xml"),hostName)

@@ -19,7 +19,7 @@ import kotlin.io.path.exists
 
 class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
 
-  private var adbDeviceRule: AdbDeviceRule=adbDeviceRule
+  private var adbDeviceRule: AdbDeviceRule =adbDeviceRule
   private lateinit var deviceType:String
   private lateinit var deviceSerial:String
   private lateinit var system:String
@@ -53,13 +53,13 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
   {
     val prop= Properties()
     val path = Paths.get(path_)
-    var mValue:String = value;
+    var mValue:String = value
     if(path.exists()){
       FileInputStream(path.toFile()).use { stream->
         try {
           prop.load(stream)
           val values:String = prop.getProperty(key,"")
-          var aVal = values.split(",").toMutableList()
+          val aVal = values.split(",").toMutableList()
           if(!aVal.contains(value)) aVal.add(value)
           mValue = aVal.joinToString(",")
 
@@ -117,7 +117,7 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
     val title_ = sfr.title.trim()
     val desc_ = sfr.description.trim()
 
-    val diffText:String = """
+    val diffText = """
 <diff>
    <add sel="/testsuite/properties">
        <property name="SFR.name" value="${title_}" />

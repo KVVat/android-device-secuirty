@@ -27,7 +27,7 @@ import java.util.TimeZone
 
 class AdamUtils {
   companion object{
-    fun root(adb:AdbDeviceRule):String{
+    fun root(adb: AdbDeviceRule):String{
       var ret:String
       runBlocking {
        ret = adb.adb.execute(
@@ -38,7 +38,7 @@ class AdamUtils {
       println("Restart adb=>$ret")
       return ret
     }
-    fun shellRequest(shellCommand:String,adb:AdbDeviceRule):ShellCommandResult{
+    fun shellRequest(shellCommand:String,adb: AdbDeviceRule):ShellCommandResult{
       var ret:ShellCommandResult
 
       runBlocking {
@@ -51,7 +51,7 @@ class AdamUtils {
 
       return ret
     }
-    fun waitLogcatLine(waitTime:Int,tagWait:String,adb:AdbDeviceRule):LogcatResult? {
+    fun waitLogcatLine(waitTime:Int,tagWait:String,adb: AdbDeviceRule):LogcatResult? {
       var found = false
       var text = ""
       var tag = ""
@@ -93,7 +93,7 @@ class AdamUtils {
     }
 
 
-    fun pullfile(sourcePath:String,dest:String,adb: AdbDeviceRule,copytoFile:Boolean=false){
+    fun pullfile(sourcePath:String, dest:String, adb: AdbDeviceRule, copytoFile:Boolean=false){
       runBlocking {
         val p: Path = Paths.get(sourcePath)
         val destPath: Path = if(copytoFile){
@@ -114,14 +114,15 @@ class AdamUtils {
         var percentage:Int
         for (percentageDouble in channel) {
           percentage = (percentageDouble * 100).toInt()
-          if(percentage%10==0) {
-            println("Pulling a file($sourcePath) " + percentage + "% done")
+          if(percentage>=100) {
+            println("Pulling a file($sourcePath) $percentage% done")
+            //percentage = 101
           }
         }
       }
     }
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun InstallApk(apkFile: File, reinstall: Boolean = false, adb:AdbDeviceRule): String {
+    fun InstallApk(apkFile: File, reinstall: Boolean = false, adb: AdbDeviceRule): String {
       var stdio: com.malinskiy.adam.request.shell.v1.ShellCommandResult
       val client:AndroidDebugBridgeClient = adb.adb
 
