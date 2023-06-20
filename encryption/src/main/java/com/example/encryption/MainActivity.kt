@@ -2,9 +2,10 @@ package com.example.encryption
 
 import android.app.Activity
 import android.app.KeyguardManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
@@ -13,131 +14,130 @@ import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.work.Data
-import androidx.work.ListenableWorker
+import androidx.annotation.RequiresApi
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_CLASS_NAME
-import androidx.work.multiprocess.RemoteListenableWorker.ARGUMENT_PACKAGE_NAME
 import com.example.encryption.utils.CoroutineKeyCheckWorker
+import androidx.biometric.BiometricPrompt
+
+
 import java.io.IOException
-import java.security.InvalidAlgorithmParameterException
-import java.security.InvalidKeyException
-import java.security.KeyStore
-import java.security.KeyStoreException
-import java.security.NoSuchAlgorithmException
-import java.security.NoSuchProviderException
-import java.security.UnrecoverableKeyException
-import javax.crypto.BadPaddingException
-import javax.crypto.Cipher
-import javax.crypto.IllegalBlockSizeException
-import javax.crypto.KeyGenerator
-import javax.crypto.NoSuchPaddingException
-import javax.crypto.SecretKey
+import java.security.*
+import java.util.concurrent.Executor
+import javax.crypto.*
 import javax.security.cert.CertificateException
-
-
-//The module simply record Unique Id to the configuration file
+//https://developer.android.com/training/sign-in/biometric-auth?hl=ja
 class MainActivity : AppCompatActivity() {
-  lateinit var mKeyGuardservice:KeyguardManager
-  var keyLockEnabled = true
-  var TAG = "ADSRP_ENCRYPTION"
-  var TAG_TEST = "FCS_CKH_EXT1_HIGH"
 
-  lateinit var keyGenParameterSpec1: KeyGenParameterSpec
-  lateinit var keyGenParameterSpec2: KeyGenParameterSpec
+  lateinit var mKeyGuardservice: KeyguardManager
+  var keyLockEnabled = true;
+
+  private val TAG = "FCS_CKH_EXT_TEST"
   private val REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1
+  private val PREF_NAME:String = "FCS_CKH_EXT_PREF"
+
+  private var workManager: WorkManager? =null;
+
+  lateinit var keyGenParameterSpec1: KeyGenParameterSpec;
+  lateinit var keyGenParameterSpec2: KeyGenParameterSpec;
 
 
-  private var workManager: WorkManager? =null
-
+  private lateinit var executor: Executor
+  private lateinit var biometricPrompt: BiometricPrompt
+  private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    val btn:Button = findViewById<Button>(R.id.test_button)
+    val btn: Button = findViewById<Button>(R.id.test_button)
+    val biometric_btn: Button = findViewById<Button>(R.id.biometric_test)
 
     mKeyGuardservice =
-      getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+      getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager;
 
-    var notSecure = false
-    if (!mKeyGuardservice.isKeyguardSecure) {
+    if (!mKeyGuardservice.isKeyguardSecure()) {
       keyLockEnabled = false
       btn.isEnabled = false
+      biometric_btn.isEnabled = false
       Log.w(TAG,"KeyGuard Secure is disabled. we can not try testing keys relate to it.")
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => disabled")
-      //return; //画面のロックが設定されていない
-      notSecure = true
-    }
-    if(!notSecure) {
-      keyGenParameterSpec1 =
-        keyGenParameterSpec("key_1", true, false)
-      createKey(keyGenParameterSpec1)
+      writePrefValue("AUTHREQUIRED","NG")
+
+      return; //画面のロックが設定されていない
     }
 
+    keyGenParameterSpec1 =
+      keyGenParameterSpec("key_auth",true,false)
+    createKey(keyGenParameterSpec1)
+
     keyGenParameterSpec2 =
-      keyGenParameterSpec("key_2",false,true)
+      keyGenParameterSpec("key_unlock",false,true)
     createKey(keyGenParameterSpec2)
 
     btn.setOnClickListener {
       Log.i(TAG,"Button Clicked!")
-      tryEncrypt("key_1")
+      tryEncrypt("key_auth",true)
     }
-    //Log.d(TAG_TEST,"WorkManager enque s")
-    testUnlockedDeviceRequired()
 
-    /*val serviceName = RemoteWorkerService::class.java.name
-    val componentName = ComponentName(PACKAGE_NAME, serviceName)
-    val oneTimeWorkRequest = buildOneTimeWorkRemoteWorkRequest(
-      componentName,
-      CoroutineKeyCheckWorker::class.java
-    )*/
-    workManager = WorkManager.getInstance(applicationContext)
+    workManager = WorkManager.getInstance(applicationContext);
     val request = OneTimeWorkRequest.from(CoroutineKeyCheckWorker::class.java)
-    //manager.enqueue(request)
     workManager?.enqueue(request)
-    Log.d(TAG_TEST,"WorkManager enque")
-    /* Application should run ke_2 check in background
-    val request = OneTimeWorkRequestBuilder<MyWorkTestable>()
-      .build()
 
-    // Enqueue and wait for result. This also runs the Worker synchronously
-    // because we are using a SynchronousExecutor.
-    workManager.enqueue(request).result.get()
-    // Get WorkInfo
-    val workInfo = workManager.getWorkInfoById(request.id).get()
-    */
-  }
+    //biometric authenticators
+    executor = ContextCompat.getMainExecutor(this)
+    biometricPrompt = BiometricPrompt(this, executor,
+      object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationError(errorCode: Int,
+                                           errString: CharSequence) {
+          super.onAuthenticationError(errorCode, errString)
+          Toast.makeText(applicationContext,
+            "Authentication error: $errString", Toast.LENGTH_SHORT)
+            .show()
+        }
 
-  private fun testUnlockedDeviceRequired():Boolean
-  {
-    try {
-      tryEncrypt("key_2")
-      Log.d(TAG_TEST,"KeyFeature:setUnlockedDeviceRequired=true => success")
-      return true
-    } catch (e:java.lang.RuntimeException){
-      Log.d(TAG_TEST,"KeyFeature:setUnlockedDeviceRequired=true => failed")
-      return false
+        override fun onAuthenticationSucceeded(
+          result: BiometricPrompt.AuthenticationResult) {
+          super.onAuthenticationSucceeded(result)
+          Toast.makeText(applicationContext,
+            "Authentication succeeded!", Toast.LENGTH_SHORT)
+            .show()
+        }
+
+        override fun onAuthenticationFailed() {
+          super.onAuthenticationFailed()
+          Toast.makeText(applicationContext, "Authentication failed",
+            Toast.LENGTH_SHORT)
+            .show()
+        }
+      })
+
+    promptInfo =
+      BiometricPrompt.PromptInfo.Builder()
+        .setTitle("Device Authentication")
+        .setAllowedAuthenticators(DEVICE_CREDENTIAL)
+        .build()
+    biometricPrompt.authenticate(promptInfo)
+    val biometricLoginButton =
+      findViewById<Button>(R.id.biometric_test)
+
+    biometricLoginButton.setOnClickListener {
+      biometricPrompt.authenticate(promptInfo)
     }
   }
-  private fun buildOneTimeWorkRemoteWorkRequest(
-    componentName: ComponentName
-    , listenableWorkerClass: Class<out ListenableWorker>
-  ): OneTimeWorkRequest {
 
-    // ARGUMENT_PACKAGE_NAME and ARGUMENT_CLASS_NAME are used to determine the service
-    // that a Worker binds to. By specifying these parameters, we can designate the process a
-    // Worker runs in.
-    val data: Data = Data.Builder()
-      .putString(ARGUMENT_PACKAGE_NAME, componentName.packageName)
-      .putString(ARGUMENT_CLASS_NAME, componentName.className)
-      .build()
-
-    return OneTimeWorkRequest.Builder(listenableWorkerClass)
-      .setInputData(data)
-      .build()
+  fun writePrefValue(label:String,value:String):String{
+    val sharedPref = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    val ret = sharedPref.getString(label,"")
+    sharedPref.edit().putString(label,value).apply()
+    Log.d(TAG,"${label}:${value}")
+    if(ret==""){
+      return value;
+    } else {
+      Log.d(TAG, "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!)
+      return ret;
+    }
   }
 
   private fun createKey(keyGenParameterSpec: KeyGenParameterSpec) {
@@ -187,8 +187,7 @@ class MainActivity : AppCompatActivity() {
       throw java.lang.RuntimeException("Failed to create a symmetric key", e)
     }
   }
-
-  private fun tryEncrypt(keyname:String): Boolean {
+  private fun tryEncrypt(keyname:String,click_check:Boolean=false): Boolean {
     try {
       val keyStore = KeyStore.getInstance("AndroidKeyStore")
       keyStore.load(null)
@@ -203,18 +202,32 @@ class MainActivity : AppCompatActivity() {
       cipher.doFinal("test".toByteArray())
       // If the user has recently authenticated, you will reach here.
       //showAlreadyAuthenticated()
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => success")
-      Toast.makeText(this, ("Authed"), Toast.LENGTH_LONG).show()
+      if(keyname.equals("key_auth") && !click_check) {
+        //Log.d(TAG_TEST_AUTH,"AUTHREQUIRED:OK")
+        writePrefValue("AUTHREQUIRED","OK")
+        Toast.makeText(this, ("Authed"), Toast.LENGTH_LONG).show()
+      }
       return true
     } catch (e: UserNotAuthenticatedException) {
       // User is not authenticated, let's authenticate with device credentials.
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => failed")
-      showAuthenticationScreen()
+
+      if(keyname.equals("key_auth") ) {
+        if(!click_check) {
+          writePrefValue("AUTHREQUIRED","NG")
+          Toast.makeText(this, ("NG - User Not Authed"), Toast.LENGTH_LONG).show()
+        }
+        showAuthenticationScreen()
+      }
+
       return false
     } catch (e: KeyPermanentlyInvalidatedException) {
       // This happens if the lock screen has been disabled or reset after the key was
       // generated after the key was generated.
-      Log.d(TAG_TEST,"KeyFeature:setAuthenticationRequired=true => failed (keys are invalidated after created)")
+      if(keyname.equals("key_auth") && !click_check) {
+        writePrefValue("AUTHREQUIRED","NG")
+        Toast.makeText(this, ("NG - Key Permanently Invalidate"), Toast.LENGTH_LONG).show()
+      }
+      //e.printStackTrace()
       return false
     } catch (e: BadPaddingException) {
       throw java.lang.RuntimeException(e)
@@ -241,7 +254,6 @@ class MainActivity : AppCompatActivity() {
     // we will provide a generic one for you if you leave it null
     val intent: Intent = mKeyGuardservice.createConfirmDeviceCredentialIntent(null, null)
     startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS)
-
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -249,12 +261,16 @@ class MainActivity : AppCompatActivity() {
     if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
       // Challenge completed, proceed with using cipher
       if (resultCode == Activity.RESULT_OK) {
-        if (tryEncrypt("key_1")) { }
+        tryEncrypt("key_auth",false)
       } else {
         // The user canceled or didn’t complete the lock screen
         // operation. Go to error/cancellation flow.
         Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show()
+        writePrefValue("AUTHREQUIRED","NG")
       }
     }
   }
+
+
+
 }

@@ -64,7 +64,7 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
           mValue = aVal.joinToString(",")
 
         } catch (e:IOException) {
-          println("Prop Read Error:"+e)
+          println("Prop Read Error:$e")
         } finally {
           stream.close()
         }
@@ -79,7 +79,7 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
       try {
         prop.store(stream,"Props for process.")
       } catch (e:IOException) {
-        println("Prop Error:"+e)
+        println("Prop Error:$e")
       } finally {
         stream.close()
       }
@@ -136,7 +136,7 @@ class ADSRPTestWatcher(adbDeviceRule: AdbDeviceRule):TestWatcher() {
         writer.close()
         println("Xml Patch:Prepared")
       } catch (e:IOException) {
-        println("Xml Patch:"+e)
+        println("Xml Patch:$e")
       }
     }
     //

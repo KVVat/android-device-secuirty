@@ -43,5 +43,7 @@ dependencies {
     implementation "androidx.security:security-crypto:1.1.0-alpha04"
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
     implementation 'androidx.work:work-multiprocess:2.7.1'
+    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
 }
