@@ -32,7 +32,7 @@ class CoroutineKeyCheckWorker(
   override  fun doWork(): Result {
     repeat(50){
       try {
-        tryEncrypt("key_unlock")
+        tryEncrypt(AuthUtils.KEY_NAME)
         writePrefValue("UNLOCKDEVICE","OK")
         Thread.sleep(100)
       } catch (e:Exception){
@@ -40,6 +40,7 @@ class CoroutineKeyCheckWorker(
         Thread.sleep(100)
         return Result.failure()
       }
+
       val pf: SharedPreferences =
         context.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
       val resultAuth = pf.getString("AUTHREQUIRED","")
@@ -52,13 +53,11 @@ class CoroutineKeyCheckWorker(
   private fun writePrefValue(label:String, value:String):String{
     val sharedPref = applicationContext.getSharedPreferences(
       PREF_NAME, Context.MODE_PRIVATE)
+
     val ret = sharedPref.getString(label,"")
     sharedPref.edit().putString(label,value).apply()
 
-    return if(ret=="") value else {
-      Log.d(TAG, "ID:"+label+" API Value:"+value+" Existing Value:"+ret!!)
-      ret
-    }
+    return if(ret=="") value else ret!!
   }
 
   private fun tryEncrypt(key_name:String): Boolean {
@@ -79,8 +78,6 @@ class CoroutineKeyCheckWorker(
       // User is not authenticated, let's authenticate with device credentials.
       return false
     } catch (e: KeyPermanentlyInvalidatedException) {
-      // This happens if the lock screen has been disabled or reset after the key was
-      // generated after the key was generated.
       return false
     } catch (e: BadPaddingException) {
       throw java.lang.RuntimeException(e)
