@@ -17,12 +17,12 @@ class AuthUtils {
     companion object {
         val KEY_NAME = "KEY_NAME"
 
-        fun defaultKeyGenParametersBuilder(unlockDeviceRequired:Boolean,authRequired:Boolean,type:Int): KeyGenParameterSpec.Builder {
+        fun defaultKeyGenParametersBuilder(unlockDeviceRequired:Boolean,authRequired:Boolean,type:Int,timeout:Int=10): KeyGenParameterSpec.Builder {
             return KeyGenParameterSpec.Builder(KEY_NAME,
                 KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                .setUserAuthenticationParameters(60,type)
+                .setUserAuthenticationParameters(timeout,type)
                 .setUnlockedDeviceRequired(unlockDeviceRequired)
                 .setUserAuthenticationRequired(authRequired)
         }
@@ -50,11 +50,11 @@ class AuthUtils {
             }
         }
 
-        fun getSecretKey(): SecretKey {
+        fun getSecretKey(): SecretKey? {
             val keyStore = KeyStore.getInstance("AndroidKeyStore")
             // Before the keystore can be accessed, it must be loaded.
             keyStore.load(null)
-            return keyStore.getKey("KEY_NAME", null) as SecretKey
+            return keyStore.getKey(KEY_NAME, null) as SecretKey?
         }
 
         fun getCipher(): Cipher {

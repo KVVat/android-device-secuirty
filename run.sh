@@ -46,6 +46,7 @@ elif [ $NUM -eq 2 ]; then
    echo "Those test cases run on the target device. please check logcat to confirm the process of the test."
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High connectedAndroidTest
   ./gradlew xmlPatchForInst
+  ./gradlew xmlPatchAfterExecuteI
   #clone_output $NUM instrumentation-results
 elif [ $NUM -eq 3 ]; then
   echo "This test case automtically reboot the target device. "
@@ -64,6 +65,7 @@ elif [ $NUM -eq 4 ]; then
   read -r WARN
   ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FCS_CKH_EXT1_High2 connectedAndroidTest
   ./gradlew xmlPatchForInst
+  ./gradlew xmlPatchAfterExecuteI
 elif [ $NUM -eq 5 ]; then
   echo " - The test depends on the device/system environment, and we test it on the pixel devices"
   echo " - The test automatically operate the target device with UIAutomator"
@@ -74,7 +76,8 @@ elif [ $NUM -eq 5 ]; then
   read -r WARN
   if [ $WARN = "y" ] || [ $WARN = "Y" ]; then
     ./gradlew -Pandroid.testInstrumentationRunnerArguments.class=com.example.test_suites.FIA_AFL_1 connectedAndroidTest
-    ./gradlew xmlPatchForInst
+  ./gradlew xmlPatchForInst
+  ./gradlew xmlPatchAfterExecuteI
   fi
 elif [ $NUM -eq 6 ]; then
   echo " - This test runs ACVP harness for FIPS 140-2 certifications."

@@ -2,11 +2,9 @@ package com.example.test_suites
 
 import com.example.test_suites.rule.AdbDeviceRule
 import com.example.test_suites.utils.UIAutomatorSession
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
-import java.nio.file.Paths
 
 class UIAutomatorTest {
     @Rule
@@ -19,13 +17,13 @@ class UIAutomatorTest {
 
         UIAutomatorSession(adb,"com.android.settings").run {
             runBlocking {
-                copyxml(Paths.get("../results/out.xml"))
-                freezeRotation()
-                turnon()
-                showSettings("security")
-                delay(500)
-                listAllClickables()
-                unfreezeRotation()
+//                copyxml(Paths.get("../results/out.xml"))
+//                freezeRotation()
+//                turnon()
+//                showSettings("security")
+//                delay(500)
+//                listAllClickables()
+//                unfreezeRotation()
             }
             //copyxml(Paths.get("../results/out.xml"))
 

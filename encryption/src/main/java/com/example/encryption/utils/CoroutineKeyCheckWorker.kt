@@ -3,7 +3,6 @@ package com.example.encryption.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyPermanentlyInvalidatedException
-import android.security.keystore.KeyProperties
 import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import androidx.work.Worker
@@ -30,25 +29,38 @@ class CoroutineKeyCheckWorker(
   private val PREF_NAME:String = "FCS_CKH_EXT_PREF"
 
   override  fun doWork(): Result {
-    repeat(50){
+    var r=false
+    repeat(5){
+      //Log.d(TAG,"dowork")
       try {
-        tryEncrypt(AuthUtils.KEY_NAME)
-        writePrefValue("UNLOCKDEVICE","OK")
-        Thread.sleep(100)
+        tryEncrypt()
+        writePrefValue("BACKGROUND","OK")
+        r=true
+        Thread.sleep(1000)
       } catch (e:Exception){
-        writePrefValue("UNLOCKDEVICE","NG")
-        Thread.sleep(100)
-        return Result.failure()
+        Log.e(TAG,e.message!!)
+        //e.printStackTrace()
+        writePrefValue("BACKGROUND","NG")
+        r = false
+        //Key not found
+        Thread.sleep(1000)
+        //return Result.failure()
       }
 
       val pf: SharedPreferences =
         context.getSharedPreferences(PREF_NAME,Context.MODE_PRIVATE)
-      val resultAuth = pf.getString("AUTHREQUIRED","")
-      val resultUnlock = pf.getString("UNLOCKDEVICE","")
+      //Auth required may always false
+      //val resultAuth = pf.getString("AUTHREQUIRED","NG")
+      val resultUnlock = pf.getString("BACKGROUND","")
 
-      Log.d(TAG,"AUTHREQUIRED:$resultAuth,UNLOCKDEVICE:$resultUnlock")
+      Log.d(TAG,"BACKGROUND:$resultUnlock")
     }
-    return Result.success()
+    return if(r){
+      Result.success()
+    } else {
+      Result.failure()
+    }
+    //return Result.success()
   }
   private fun writePrefValue(label:String, value:String):String{
     val sharedPref = applicationContext.getSharedPreferences(
@@ -60,15 +72,13 @@ class CoroutineKeyCheckWorker(
     return if(ret=="") value else ret!!
   }
 
-  private fun tryEncrypt(key_name:String): Boolean {
+  private fun tryEncrypt(): Boolean {
     try {
       val keyStore = KeyStore.getInstance("AndroidKeyStore")
       keyStore.load(null)
-      val secretKey: SecretKey = keyStore.getKey(key_name, null) as SecretKey
-      val cipher: Cipher = Cipher.getInstance(
-        KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
-                + KeyProperties.ENCRYPTION_PADDING_NONE
-      )
+      val secretKey: SecretKey? = AuthUtils.getSecretKey()//keyStore.getKey(key_name, null) as SecretKey
+      val cipher = AuthUtils.getCipher()
+
       // Try encrypting something, it will only work if the user authenticated within
       // the last AUTHENTICATION_DURATION_SECONDS seconds.
       cipher.init(Cipher.ENCRYPT_MODE, secretKey)

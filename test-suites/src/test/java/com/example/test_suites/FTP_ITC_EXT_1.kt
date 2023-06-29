@@ -45,7 +45,7 @@ If TLS is supported by the TOE, the TLS channel shall as a minimum:
  implement TLS v1.2 [7], TLS v1.3 [11] or higher version of TLS; 
  and support X.509v3 certificates for mutual(cross) authentication;
  and determine validity of the peer certificate by certificate path, 
- expiration date and revocation status according to IETF RFC 5280 [8]; and
+ expiration date and revocation status according to IETF RFC 5280 [8]; and./client/build/install/client/bin/hello-world-client
 notify the TSF and [selection: not establish the connection, 
 request application authorization to establish the connection, no other action] 
 if the peer certificate is deemed invalid; 
