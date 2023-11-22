@@ -33,10 +33,15 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URI
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.EnumSet
+import java.util.stream.Collectors
+import kotlin.io.path.Path
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.nameWithoutExtension
 
 
 @SFR("Kernel ACVP Test Case", """
@@ -125,6 +130,23 @@ class KernelAcvpTest {
     }
     return true
   }
+  fun batch_install(source_:String,dest_:String,files:List<Path>):Boolean{
+    runBlocking {
+      files.forEach{
+        //println(it)
+        var target:String = it.fileName.toString()
+        var mode = "555"
+        if(target.indexOf(":")>-1){
+          var targetarg = target.split(":")
+          target = targetarg[0]
+          mode = targetarg[1]
+        }
+        println("Process(Push):"+Paths.get(source_,target).toUri()+"=>"+dest_)
+        pushFileToTmp(File(Paths.get(source_,target).toUri()),mode,dest_)
+      }
+    }
+    return true
+  }
 
   private fun bz2reader(fileURI: URI): String {
     try {
@@ -139,6 +161,8 @@ class KernelAcvpTest {
       throw ex
     }
   }
+
+
   private fun targz_reader(fileURI: URI, callback: (String, String) -> Unit)  {
     try {
       FileInputStream(File(fileURI)).use { fin ->
@@ -225,8 +249,7 @@ class KernelAcvpTest {
     val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm XXX")
 
     //Check kernel settings
-    //If the system does not require  the test should be fail.
-
+    //If the system does not require the test should be fail.
     //install test modules
     val ret = AdamUtils.root(adb)
     //If we can not to be root the device fail test
@@ -238,35 +261,13 @@ class KernelAcvpTest {
       "config.json"
     ))
 
-    // Test Set 1
-    //
-    //val vectors:List<String> = listOf(
-    // "SHA-1","SHA2-224","SHA2-256","SHA2-384","SHA2-512","HMAC-SHA-1","HMAC-SHA2-224","HMAC-SHA2-256",
-    // "HMAC-SHA2-384","HMAC-SHA2-512","CMAC-AES","ACVP-AES-ECB","ACVP-AES-CBC-CS3",
-    // "ACVP-AES-CTR","ACVP-AES-XTS","ACVP-AES-GCM","ctrDRBG","hmacDRBG"
-    // )
-
-    // Test Set 2
-    // val vectors:List<String> = listOf(
-    // "1044265_SHA2-224",            "1044271_HMAC-SHA2-256",       "1044266_SHA2-256",            "1044263_CMAC-AES",
-    // "1044258_ACVP-AES-ECB",        "1044272_HMAC-SHA2-384",       "1044270_HMAC-SHA2-224",       "1044267_SHA2-384",
-    // "1044259_ACVP-AES-CBC",        "1044261_ACVP-AES-CTR",        "1044269_HMAC-SHA-1",          "1044268_SHA2-512",
-    // "1044274_hmacDRBG",
-    // "1044273_HMAC-SHA2-512",       "1044264_SHA-1",               "1044262_ACVP-AES-XTS"       /*,"1044275_hmacDRBG"*/
-    // )
-
-    val vectors:List<String> =
-      listOf("1633593-ACVP-AES-ECB",	"1633602-SHA2-384", "1633594-ACVP-AES-CBC",	"1633603-SHA2-512",
-        "1633595-ACVP-AES-CBC-CS3",	"1633604-HMAC-SHA-1", "1633596-ACVP-AES-CTR",	"1633605-HMAC-SHA2-224",
-        "1633597-ACVP-AES-XTS",	"1633606-HMAC-SHA2-256", "1633598-CMAC-AES","1633607-HMAC-SHA2-384",
-        "1633599-SHA-1","1633608-HMAC-SHA2-512", "1633600-SHA2-224","1633609-hmacDRBG", "1633601-SHA2-256")
-
     val vectorsDir  = "/vectors-20230509/"
     val expectedDir = "/expected-20230509/"
 
-    val fnames:Array<String> = vectors.map{ "$it.bz2" }.toTypedArray()
+    //list all bz2 files in target vector directory
+    val fnames2 = Path(RES_PATH+vectorsDir).listDirectoryEntries("*.bz2")
     //
-    batch_install(RES_PATH+vectorsDir,"/data/local/tmp/vectors/",fnames)
+    batch_install(RES_PATH+vectorsDir,"/data/local/tmp/vectors/",fnames2)
 
     // For in case not be configured :
     // Because the key and DRBG entropy are set with setsockopt,
@@ -276,14 +277,15 @@ class KernelAcvpTest {
     AdamUtils.shellRequest("bzip2 -dk /data/local/tmp/vectors/*.bz2",adb)
     AdamUtils.shellRequest("cd /data/local/tmp/;rm -rf actual;mkdir actual",adb)
 
-    vectors.forEach {
-      val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$it -wrapper ./acvp_kernel_harness_arm64 > actual/$it",adb)
+   fnames2.forEach {
+      val fname = it.fileName.nameWithoutExtension
+      val sr = AdamUtils.shellRequest("cd /data/local/tmp/;./acvptool -json vectors/$fname -wrapper ./acvp_kernel_harness_arm64 > actual/$fname",adb)
       val line:String
-      errs.checkThat(a.Msg("Execute acvptool $it"),sr.exitCode, IsEqual(0))
+      errs.checkThat(a.Msg("Execute acvptool $fname"),sr.exitCode, IsEqual(0))
       if(sr.exitCode!=0) {
-        line = "\""+dateFormat.format(Date())+" *** processing $it ... failure ***\""+sr.toString()
+        line = "\""+dateFormat.format(Date())+" *** processing $fname ... failure ***\""+sr.toString()
       } else {
-        line = "\""+dateFormat.format(Date())+" *** processing $it ... ok ***\""+sr.toString()
+        line = "\""+dateFormat.format(Date())+" *** processing $fname ... ok ***\""+sr.toString()
       }
 
       AdamUtils.shellRequest("cd /data/local/tmp/;echo $line >> acvptest.log",adb)
