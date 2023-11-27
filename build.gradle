@@ -29,8 +29,9 @@ import javax.xml.xpath.XPathConstants
 import java.util.regex.Pattern
 import org.apache.commons.text.StringEscapeUtils
 
-apply plugin: 'java'
 
+apply plugin: 'java'
+//Command to package
 tasks.register("exportPackage") {
 
     doLast {
